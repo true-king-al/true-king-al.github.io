@@ -2,7 +2,35 @@
 <html>
 <head>
 <style>
-h2 {text-align: center;}
+    h1 {text-align: center;}
+    h2 {text-align: center;}
+    p {text-align: center;}
+
+    .button {
+        border: none;
+        color: black;
+        padding: 32px 64px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        transition-duration: 0.4s;
+        cursor: pointer;
+      }
+
+    .button1 {
+        background-color: #10be1f;
+        color: black;
+        border: 2px solid #04AA6D;
+        border-radius: 19px;
+    }
+      
+    .button1:hover {
+        background-color: #067b37;
+        transform: rotate(-10deg)scale(0.95);
+        color: black;
+    }
 
 html {
     height: auto;
@@ -18,15 +46,30 @@ body {
     
     
 }
+
+.center {
+    margin: 0;
+    position: absolute;
+    top: 17%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    
+}
+
 </style>
 </head>
 
 <body>
-<h1>Hello World</h1>
-<h2>sup this is logan's website</h2>
-<p>I'm hosted with GitHub Pages.</p>
+<h1>Welcome to CHMS hangout</h1>
+<h2>This is a website for CHMS kids to play games freely</h2>
+<p>Made and brought to you by King al</p>
+
+
 
 <div id="grad1"></div>
+<div class="center">
+    <button onclick="alert('Hello world!')" class="button button1">my projects</button>
+</div>
 
 </body>
 </html>
