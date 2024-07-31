@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        h1 {text-align: center;}
+        h2 {text-align: center;}
+        html {
+            height: auto;
+            background-image: linear-gradient(rgb(0, 0, 0), rgb(23, 23, 23));
+            background-repeat: no-repeat;
+            min-height: 100vh;
+            margin: 0;
+        }
+        body {
+            height: auto;
+            background-attachment: fixed;
+            background-size: cover;
+        }
+        .button {
+            border: 2px solid #373737;
+            color: black;
+            padding: 32px 64px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            transition-duration: 0.4s;
+            cursor: pointer;
+        }
+        .button1 {
+            background-color: #000000;
+            border-color: #303030;
+            color: rgb(255, 255, 255);
+            border-radius: 19px;
+        }
+        .button1:hover {
+            background-color: #000000;
+            border-color: #a9a9a9;
+            color: rgb(255, 255, 255);
+        }
+        .button2 {
+            padding: 32px 64px;
+        }
+        .button3 {
+            background-color: #000000;
+            border-color: #303030;
+            color: rgb(255, 255, 255);
+            border-radius: 19px;
+        }
+        .button3:hover {
+            background-color: #000000;
+            border-color: #a9a9a9;
+            color: rgb(255, 255, 255);
+        }
+        .container {
+            height: 200px;
+            position: relative;
+        }
+        .center, .ucenter {
+            margin: 0;
+            position: absolute;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .center {
+            top: 40%;
+        }
+        .ucenter {
+            top: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="color:#7b7b7b;">Welcome to my projects</h1>
+    <h2 style="color:#7b7b7b;">this has all the implemented games</h2>
+
+    <div class="container">
+        <div class="center">
+            <a href="index.html">
+                <button class="button button1">back to main site</button>
+            </a>
+        </div>
+        <div class="ucenter">
+            <a href="aboutme.html">
+                <button class="button button2 button3">About Me!</button>
+            </a>
+        </div>
+    </div>
+</body>
+</html>

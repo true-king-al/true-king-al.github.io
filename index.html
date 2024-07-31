@@ -32,6 +32,33 @@
         color: black;
     }
 
+    .button2 {
+        border: 2px solid #373737;
+        color: black;
+        padding: 32px 64px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        transition-duration: 0.4s;
+        cursor: pointer;
+      }
+
+    .button3 {
+        background-color: #000000;
+        border-color: #303030;
+        color: rgb(255, 255, 255);
+        border: 2px solid #373737;
+        border-radius: 19px;
+    }
+      
+    .button3:hover {
+        background-color: #000000;
+        border-color: #a9a9a9;
+        color: rgb(255, 255, 255);
+    }
+
 html {
     height: auto;
     background-image: linear-gradient(red, yellow);
@@ -60,6 +87,15 @@ body {
     transform: translate(-50%, -50%);
     
 }
+.ucenter {
+    margin: 0;
+    position: absolute;
+    top: 200%;
+    left: 50%;
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    
+}
 
 </style>
 </head>
@@ -75,7 +111,14 @@ body {
 
 <div class="container">
     <div class="center">
-        <button onclick="alert('Hello world! How do i link to another page?')" class="button button1">my projects</button>
+        <a href="projects.html">
+            <button class="button button1">my projects</button>
+        </a>
+    </div>
+    <div class="ucenter">
+        <a href="aboutme.html">
+            <button class="button2 button3">About Me!</button>
+        </a>
     </div>
 </div>
 
