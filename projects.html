@@ -53,20 +53,31 @@
             border-color: #a9a9a9;
             color: rgb(255, 255, 255);
         }
-        .button-minecraft {
+        .button-minecraft, .button-retro {
             padding: 32px 64px;
             border-radius: 19px;
-            background-image: url('Minecraft_image.png');
             background-size: cover;
-            border: 2px solid #4CAF50;
             color: white;
             font-size: 18px;
             font-weight: bold;
+        }
+        .button-minecraft {
+            background-image: url('Minecraft_image.png');
+            border: 2px solid #4CAF50;
         }
         .button-minecraft:hover {
             background-color: #4CAF50;
             background-blend-mode: overlay;
             border-color: #2E7D32;
+        }
+        .button-retro {
+            background-image: url('retroimage.png');
+            border: 2px solid #FF8C00;
+        }
+        .button-retro:hover {
+            background-color: #FF8C00;
+            background-blend-mode: overlay;
+            border-color: #E65100;
         }
         .container {
             height: 200px;
@@ -83,6 +94,12 @@
         }
         .ucenter {
             top: 100%;
+        }
+        .button-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 50px;
         }
     </style>
 </head>
@@ -101,9 +118,12 @@
                 <button class="button button2 button3">About Me!</button>
             </a>
         </div>
-        <div class="ucenter" style="top: 150%;">
+        <div class="ucenter button-row">
             <a href="minecraft.html">
                 <button class="button button2 button-minecraft">Minecraft</button>
+            </a>
+            <a href="retro.html">
+                <button class="button button2 button-retro">Retro</button>
             </a>
         </div>
     </div>
