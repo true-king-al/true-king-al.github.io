@@ -46,11 +46,15 @@ body {
     
     
 }
+.container {
+    height: 200px;
+    position: relative;
+}
 
 .center {
     margin: 0;
     position: absolute;
-    top: 17%;
+    top: 20%;
     left: 50%;
     -ms-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
@@ -68,8 +72,11 @@ body {
 
 
 <div id="grad1"></div>
-<div class="center">
-    <button onclick="alert('Hello world!')" class="button button1">my projects</button>
+
+<div class="container">
+    <div class="center">
+        <button onclick="alert('Hello world!')" class="button button1">my projects</button>
+    </div>
 </div>
 
 </body>
