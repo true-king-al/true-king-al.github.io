@@ -32,53 +32,43 @@
 </head>
 <body>
     <h1>Messenger</h1>
-    <h2 id="display-message">Loading...</h2>
-    <form id="message-form">
-        <input type="text" id="message-input" placeholder="Enter your message">
-        <button type="submit">Save Message</button>
-    </form>
-
+    <div id="kvdb-container"></div>
     <script>
-        // Fetch the current message from KVdb and display it
-        function fetchMessage() {
-            fetch('https://kvdb.io/LtpBRNkzQicL8pF1rGvNYJ/hello')
-                .then(response => response.text())
-                .then(data => {
-                    document.getElementById('display-message').textContent = data ? data : 'No message set.';
-                })
-                .catch(error => {
-                    console.error('Error fetching message:', error);
-                });
-        }
+        // Load and display the KVdb Lua script
+        fetch('https://kvdb.io/LtpBRNkzQicL8pF1rGvNYJ', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: `script=${encodeURIComponent(`
+                kvdb.header["content-type"] = "text/html"
 
-        // Save the new message to KVdb
-        function saveMessage(event) {
-            event.preventDefault();
-            const message = document.getElementById('message-input').value;
+                if kvdb.var.name then
+                    kvdb.set("hello", kvdb.var.name)
+                end
 
-            fetch('https://kvdb.io/LtpBRNkzQicL8pF1rGvNYJ/hello', {
-                method: 'POST',
-                body: new URLSearchParams({ name: message }),
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                }
-            })
-            .then(response => {
-                if (response.ok) {
-                    fetchMessage(); // Refresh the displayed message
-                } else {
-                    console.error('Failed to save message');
-                }
-            })
-            .catch(error => {
-                console.error('Error saving message:', error);
-            });
-        }
+                local name = kvdb.get("hello")
+                if name then
+                    kvdb.say("Hello " .. kvdb.escape_html(name))
+                else
+                    kvdb.say("Hello stranger!")
+                end
 
-        document.getElementById('message-form').addEventListener('submit', saveMessage);
-
-        // Load the initial message when the page loads
-        window.onload = fetchMessage;
+                kvdb.say([[
+                    <form method="post">
+                    Enter your message: <input name="name">
+                    <button type="submit">Save Message</button>
+                    </form>
+                ]])
+            `)}`
+        })
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('kvdb-container').innerHTML = data;
+        })
+        .catch(error => {
+            console.error('Error loading KVdb script:', error);
+        });
     </script>
 </body>
 </html>
