@@ -53,7 +53,7 @@
             border-color: #a9a9a9;
             color: rgb(255, 255, 255);
         }
-        .button-minecraft, .button-retro {
+        .button-minecraft, .button-retro, .button-textinorsm {
             padding: 32px 64px;
             border-radius: 19px;
             background-size: cover;
@@ -78,6 +78,15 @@
             background-color: #FF8C00;
             background-blend-mode: overlay;
             border-color: #E65100;
+        }
+        .button-textinorsm {
+            background-image: url('textinorsm.png');
+            border: 2px solid #8B008B;
+        }
+        .button-textinorsm:hover {
+            background-color: #8B008B;
+            background-blend-mode: overlay;
+            border-color: #4B0082;
         }
         .container {
             height: 200px;
@@ -126,7 +135,7 @@
                 <button class="button button2 button-retro">Retro</button>
             </a>
             <a href="messenger.html">
-                <button class="button button2 button-retro">Messenger</button>
+                <button class="button button2 button-textinorsm">Messenger</button>
             </a>
         </div>
     </div>
