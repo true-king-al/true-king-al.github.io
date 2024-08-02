@@ -31,12 +31,13 @@
         #display-message {
             max-height: 400px;
             overflow-y: auto;
+            text-align: left;
         }
     </style>
 </head>
 <body>
     <h1>Messenger</h1>
-    <div id="display-message">Loading...</div>
+    <h2 id="display-message">Loading...</h2>
     <form id="message-form">
         <input type="text" id="message-input" placeholder="Enter your message">
         <button type="submit">Send Message</button>
@@ -73,10 +74,20 @@
             onValue(latestMessagesQuery, (snapshot) => {
                 const data = snapshot.val();
                 let displayText = 'No messages yet.';
+                const now = Date.now();
+
                 if (data) {
-                    const messagesArray = Object.values(data);
-                    displayText = messagesArray.join('<br>');
+                    const messagesArray = Object.entries(data).map(([timestamp, message]) => {
+                        const messageTime = new Date(parseInt(timestamp));
+                        const timeDiff = now - messageTime.getTime();
+                        const minutes = Math.floor(timeDiff / 60000); // Time difference in minutes
+                        const hours = Math.floor(minutes / 60);
+                        const displayDiff = hours > 0 ? `${hours}h` : `${minutes}m`;
+                        return `${message} <br><small>(${displayDiff} ago)</small>`;
+                    }).reverse();
+                    displayText = messagesArray.join('<br><br>');
                 }
+
                 document.getElementById('display-message').innerHTML = displayText;
             });
         }
