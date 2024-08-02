@@ -7,6 +7,7 @@
             background-color: #f4f4f4;
             text-align: center;
             padding: 50px;
+            position: relative; /* Ensure positioning context for the button */
         }
         input[type="text"] {
             padding: 10px;
@@ -54,15 +55,54 @@
             margin-left: 10px;
             color: #888;
         }
+        .settings-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: url('settings.png') no-repeat center center;
+            background-size: cover;
+            cursor: pointer;
+        }
+        .settings-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background: white;
+            border: 1px solid #ddd;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        .settings-modal input[type="text"] {
+            width: 100px;
+        }
+        .settings-modal button {
+            background-color: #007BFF;
+        }
     </style>
 </head>
 <body>
     <h1>Messenger</h1>
+    <button class="settings-button"></button>
     <div id="display-message">Loading...</div>
     <form id="message-form">
         <input type="text" id="message-input" placeholder="Enter your message">
         <button type="submit">Send Message</button>
     </form>
+    
+    <!-- Settings Modal -->
+    <div class="settings-modal" id="settings-modal">
+        <h2>Settings</h2>
+        <label for="message-count">Number of messages to show:</label>
+        <input type="text" id="message-count" placeholder="5">
+        <button id="apply-settings">Apply</button>
+        <button id="close-settings">Close</button>
+    </div>
 
     <!-- Firebase SDK -->
     <script type="module">
@@ -87,11 +127,12 @@
         const database = getDatabase(app);
 
         let username;
+        let messageLimit = 5; // Default message limit
 
-        // Function to fetch and display the last 5 messages
+        // Function to fetch and display messages
         function fetchMessages() {
             const messagesRef = ref(database, 'messages');
-            const latestMessagesQuery = query(messagesRef, orderByKey(), limitToLast(5));
+            const latestMessagesQuery = query(messagesRef, orderByKey(), limitToLast(messageLimit));
             onValue(latestMessagesQuery, (snapshot) => {
                 const data = snapshot.val();
                 let displayText = 'No messages yet.';
@@ -135,6 +176,28 @@
                     });
             }
         }
+
+        // Open settings modal
+        document.querySelector('.settings-button').addEventListener('click', () => {
+            document.getElementById('settings-modal').style.display = 'block';
+        });
+
+        // Apply settings
+        document.getElementById('apply-settings').addEventListener('click', () => {
+            const count = parseInt(document.getElementById('message-count').value);
+            if (!isNaN(count) && count > 0) {
+                messageLimit = count;
+                fetchMessages(); // Refresh messages with new limit
+                document.getElementById('settings-modal').style.display = 'none';
+            } else {
+                alert('Please enter a valid number.');
+            }
+        });
+
+        // Close settings modal
+        document.getElementById('close-settings').addEventListener('click', () => {
+            document.getElementById('settings-modal').style.display = 'none';
+        });
 
         document.getElementById('message-form').addEventListener('submit', saveMessage);
 
