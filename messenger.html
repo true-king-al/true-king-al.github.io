@@ -11,6 +11,7 @@
         input[type="text"] {
             padding: 10px;
             font-size: 16px;
+            margin-right: 10px;
         }
         button {
             padding: 10px 20px;
@@ -20,6 +21,9 @@
             color: white;
             border: none;
             border-radius: 5px;
+        }
+        button:active {
+            background-color: #45a049;
         }
         h1, h2 {
             color: #333;
@@ -56,8 +60,12 @@
                 method: 'POST',
                 body: message,
             })
-            .then(() => {
-                fetchMessage(); // Refresh the displayed message
+            .then(response => {
+                if (response.ok) {
+                    fetchMessage(); // Refresh the displayed message
+                } else {
+                    console.error('Failed to save message');
+                }
             })
             .catch(error => {
                 console.error('Error saving message:', error);
