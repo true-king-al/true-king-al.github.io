@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 50px;
+            position: relative; /* Ensure positioning context for the button */
+        }
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:active {
+            background-color: #45a049;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        #display-suggestions {
+            max-height: 400px;
+            overflow-y: auto;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .suggestion-container {
+            text-align: left;
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            justify-content: space-between;
+            padding: 5px;
+            border-bottom: 1px solid #ddd;
+            box-sizing: border-box;
+        }
+        .suggestion-text {
+            flex: 1;
+        }
+        .suggestion-time {
+            white-space: nowrap;
+            margin-left: 10px;
+            color: #888;
+        }
+        .plus-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: url('plus.png') no-repeat center center;
+            background-size: cover;
+            cursor: pointer;
+        }
+        .suggestion-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background: white;
+            border: 1px solid #ddd;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        .suggestion-modal input[type="text"] {
+            width: 100%;
+        }
+        .suggestion-modal button {
+            background-color: #007BFF;
+        }
+    </style>
+</head>
+<body>
+    <h1>Suggestions</h1>
+    <button class="plus-button"></button>
+    <div id="display-suggestions">Loading...</div>
+    
+    <!-- Suggestion Modal -->
+    <div class="suggestion-modal" id="suggestion-modal">
+        <h2>Submit a Suggestion</h2>
+        <form id="suggestion-form">
+            <input type="text" id="suggestion-input" placeholder="Enter your suggestion">
+            <button type="submit">Submit Suggestion</button>
+        </form>
+        <button id="close-suggestion">Close</button>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
+        import { getDatabase, ref, set, onValue, query, orderByKey, limitToLast } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-analytics.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBzxQgwD_gBuylhdqlRck_PEVzueWccvTM",
+            authDomain: "messengerformewebsite.firebaseapp.com",
+            databaseURL: "https://messengerformewebsite-default-rtdb.firebaseio.com/",
+            projectId: "messengerformewebsite",
+            storageBucket: "messengerformewebsite.appspot.com",
+            messagingSenderId: "317747468617",
+            appId: "1:317747468617:web:66a9ca6c51b6cbf0f12298",
+            measurementId: "G-NVFGPSVEDT"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        let suggestionLimit = 5; // Default suggestion limit
+
+        // Function to fetch and display suggestions
+        function fetchSuggestions() {
+            const suggestionsRef = ref(database, 'suggestions');
+            const latestSuggestionsQuery = query(suggestionsRef, orderByKey(), limitToLast(suggestionLimit));
+            onValue(latestSuggestionsQuery, (snapshot) => {
+                const data = snapshot.val();
+                let displayText = 'No suggestions yet.';
+                const now = Date.now();
+
+                if (data) {
+                    const suggestionsArray = Object.entries(data).map(([timestamp, suggestion]) => {
+                        const suggestionTime = new Date(parseInt(timestamp));
+                        const timeDiff = now - suggestionTime.getTime();
+                        const minutes = Math.floor(timeDiff / 60000); // Time difference in minutes
+                        const hours = Math.floor(minutes / 60);
+                        const displayDiff = hours > 0 ? `${hours}h` : `${minutes}m`;
+                        return `
+                            <div class="suggestion-container">
+                                <div class="suggestion-text">${suggestion}</div>
+                                <div class="suggestion-time">${displayDiff} ago</div>
+                            </div>
+                        `;
+                    }).reverse();
+                    displayText = suggestionsArray.join('');
+                }
+
+                document.getElementById('display-suggestions').innerHTML = displayText;
+            });
+        }
+
+        // Function to save the suggestion
+        function saveSuggestion(event) {
+            event.preventDefault();
+            const suggestion = document.getElementById('suggestion-input').value;
+            if (suggestion) {
+                const newSuggestionRef = ref(database, 'suggestions/' + Date.now());
+                set(newSuggestionRef, suggestion)
+                    .then(() => {
+                        console.log('Suggestion saved successfully');
+                        document.getElementById('suggestion-input').value = ''; // Clear input field
+                        fetchSuggestions(); // Refresh suggestions
+                    })
+                    .catch(error => {
+                        console.error('Error saving suggestion:', error);
+                    });
+            }
+        }
+
+        // Open suggestion modal
+        document.querySelector('.plus-button').addEventListener('click', () => {
+            document.getElementById('suggestion-modal').style.display = 'block';
+        });
+
+        // Close suggestion modal
+        document.getElementById('close-suggestion').addEventListener('click', () => {
+            document.getElementById('suggestion-modal').style.display = 'none';
+        });
+
+        document.getElementById('suggestion-form').addEventListener('submit', saveSuggestion);
+
+        // Load suggestions on page load
+        window.onload = function() {
+            fetchSuggestions();
+        }
+    </script>
+</body>
+</html>
