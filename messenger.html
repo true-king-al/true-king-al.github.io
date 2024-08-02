@@ -48,7 +48,7 @@
         const firebaseConfig = {
             apiKey: "AIzaSyBzxQgwD_gBuylhdqlRck_PEVzueWccvTM",
             authDomain: "messengerformewebsite.firebaseapp.com",
-            databaseURL: "https://messengerformewebsite.firebaseio.com/",
+            databaseURL: "https://messengerformewebsite-default-rtdb.firebaseio.com/",
             projectId: "messengerformewebsite",
             storageBucket: "messengerformewebsite.appspot.com",
             messagingSenderId: "317747468617",
@@ -72,7 +72,7 @@
         // Function to save the message
         function saveMessage(event) {
             event.preventDefault();
-            var message = document.getElementById('message-input').value;
+            const message = document.getElementById('message-input').value;
             set(ref(database, 'message'), message)
                 .then(() => {
                     console.log('Message saved successfully');
