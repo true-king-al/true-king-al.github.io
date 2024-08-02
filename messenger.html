@@ -32,43 +32,57 @@
 </head>
 <body>
     <h1>Messenger</h1>
-    <div id="kvdb-container"></div>
+    <h2 id="display-message">Loading...</h2>
+    <form id="message-form">
+        <input type="text" id="message-input" placeholder="Enter your message">
+        <button type="submit">Save Message</button>
+    </form>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js"></script>
     <script>
-        // Load and display the KVdb Lua script
-        fetch('https://kvdb.io/LtpBRNkzQicL8pF1rGvNYJ', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: `script=${encodeURIComponent(`
-                kvdb.header["content-type"] = "text/html"
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBzxQgwD_gBuylhdqlRck_PEVzueWccvTM",
+            authDomain: "messengerformewebsite.firebaseapp.com",
+            databaseURL: "messengerformewebsite.firebaseio.com",
+            projectId: "messengerformewebsite",
+            storageBucket: "messengerformewebsite.appspot.com",
+            messagingSenderId: "317747468617",
+            appId: "1:317747468617:web:66a9ca6c51b6cbf0f12298"
+        };
 
-                if kvdb.var.name then
-                    kvdb.set("hello", kvdb.var.name)
-                end
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
 
-                local name = kvdb.get("hello")
-                if name then
-                    kvdb.say("Hello " .. kvdb.escape_html(name))
-                else
-                    kvdb.say("Hello stranger!")
-                end
+        // Function to fetch and display the message
+        function fetchMessage() {
+            const messageRef = database.ref('message');
+            messageRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                document.getElementById('display-message').textContent = data ? data : 'No message set.';
+            });
+        }
 
-                kvdb.say([[
-                    <form method="post">
-                    Enter your message: <input name="name">
-                    <button type="submit">Save Message</button>
-                    </form>
-                ]])
-            `)}`
-        })
-        .then(response => response.text())
-        .then(data => {
-            document.getElementById('kvdb-container').innerHTML = data;
-        })
-        .catch(error => {
-            console.error('Error loading KVdb script:', error);
-        });
+        // Function to save the message
+        function saveMessage(event) {
+            event.preventDefault();
+            const message = document.getElementById('message-input').value;
+            database.ref('message').set(message)
+                .then(() => {
+                    console.log('Message saved successfully');
+                })
+                .catch(error => {
+                    console.error('Error saving message:', error);
+                });
+        }
+
+        document.getElementById('message-form').addEventListener('submit', saveMessage);
+
+        // Load the initial message when the page loads
+        window.onload = fetchMessage;
     </script>
 </body>
 </html>
