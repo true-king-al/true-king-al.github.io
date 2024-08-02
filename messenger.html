@@ -35,7 +35,7 @@
     <h2 id="display-message">Loading...</h2>
     <form id="message-form">
         <input type="text" id="message-input" placeholder="Enter your message">
-        <button type="submit">Save Message</button>
+        <button type="submit">Send Message</button>
     </form>
 
     <!-- Firebase SDK -->
@@ -60,31 +60,18 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
-        // Prompt for the user's name
-        let username = localStorage.getItem('username');
-        if (!username) {
-            username = prompt("Please enter your name:");
-            if (username) {
-                localStorage.setItem('username', username);
-            } else {
-                username = "Anonymous";
-            }
-        }
+        let username;
 
         // Function to fetch and display messages
         function fetchMessages() {
             const messagesRef = ref(database, 'messages');
             onValue(messagesRef, (snapshot) => {
                 const data = snapshot.val();
+                let displayText = 'No messages yet.';
                 if (data) {
-                    let displayText = '';
-                    for (let key in data) {
-                        displayText += data[key] + '<br>';
-                    }
-                    document.getElementById('display-message').innerHTML = displayText;
-                } else {
-                    document.getElementById('display-message').innerHTML = 'No messages yet.';
+                    displayText = Object.values(data).join('<br>');
                 }
+                document.getElementById('display-message').innerHTML = displayText;
             });
         }
 
@@ -92,21 +79,28 @@
         function saveMessage(event) {
             event.preventDefault();
             const message = document.getElementById('message-input').value;
-            const messageText = `${username}: ${message}`;
-            const newMessageRef = ref(database, 'messages/' + new Date().toISOString());
-            set(newMessageRef, messageText)
-                .then(() => {
-                    console.log('Message saved successfully');
-                })
-                .catch(error => {
-                    console.error('Error saving message:', error);
-                });
+            if (username && message) {
+                const newMessageRef = ref(database, 'messages/' + Date.now());
+                set(newMessageRef, `${username}: ${message}`)
+                    .then(() => {
+                        console.log('Message saved successfully');
+                    })
+                    .catch(error => {
+                        console.error('Error saving message:', error);
+                    });
+            }
         }
 
         document.getElementById('message-form').addEventListener('submit', saveMessage);
 
-        // Load the initial messages when the page loads
-        window.onload = fetchMessages;
+        // Prompt for username and load messages
+        window.onload = function() {
+            username = prompt('Enter your name:');
+            if (!username) {
+                username = 'Anonymous';
+            }
+            fetchMessages();
+        }
     </script>
 </body>
 </html>
