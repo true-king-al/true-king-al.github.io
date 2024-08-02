@@ -31,13 +31,34 @@
         #display-message {
             max-height: 400px;
             overflow-y: auto;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .message-container {
             text-align: left;
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            justify-content: space-between;
+            padding: 5px;
+            border-bottom: 1px solid #ddd;
+            box-sizing: border-box;
+        }
+        .message-text {
+            flex: 1;
+        }
+        .message-time {
+            white-space: nowrap;
+            margin-left: 10px;
+            color: #888;
         }
     </style>
 </head>
 <body>
     <h1>Messenger</h1>
-    <h2 id="display-message">Loading...</h2>
+    <div id="display-message">Loading...</div>
     <form id="message-form">
         <input type="text" id="message-input" placeholder="Enter your message">
         <button type="submit">Send Message</button>
@@ -83,9 +104,14 @@
                         const minutes = Math.floor(timeDiff / 60000); // Time difference in minutes
                         const hours = Math.floor(minutes / 60);
                         const displayDiff = hours > 0 ? `${hours}h` : `${minutes}m`;
-                        return `${message} <br><small>(${displayDiff} ago)</small>`;
+                        return `
+                            <div class="message-container">
+                                <div class="message-text">${message}</div>
+                                <div class="message-time">${displayDiff} ago</div>
+                            </div>
+                        `;
                     }).reverse();
-                    displayText = messagesArray.join('<br><br>');
+                    displayText = messagesArray.join('');
                 }
 
                 document.getElementById('display-message').innerHTML = displayText;
