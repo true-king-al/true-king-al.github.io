@@ -60,12 +60,31 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
-        // Function to fetch and display the message
-        function fetchMessage() {
-            const messageRef = ref(database, 'message');
-            onValue(messageRef, (snapshot) => {
+        // Prompt for the user's name
+        let username = localStorage.getItem('username');
+        if (!username) {
+            username = prompt("Please enter your name:");
+            if (username) {
+                localStorage.setItem('username', username);
+            } else {
+                username = "Anonymous";
+            }
+        }
+
+        // Function to fetch and display messages
+        function fetchMessages() {
+            const messagesRef = ref(database, 'messages');
+            onValue(messagesRef, (snapshot) => {
                 const data = snapshot.val();
-                document.getElementById('display-message').textContent = data ? data : 'No message set.';
+                if (data) {
+                    let displayText = '';
+                    for (let key in data) {
+                        displayText += data[key] + '<br>';
+                    }
+                    document.getElementById('display-message').innerHTML = displayText;
+                } else {
+                    document.getElementById('display-message').innerHTML = 'No messages yet.';
+                }
             });
         }
 
@@ -73,7 +92,9 @@
         function saveMessage(event) {
             event.preventDefault();
             const message = document.getElementById('message-input').value;
-            set(ref(database, 'message'), message)
+            const messageText = `${username}: ${message}`;
+            const newMessageRef = ref(database, 'messages/' + new Date().toISOString());
+            set(newMessageRef, messageText)
                 .then(() => {
                     console.log('Message saved successfully');
                 })
@@ -84,8 +105,8 @@
 
         document.getElementById('message-form').addEventListener('submit', saveMessage);
 
-        // Load the initial message when the page loads
-        window.onload = fetchMessage;
+        // Load the initial messages when the page loads
+        window.onload = fetchMessages;
     </script>
 </body>
 </html>
