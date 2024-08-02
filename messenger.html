@@ -28,11 +28,15 @@
         h1, h2 {
             color: #333;
         }
+        #display-message {
+            max-height: 400px;
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body>
     <h1>Messenger</h1>
-    <h2 id="display-message">Loading...</h2>
+    <div id="display-message">Loading...</div>
     <form id="message-form">
         <input type="text" id="message-input" placeholder="Enter your message">
         <button type="submit">Send Message</button>
@@ -41,7 +45,7 @@
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
+        import { getDatabase, ref, set, onValue, query, orderByKey, limitToLast } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-analytics.js";
 
         // Your web app's Firebase configuration
@@ -62,14 +66,16 @@
 
         let username;
 
-        // Function to fetch and display messages
+        // Function to fetch and display the last 5 messages
         function fetchMessages() {
             const messagesRef = ref(database, 'messages');
-            onValue(messagesRef, (snapshot) => {
+            const latestMessagesQuery = query(messagesRef, orderByKey(), limitToLast(5));
+            onValue(latestMessagesQuery, (snapshot) => {
                 const data = snapshot.val();
                 let displayText = 'No messages yet.';
                 if (data) {
-                    displayText = Object.values(data).join('<br>');
+                    const messagesArray = Object.values(data);
+                    displayText = messagesArray.join('<br>');
                 }
                 document.getElementById('display-message').innerHTML = displayText;
             });
@@ -84,6 +90,8 @@
                 set(newMessageRef, `${username}: ${message}`)
                     .then(() => {
                         console.log('Message saved successfully');
+                        document.getElementById('message-input').value = ''; // Clear input field
+                        fetchMessages(); // Refresh messages
                     })
                     .catch(error => {
                         console.error('Error saving message:', error);
