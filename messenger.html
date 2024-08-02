@@ -72,7 +72,7 @@
         // Function to save the message
         function saveMessage(event) {
             event.preventDefault();
-            const message = document.getElementById('message-input').value;
+            var message = document.getElementById('message-input').value;
             set(ref(database, 'message'), message)
                 .then(() => {
                     console.log('Message saved successfully');
