@@ -39,10 +39,12 @@
     </form>
 
     <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js"></script>
-    <script>
-        // Your Firebase configuration
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-analytics.js";
+
+        // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBzxQgwD_gBuylhdqlRck_PEVzueWccvTM",
             authDomain: "messengerformewebsite.firebaseapp.com",
@@ -50,17 +52,18 @@
             projectId: "messengerformewebsite",
             storageBucket: "messengerformewebsite.appspot.com",
             messagingSenderId: "317747468617",
-            appId: "1:317747468617:web:66a9ca6c51b6cbf0f12298"
+            appId: "1:317747468617:web:66a9ca6c51b6cbf0f12298",
+            measurementId: "G-NVFGPSVEDT"
         };
 
         // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
 
         // Function to fetch and display the message
         function fetchMessage() {
-            const messageRef = database.ref('message');
-            messageRef.on('value', (snapshot) => {
+            const messageRef = ref(database, 'message');
+            onValue(messageRef, (snapshot) => {
                 const data = snapshot.val();
                 document.getElementById('display-message').textContent = data ? data : 'No message set.';
             });
@@ -70,7 +73,7 @@
         function saveMessage(event) {
             event.preventDefault();
             const message = document.getElementById('message-input').value;
-            database.ref('message').set(message)
+            set(ref(database, 'message'), message)
                 .then(() => {
                     console.log('Message saved successfully');
                 })
