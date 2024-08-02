@@ -58,7 +58,10 @@
 
             fetch('https://kvdb.io/LtpBRNkzQicL8pF1rGvNYJ/hello', {
                 method: 'POST',
-                body: message,
+                body: new URLSearchParams({ name: message }),
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
             })
             .then(response => {
                 if (response.ok) {
