@@ -84,6 +84,18 @@
         .settings-modal button {
             background-color: #007BFF;
         }
+        /* Back button styling */
+        .back-button {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            width: 40px;
+            height: 40px;
+            background: url('backarrow.png') no-repeat center center;
+            background-size: cover;
+            border: none;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -103,6 +115,9 @@
         <button id="apply-settings">Apply</button>
         <button id="close-settings">Close</button>
     </div>
+
+    <!-- Back button -->
+    <button class="back-button" onclick="window.location.href='index.html'"></button>
 
     <!-- Firebase SDK -->
     <script type="module">
