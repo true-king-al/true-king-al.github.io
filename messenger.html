@@ -6,39 +6,85 @@
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
             text-align: center;
-            padding: 20px;
+            padding: 50px;
             position: relative; /* Ensure positioning context for the button */
         }
-        .container {
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:active {
+            background-color: #45a049;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        #display-message {
+            max-height: 400px;
+            overflow-y: auto;
+            text-align: center;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-        .pixel-grid {
-            display: grid;
-            gap: 2px;
+        .message-container {
+            text-align: left;
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            justify-content: space-between;
+            padding: 5px;
+            border-bottom: 1px solid #ddd;
+            box-sizing: border-box;
         }
-        .pixel {
-            width: 20px;
-            height: 20px;
-            background-color: #fff;
+        .message-text {
+            flex: 1;
+        }
+        .message-time {
+            white-space: nowrap;
+            margin-left: 10px;
+            color: #888;
+        }
+        .settings-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: url('settings.png') no-repeat center center;
+            background-size: cover;
+            cursor: pointer;
+        }
+        .settings-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background: white;
             border: 1px solid #ddd;
-            cursor: pointer;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
         }
-        .color-selector {
-            margin-top: 20px;
+        .settings-modal input[type="text"] {
+            width: 100px;
         }
-        .color {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            margin: 0 5px;
-            cursor: pointer;
-            border: 2px solid transparent;
+        .settings-modal button {
+            background-color: #007BFF;
         }
-        .color.selected {
-            border-color: #000;
-        }
+        /* Back button styling */
         .back-button {
             position: absolute;
             bottom: 10px;
@@ -53,22 +99,31 @@
     </style>
 </head>
 <body>
-    <h1>Pixel Place</h1>
-    <div class="container">
-        <div class="pixel-grid" id="pixel-grid">
-            <!-- Pixels will be generated here by JavaScript -->
-        </div>
-        <div class="color-selector" id="color-selector">
-            <!-- Colors will be generated here by JavaScript -->
-        </div>
+    <h1>Messenger</h1>
+    <button class="settings-button"></button>
+    <div id="display-message">Loading...</div>
+    <form id="message-form">
+        <input type="text" id="message-input" placeholder="Enter your message">
+        <button type="submit">Send Message</button>
+    </form>
+    
+    <!-- Settings Modal -->
+    <div class="settings-modal" id="settings-modal">
+        <h2>Settings</h2>
+        <label for="message-count">Number of messages to show:</label>
+        <input type="text" id="message-count" placeholder="5">
+        <button id="apply-settings">Apply</button>
+        <button id="close-settings">Close</button>
     </div>
 
+    <!-- Back button -->
     <button class="back-button" onclick="window.location.href='index.html'"></button>
 
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
+        import { getDatabase, ref, set, onValue, query, orderByKey, limitToLast } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-analytics.js";
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -86,63 +141,89 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
-        // Variable to control the grid dimensions
-        const gridSize = 20; // You can change this value to control the grid size
-        const pixelGrid = document.getElementById('pixel-grid');
-        const pixels = [];
+        let username;
+        let messageLimit = 10; // Default message limit
 
-        // Set the grid dimensions
-        pixelGrid.style.gridTemplateColumns = `repeat(${gridSize}, 20px)`;
-        pixelGrid.style.gridTemplateRows = `repeat(${gridSize}, 20px)`;
+        // Function to fetch and display messages
+        function fetchMessages() {
+            const messagesRef = ref(database, 'messages');
+            const latestMessagesQuery = query(messagesRef, orderByKey(), limitToLast(messageLimit));
+            onValue(latestMessagesQuery, (snapshot) => {
+                const data = snapshot.val();
+                let displayText = 'No messages yet.';
+                const now = Date.now();
 
-        // Generate pixel grid
-        for (let i = 0; i < gridSize * gridSize; i++) {
-            const pixel = document.createElement('div');
-            pixel.className = 'pixel';
-            pixel.addEventListener('click', () => {
-                pixel.style.backgroundColor = selectedColor;
-                savePixelGrid();
+                if (data) {
+                    const messagesArray = Object.entries(data).map(([timestamp, message]) => {
+                        const messageTime = new Date(parseInt(timestamp));
+                        const timeDiff = now - messageTime.getTime();
+                        const minutes = Math.floor(timeDiff / 60000); // Time difference in minutes
+                        const hours = Math.floor(minutes / 60);
+                        const displayDiff = hours > 0 ? `${hours}h` : `${minutes}m`;
+                        return `
+                            <div class="message-container">
+                                <div class="message-text">${message}</div>
+                                <div class="message-time">${displayDiff} ago</div>
+                            </div>
+                        `;
+                    }).reverse();
+                    displayText = messagesArray.join('');
+                }
+
+                document.getElementById('display-message').innerHTML = displayText;
             });
-            pixelGrid.appendChild(pixel);
-            pixels.push(pixel);
         }
 
-        // Generate color selector
-        const colors = ['#000000', '#FFFFFF', '#FF0000', '#FFA500', '#FFFF00', '#008000', '#00FFFF','#0000FF', '#4B0082', '#EE82EE', '#964B00'];
-        let selectedColor = colors[0];
-        const colorSelector = document.getElementById('color-selector');
+        // Function to save the message
+        function saveMessage(event) {
+            event.preventDefault();
+            const message = document.getElementById('message-input').value;
+            if (username && message) {
+                const newMessageRef = ref(database, 'messages/' + Date.now());
+                set(newMessageRef, `${username}: ${message}`)
+                    .then(() => {
+                        console.log('Message saved successfully');
+                        document.getElementById('message-input').value = ''; // Clear input field
+                        fetchMessages(); // Refresh messages
+                    })
+                    .catch(error => {
+                        console.error('Error saving message:', error);
+                    });
+            }
+        }
 
-        colors.forEach(color => {
-            const colorDiv = document.createElement('div');
-            colorDiv.className = 'color';
-            colorDiv.style.backgroundColor = color;
-            colorDiv.addEventListener('click', () => {
-                selectedColor = color;
-                document.querySelectorAll('.color').forEach(c => c.classList.remove('selected'));
-                colorDiv.classList.add('selected');
-            });
-            if (color === selectedColor) colorDiv.classList.add('selected');
-            colorSelector.appendChild(colorDiv);
+        // Open settings modal
+        document.querySelector('.settings-button').addEventListener('click', () => {
+            document.getElementById('settings-modal').style.display = 'block';
         });
 
-        // Function to save pixel grid to Firebase
-        function savePixelGrid() {
-            const pixelData = pixels.map(pixel => pixel.style.backgroundColor);
-            set(ref(database, 'pixel-grid'), pixelData);
-        }
-
-        // Load pixel grid from Firebase and sync changes in real-time
-        onValue(ref(database, 'pixel-grid'), (snapshot) => {
-            const pixelData = snapshot.val();
-            if (pixelData) {
-                pixelData.forEach((color, index) => {
-                    pixels[index].style.backgroundColor = color;
-                });
+        // Apply settings
+        document.getElementById('apply-settings').addEventListener('click', () => {
+            const count = parseInt(document.getElementById('message-count').value);
+            if (!isNaN(count) && count > 0) {
+                messageLimit = count;
+                fetchMessages(); // Refresh messages with new limit
+                document.getElementById('settings-modal').style.display = 'none';
+            } else {
+                alert('Please enter a valid number.');
             }
         });
 
-        // Auto-save and sync
-        window.addEventListener('beforeunload', savePixelGrid);
+        // Close settings modal
+        document.getElementById('close-settings').addEventListener('click', () => {
+            document.getElementById('settings-modal').style.display = 'none';
+        });
+
+        document.getElementById('message-form').addEventListener('submit', saveMessage);
+
+        // Prompt for username and load messages
+        window.onload = function() {
+            username = prompt('Enter your name:');
+            if (!username) {
+                username = 'Anonymous';
+            }
+            fetchMessages();
+        }
     </script>
 </body>
 </html>

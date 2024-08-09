@@ -53,13 +53,15 @@
             border-color: #a9a9a9;
             color: rgb(255, 255, 255);
         }
-        .button-minecraft, .button-retro, .button-textinorsm {
+        .button-minecraft, .button-retro, .button-textinorsm, .button-pixelplace {
             padding: 32px 64px;
             border-radius: 19px;
             background-size: cover;
+            background-position: center;
             color: white;
             font-size: 18px;
             font-weight: bold;
+            height: 100px; /* Set a fixed height for all buttons */
         }
         .button-minecraft {
             background-image: url('Minecraft_image.png');
@@ -87,6 +89,15 @@
             background-color: #8B008B;
             background-blend-mode: overlay;
             border-color: #4B0082;
+        }
+        .button-pixelplace {
+            background-image: url('pixelplace.png');
+            border: 2px solid #008B8B;
+        }
+        .button-pixelplace:hover {
+            background-color: #008B8B;
+            background-blend-mode: overlay;
+            border-color: #006868;
         }
         .container {
             height: 200px;
@@ -136,6 +147,9 @@
             </a>
             <a href="messenger.html">
                 <button class="button button2 button-textinorsm">Messenger</button>
+            </a>
+            <a href="pixelplace.html">
+                <button class="button button2 button-pixelplace">Pixel Place</button>
             </a>
         </div>
     </div>
