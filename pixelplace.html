@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .pixel-grid {
+            display: grid;
+            gap: 2px;
+        }
+        .pixel {
+            width: 20px;
+            height: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            cursor: pointer;
+        }
+        .color-selector {
+            margin-top: 20px;
+        }
+        .color {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin: 0 5px;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .color.selected {
+            border-color: #000;
+        }
+    </style>
+</head>
+<body>
+    <h1>Pixel Place</h1>
+    <div class="container">
+        <div class="pixel-grid" id="pixel-grid">
+            <!-- Pixels will be generated here by JavaScript -->
+        </div>
+        <div class="color-selector" id="color-selector">
+            <!-- Colors will be generated here by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBzxQgwD_gBuylhdqlRck_PEVzueWccvTM",
+            authDomain: "messengerformewebsite.firebaseapp.com",
+            databaseURL: "https://messengerformewebsite-default-rtdb.firebaseio.com/",
+            projectId: "messengerformewebsite",
+            storageBucket: "messengerformewebsite.appspot.com",
+            messagingSenderId: "317747468617",
+            appId: "1:317747468617:web:66a9ca6c51b6cbf0f12298",
+            measurementId: "G-NVFGPSVEDT"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Variable to control the grid dimensions
+        const gridSize = 20; // You can change this value to control the grid size
+        const pixelGrid = document.getElementById('pixel-grid');
+        const pixels = [];
+
+        // Set the grid dimensions
+        pixelGrid.style.gridTemplateColumns = `repeat(${gridSize}, 20px)`;
+        pixelGrid.style.gridTemplateRows = `repeat(${gridSize}, 20px)`;
+
+        // Generate pixel grid
+        for (let i = 0; i < gridSize * gridSize; i++) {
+            const pixel = document.createElement('div');
+            pixel.className = 'pixel';
+            pixel.addEventListener('click', () => {
+                pixel.style.backgroundColor = selectedColor;
+                savePixelGrid();
+            });
+            pixelGrid.appendChild(pixel);
+            pixels.push(pixel);
+        }
+
+        // Generate color selector
+        const colors = ['#000000', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFFFFF'];
+        let selectedColor = colors[0];
+        const colorSelector = document.getElementById('color-selector');
+
+        colors.forEach(color => {
+            const colorDiv = document.createElement('div');
+            colorDiv.className = 'color';
+            colorDiv.style.backgroundColor = color;
+            colorDiv.addEventListener('click', () => {
+                selectedColor = color;
+                document.querySelectorAll('.color').forEach(c => c.classList.remove('selected'));
+                colorDiv.classList.add('selected');
+            });
+            if (color === selectedColor) colorDiv.classList.add('selected');
+            colorSelector.appendChild(colorDiv);
+        });
+
+        // Function to save pixel grid to Firebase
+        function savePixelGrid() {
+            const pixelData = pixels.map(pixel => pixel.style.backgroundColor);
+            set(ref(database, 'pixel-grid'), pixelData);
+        }
+
+        // Load pixel grid from Firebase and sync changes in real-time
+        onValue(ref(database, 'pixel-grid'), (snapshot) => {
+            const pixelData = snapshot.val();
+            if (pixelData) {
+                pixelData.forEach((color, index) => {
+                    pixels[index].style.backgroundColor = color;
+                });
+            }
+        });
+
+        // Auto-save and sync
+        window.addEventListener('beforeunload', savePixelGrid);
+    </script>
+</body>
+</html>
