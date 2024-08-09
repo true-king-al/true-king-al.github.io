@@ -16,6 +16,7 @@
         .pixel-grid {
             display: grid;
             gap: 2px;
+            margin-top: 20px;
         }
         .pixel {
             width: 20px;
@@ -38,6 +39,19 @@
         .color.selected {
             border-color: #000;
         }
+        .back-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .back-button:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
@@ -49,6 +63,7 @@
         <div class="color-selector" id="color-selector">
             <!-- Colors will be generated here by JavaScript -->
         </div>
+        <a href="index.html" class="back-button">Back</a>
     </div>
 
     <!-- Firebase SDK -->
@@ -94,7 +109,7 @@
         }
 
         // Generate color selector
-        const colors = ['#000000', '#FFFFFF', '#FF0000', '#FFA500', '#FFFF00', '#008000', '#00FFFF','#0000FF', '#4B0082', '#EE82EE', '#964B00'];
+        const colors = ['#000000', '#FFFFFF', '#FF0000', '#FFA500', '#FFFF00', '#008000', '#0000FF', '#4B0082', '#EE82EE', '#A52A2A'];
         let selectedColor = colors[0];
         const colorSelector = document.getElementById('color-selector');
 
