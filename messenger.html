@@ -144,6 +144,14 @@
         let username;
         let messageLimit = 10; // Default message limit
 
+        // List of forbidden words
+        const forbiddenWords = ['nigger', 'nigga'];
+
+        // Function to check if text contains forbidden words
+        function containsForbiddenWords(text) {
+            return forbiddenWords.some(word => text.toLowerCase().includes(word));
+        }
+
         // Function to fetch and display messages
         function fetchMessages() {
             const messagesRef = ref(database, 'messages');
@@ -179,6 +187,10 @@
             event.preventDefault();
             const message = document.getElementById('message-input').value;
             if (username && message) {
+                if (containsForbiddenWords(message)) {
+                    alert('Your message contains forbidden words and cannot be sent.');
+                    return;
+                }
                 const newMessageRef = ref(database, 'messages/' + Date.now());
                 set(newMessageRef, `${username}: ${message}`)
                     .then(() => {
@@ -219,7 +231,8 @@
         // Prompt for username and load messages
         window.onload = function() {
             username = prompt('Enter your name:');
-            if (!username) {
+            if (!username || containsForbiddenWords(username)) {
+                alert('Your name contains forbidden words and cannot be used. Please enter a different name.');
                 username = 'Anonymous';
             }
             fetchMessages();
