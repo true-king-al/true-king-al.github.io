@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        canvas {
+            border: 1px solid #000000;
+        }
+    </style>
+</head>
+<body>
+<h1>HTML5 Canvas Rotation and Movement</h1>
+
+<canvas id="myCanvas" width="500" height="400">
+    Sorry, your browser does not support canvas.
+</canvas>
+
+<script>
+let angle = 0; // Initial rotation angle
+const rotationSpeed = 0.05; // Speed of rotation
+const moveSpeed = 2; // Speed of movement
+let x = 200; // Initial x position of turret
+let y = 200; // Initial y position of turret
+const radius = 40; // Radius of the circle
+const turretWidth = 20; // Width of the turret rectangle
+const turretHeight = 70; // Height of the turret rectangle
+
+const canvas = document.getElementById("myCanvas");
+const ctx = canvas.getContext("2d");
+
+function drawTurret() {
+    // Clear the canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw the rotating turret
+    ctx.save(); // Save the current state
+
+    // Translate to the center of the turret and rotate
+    ctx.translate(x, y - radius); // Move the origin to the center of the turret
+    ctx.rotate(angle); // Rotate by the current angle
+    
+    // Draw the turret rectangle
+    ctx.fillStyle = "gray";
+    ctx.fillRect(-turretWidth / 2, -turretHeight, turretWidth, turretHeight);
+
+    // Draw the circle
+    ctx.beginPath();
+    ctx.arc(0, 0, radius, 0, 2 * Math.PI);
+    ctx.fillStyle = "red";
+    ctx.fill();
+    
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = "blue";
+    ctx.stroke();
+    
+    ctx.restore(); // Restore to the previous state
+}
+
+// Handle keydown events
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'ArrowLeft') {
+        angle -= rotationSpeed; // Rotate counterclockwise
+    } 
+    if (event.key === 'ArrowRight') {
+        angle += rotationSpeed; // Rotate clockwise
+    } 
+    if (event.key === 'ArrowUp') {
+        // Move forward in the direction the turret is facing
+        x += moveSpeed * Math.cos(angle - (Math.PI/2));
+        y += moveSpeed * Math.sin(angle - (Math.PI/2));
+    }
+});
+
+function update() {
+    drawTurret();
+    requestAnimationFrame(update); // Continue the animation
+}
+
+// Start the animation
+update();
+
+</script>
+
+</body>
+</html>
