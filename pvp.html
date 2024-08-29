@@ -31,6 +31,9 @@ const radius = 40; // Radius of the circle
 const turretWidth = 20; // Width of the turret rectangle
 const turretHeight = 70; // Height of the turret rectangle
 
+const bulletRadius = 5; // Radius of the bullet
+const bulletSpeed = 5; // Speed of the bullet
+
 const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -49,8 +52,11 @@ resizeCanvas();
 const keys = {
     ArrowLeft: false,
     ArrowRight: false,
-    ArrowUp: false
+    ArrowUp: false,
+    Space: false
 };
+
+const bullets = []; // Array to hold the bullets
 
 function drawTurret() {
     // Clear the canvas
@@ -78,6 +84,35 @@ function drawTurret() {
     ctx.stroke();
     
     ctx.restore(); // Restore to the previous state
+    
+    // Draw bullets
+    ctx.fillStyle = "black";
+    bullets.forEach(bullet => {
+        ctx.beginPath();
+        ctx.arc(bullet.x, bullet.y, bulletRadius, 0, 2 * Math.PI);
+        ctx.fill();
+    });
+}
+
+function updateBullets() {
+    bullets.forEach(bullet => {
+        bullet.x += bullet.dx;
+        bullet.y += bullet.dy;
+
+        // Remove bullets that are out of bounds
+        if (bullet.x < 0 || bullet.x > canvas.width || bullet.y < 0 || bullet.y > canvas.height) {
+            bullet.remove = true;
+        }
+    });
+
+    // Filter out removed bullets
+    bullets = bullets.filter(bullet => !bullet.remove);
+}
+
+function draw() {
+    drawTurret();
+    updateBullets();
+    requestAnimationFrame(draw); // Continue the animation
 }
 
 // Handle keydown events
@@ -107,9 +142,20 @@ function update() {
         x += moveSpeed * Math.cos(angle - (Math.PI / 2));
         y += moveSpeed * Math.sin(angle - (Math.PI / 2));
     }
+    
+    // Handle shooting
+    if (keys.Space) {
+        // Create a new bullet
+        const bulletDx = bulletSpeed * Math.cos(angle - (Math.PI / 2));
+        const bulletDy = bulletSpeed * Math.sin(angle - (Math.PI / 2));
+        bullets.push({ x: x, y: y, dx: bulletDx, dy: bulletDy, remove: false });
+        
+        // Prevent continuous firing by adding a small delay
+        keys.Space = false; // Set to false to require key release to fire again
+    }
 
-    drawTurret();
-    requestAnimationFrame(update); // Continue the animation
+    updateBullets();
+    draw();
 }
 
 // Start the animation
