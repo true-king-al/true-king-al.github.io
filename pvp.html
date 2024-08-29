@@ -30,9 +30,7 @@ let y = 200; // Initial y position of turret
 const radius = 40; // Radius of the circle
 const turretWidth = 20; // Width of the turret rectangle
 const turretHeight = 70; // Height of the turret rectangle
-
-const bulletRadius = 5; // Radius of the bullet
-const bulletSpeed = 5; // Speed of the bullet
+const bulletSpeed = 5; // Speed of the bullets
 
 const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
@@ -56,7 +54,30 @@ const keys = {
     Space: false
 };
 
-const bullets = []; // Array to hold the bullets
+class Bullet {
+    constructor(x, y, angle) {
+        this.x = x;
+        this.y = y;
+        this.angle = angle;
+        this.speed = bulletSpeed;
+    }
+
+    update() {
+        this.x += this.speed * Math.cos(this.angle);
+        this.y += this.speed * Math.sin(this.angle);
+    }
+
+    draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, 5, 0, 2 * Math.PI);
+        ctx.fillStyle = "black";
+        ctx.fill();
+        ctx.strokeStyle = "white";
+        ctx.stroke();
+    }
+}
+
+let bullets = [];
 
 function drawTurret() {
     // Clear the canvas
@@ -84,50 +105,13 @@ function drawTurret() {
     ctx.stroke();
     
     ctx.restore(); // Restore to the previous state
-    
+
     // Draw bullets
-    ctx.fillStyle = "black";
     bullets.forEach(bullet => {
-        ctx.beginPath();
-        ctx.arc(bullet.x, bullet.y, bulletRadius, 0, 2 * Math.PI);
-        ctx.fill();
+        bullet.update();
+        bullet.draw();
     });
 }
-
-function updateBullets() {
-    bullets.forEach(bullet => {
-        bullet.x += bullet.dx;
-        bullet.y += bullet.dy;
-
-        // Remove bullets that are out of bounds
-        if (bullet.x < 0 || bullet.x > canvas.width || bullet.y < 0 || bullet.y > canvas.height) {
-            bullet.remove = true;
-        }
-    });
-
-    // Filter out removed bullets
-    bullets = bullets.filter(bullet => !bullet.remove);
-}
-
-function draw() {
-    drawTurret();
-    updateBullets();
-    requestAnimationFrame(draw); // Continue the animation
-}
-
-// Handle keydown events
-document.addEventListener('keydown', function(event) {
-    if (keys.hasOwnProperty(event.key)) {
-        keys[event.key] = true;
-    }
-});
-
-// Handle keyup events
-document.addEventListener('keyup', function(event) {
-    if (keys.hasOwnProperty(event.key)) {
-        keys[event.key] = false;
-    }
-});
 
 function update() {
     // Handle rotation
@@ -142,25 +126,42 @@ function update() {
         x += moveSpeed * Math.cos(angle - (Math.PI / 2));
         y += moveSpeed * Math.sin(angle - (Math.PI / 2));
     }
-    
-    // Handle shooting
     if (keys.Space) {
-        // Create a new bullet
-        const bulletDx = bulletSpeed * Math.cos(angle - (Math.PI / 2));
-        const bulletDy = bulletSpeed * Math.sin(angle - (Math.PI / 2));
-        bullets.push({ x: x, y: y, dx: bulletDx, dy: bulletDy, remove: false });
-        
-        // Prevent continuous firing by adding a small delay
-        keys.Space = false; // Set to false to require key release to fire again
+        // Shoot a bullet
+        bullets.push(new Bullet(
+            x + Math.cos(angle) * (radius + 10), // Offset from the turret
+            y + Math.sin(angle) * (radius + 10), // Offset from the turret
+            angle
+        ));
+        keys.Space = false;
+        console.log("Bullet fired!"); // Debug message
     }
 
-    updateBullets();
-    draw();
+    // Remove bullets that are off-screen
+    bullets = bullets.filter(bullet => 
+        bullet.x >= 0 && bullet.x <= canvas.width && bullet.y >= 0 && bullet.y <= canvas.height
+    );
+
+    drawTurret();
+    requestAnimationFrame(update); // Continue the animation
 }
 
 // Start the animation
 update();
 
+// Handle keydown events
+document.addEventListener('keydown', function(event) {
+    if (keys.hasOwnProperty(event.key)) {
+        keys[event.key] = true;
+    }
+});
+
+// Handle keyup events
+document.addEventListener('keyup', function(event) {
+    if (keys.hasOwnProperty(event.key)) {
+        keys[event.key] = false;
+    }
+});
 </script>
 
 </body>
