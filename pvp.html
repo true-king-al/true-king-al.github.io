@@ -153,15 +153,15 @@ update();
 
 // Handle keydown events
 document.addEventListener('keydown', function(event) {
-    if (keys.hasOwnProperty(event.key)) {
-        keys[event.key] = true;
+    if (event.code in keys) {
+        keys[event.code] = true;
     }
 });
 
 // Handle keyup events
 document.addEventListener('keyup', function(event) {
-    if (keys.hasOwnProperty(event.key)) {
-        keys[event.key] = false;
+    if (event.code in keys) {
+        keys[event.code] = false;
     }
 });
 </script>
