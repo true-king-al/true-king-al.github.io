@@ -21,155 +21,214 @@
     Sorry, your browser does not support canvas.
 </canvas>
 
-<script>
-let angle = 0; // Initial rotation angle
-const rotationSpeed = 0.05; // Speed of rotation
-const moveSpeed = 2; // Speed of movement
-let x = 200; // Initial x position of turret
-let y = 200; // Initial y position of turret
-const radius = 40; // Radius of the circle
-const turretWidth = 20; // Width of the turret rectangle
-const turretHeight = 70; // Height of the turret rectangle
-const bulletSpeed = 5; // Speed of the bullets
+<script type="module">
+    // Firebase Imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-analytics.js";
 
-const canvas = document.getElementById("myCanvas");
-const ctx = canvas.getContext("2d");
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyBzxQgwD_gBuylhdqlRck_PEVzueWccvTM",
+        authDomain: "messengerformewebsite.firebaseapp.com",
+        databaseURL: "https://messengerformewebsite-default-rtdb.firebaseio.com/",
+        projectId: "messengerformewebsite",
+        storageBucket: "messengerformewebsite.appspot.com",
+        messagingSenderId: "317747468617",
+        appId: "1:317747468617:web:66a9ca6c51b6cbf0f12298",
+        measurementId: "G-NVFGPSVEDT"
+    };
 
-// Function to resize the canvas to fill the viewport
-function resizeCanvas() {
-    if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    // Player ID - Each player should have a unique ID (could be generated or static for testing)
+    const playerId = Math.random().toString(36).substr(2, 9);
+
+    // Firebase References
+    const playerRef = ref(database, 'players/' + playerId);
+    const allPlayersRef = ref(database, 'players');
+
+    // Initial player state
+    let angle = 0; // Initial rotation angle
+    const rotationSpeed = 0.05; // Speed of rotation
+    const moveSpeed = 2; // Speed of movement
+    let x = 200; // Initial x position of turret
+    let y = 200; // Initial y position of turret
+    const radius = 40; // Radius of the circle
+    const turretWidth = 20; // Width of the turret rectangle
+    const turretHeight = 70; // Height of the turret rectangle
+    const bulletSpeed = 5; // Speed of the bullets
+
+    const canvas = document.getElementById("myCanvas");
+    const ctx = canvas.getContext("2d");
+
+    // Function to resize the canvas to fill the viewport
+    function resizeCanvas() {
+        if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
     }
-}
 
-// Resize the canvas when the window is resized
-window.addEventListener('resize', resizeCanvas);
+    // Resize the canvas when the window is resized
+    window.addEventListener('resize', resizeCanvas);
 
-// Initial canvas size
-resizeCanvas();
+    // Initial canvas size
+    resizeCanvas();
 
-const keys = {
-    ArrowLeft: false,
-    ArrowRight: false,
-    ArrowUp: false,
-    Space: false
-};
+    const keys = {
+        ArrowLeft: false,
+        ArrowRight: false,
+        ArrowUp: false,
+        Space: false
+    };
 
-class Bullet {
-    constructor(x, y, angle) {
-        this.x = x;
-        this.y = y;
-        this.angle = angle;
-        this.speed = bulletSpeed;
+    class Bullet {
+        constructor(x, y, angle) {
+            this.x = x;
+            this.y = y;
+            this.angle = angle;
+            this.speed = bulletSpeed;
+        }
+
+        update() {
+            this.x += this.speed * Math.cos(this.angle);
+            this.y += this.speed * Math.sin(this.angle);
+        }
+
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, 5, 0, 2 * Math.PI);
+            ctx.fillStyle = "black";
+            ctx.fill();
+            ctx.strokeStyle = "white";
+            ctx.stroke();
+        }
     }
 
-    update() {
-        this.x += this.speed * Math.cos(this.angle);
-        this.y += this.speed * Math.sin(this.angle);
+    let bullets = [];
+    let allPlayersData = {}; // Store data of all players
+
+    // Function to update Firebase with current player state
+    function updateFirebase() {
+        set(playerRef, {
+            x: x,
+            y: y,
+            angle: angle,
+            bullets: bullets.map(bullet => ({ x: bullet.x, y: bullet.y, angle: bullet.angle }))
+        });
     }
 
-    draw() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, 5, 0, 2 * Math.PI);
-        ctx.fillStyle = "black";
-        ctx.fill();
-        ctx.strokeStyle = "white";
-        ctx.stroke();
-    }
-}
-
-let bullets = [];
-
-function drawTurret() {
-    // Clear the canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // Draw the rotating turret
-    ctx.save(); // Save the current state
-
-    // Translate to the center of the turret and rotate
-    ctx.translate(x, y - radius); // Move the origin to the center of the turret
-    ctx.rotate(angle); // Rotate by the current angle
-    
-    // Draw the turret rectangle
-    ctx.fillStyle = "gray";
-    ctx.fillRect(-turretWidth / 2, -turretHeight, turretWidth, turretHeight);
-
-    // Draw the circle
-    ctx.beginPath();
-    ctx.arc(0, 0, radius, 0, 2 * Math.PI);
-    ctx.fillStyle = "red";
-    ctx.fill();
-    
-    ctx.lineWidth = 4;
-    ctx.strokeStyle = "blue";
-    ctx.stroke();
-    
-    ctx.restore(); // Restore to the previous state
-
-    // Draw bullets
-    bullets.forEach(bullet => {
-        bullet.update();
-        bullet.draw();
+    // Listen for updates from other players
+    onValue(allPlayersRef, (snapshot) => {
+        allPlayersData = snapshot.val() || {};
     });
-}
 
-function update() {
-    // Handle rotation
-    if (keys.ArrowLeft) {
-        angle -= rotationSpeed; // Rotate counterclockwise
-    } 
-    if (keys.ArrowRight) {
-        angle += rotationSpeed; // Rotate clockwise
-    } 
-    // Handle movement
-    if (keys.ArrowUp) {
-        x += moveSpeed * Math.cos(angle - (Math.PI / 2));
-        y += moveSpeed * Math.sin(angle - (Math.PI / 2));
-    }
-	if (keys.Space) {
-    // Calculate the position at the tip of the turret for the bullet to 	start
-    const bulletX = x + (radius + turretHeight / 2) * Math.cos(angle - 	Math.PI / 2);
-    const bulletY = (y-radius) + (radius + turretHeight / 2) * Math.sin(angle - Math.PI / 2);
+    function drawTurret() {
+        // Clear the canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw all players' turrets
+        for (let id in allPlayersData) {
+            if (id !== playerId) { // Don't draw yourself twice
+                const player = allPlayersData[id];
+                drawPlayer(player.x, player.y, player.angle, player.bullets);
+            }
+        }
 
-    // Shoot a bullet
-    bullets.push(new Bullet(bulletX, bulletY, angle - Math.PI / 2));
-    keys.Space = false; // Comment this line out to enable continuous shooting
-    console.log("Bullet fired!"); // Debug message
+        // Draw the current player's turret
+        drawPlayer(x, y, angle, bullets);
     }
 
+    function drawPlayer(px, py, pAngle, pBullets) {
+        ctx.save(); // Save the current state
 
-    // Remove bullets that are off-screen
-    bullets = bullets.filter(bullet => 
-        bullet.x >= 0 && bullet.x <= canvas.width && bullet.y >= 0 && bullet.y <= canvas.height
-    );
+        // Translate to the center of the turret and rotate
+        ctx.translate(px, py - radius); // Move the origin to the center of the turret
+        ctx.rotate(pAngle); // Rotate by the current angle
+        
+        // Draw the turret rectangle
+        ctx.fillStyle = "gray";
+        ctx.fillRect(-turretWidth / 2, -turretHeight, turretWidth, turretHeight);
 
-    drawTurret();
-    // old debuging
-    //ctx.beginPath();  
-    //ctx.arc(x, y, 5, 0, 2 * Math.PI);
-    //ctx.fillStyle = "black";
-    //ctx.fill();
-    requestAnimationFrame(update); // Continue the animation
-}
+        // Draw the circle
+        ctx.beginPath();
+        ctx.arc(0, 0, radius, 0, 2 * Math.PI);
+        ctx.fillStyle = "red";
+        ctx.fill();
+        
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = "blue";
+        ctx.stroke();
+        
+        ctx.restore(); // Restore to the previous state
 
-// Start the animation
-update();
-
-// Handle keydown events
-document.addEventListener('keydown', function(event) {
-    if (event.code in keys) {
-        keys[event.code] = true;
+        // Draw bullets
+        pBullets.forEach(bullet => {
+            ctx.beginPath();
+            ctx.arc(bullet.x, bullet.y, 5, 0, 2 * Math.PI);
+            ctx.fillStyle = "black";
+            ctx.fill();
+            ctx.strokeStyle = "white";
+            ctx.stroke();
+        });
     }
-});
 
-// Handle keyup events
-document.addEventListener('keyup', function(event) {
-    if (event.code in keys) {
-        keys[event.code] = false;
+    function update() {
+        // Handle rotation
+        if (keys.ArrowLeft) {
+            angle -= rotationSpeed; // Rotate counterclockwise
+        } 
+        if (keys.ArrowRight) {
+            angle += rotationSpeed; // Rotate clockwise
+        } 
+        // Handle movement
+        if (keys.ArrowUp) {
+            x += moveSpeed * Math.cos(angle - (Math.PI / 2));
+            y += moveSpeed * Math.sin(angle - (Math.PI / 2));
+        }
+        if (keys.Space) {
+            // Calculate the position at the tip of the turret for the bullet to start
+            const bulletX = x + (radius + turretHeight / 2) * Math.cos(angle - Math.PI / 2);
+            const bulletY = (y-radius) + (radius + turretHeight / 2) * Math.sin(angle - Math.PI / 2);
+
+            // Shoot a bullet
+            bullets.push(new Bullet(bulletX, bulletY, angle - Math.PI / 2));
+            keys.Space = false; // Comment this line out to enable continuous shooting
+        }
+
+        // Remove bullets that are off-screen
+        bullets = bullets.filter(bullet => 
+            bullet.x >= 0 && bullet.x <= canvas.width && bullet.y >= 0 && bullet.y <= canvas.height
+        );
+
+        // Update Firebase with the current state
+        updateFirebase();
+
+        // Draw the scene
+        drawTurret();
+
+        requestAnimationFrame(update); // Continue the animation
     }
-});
+
+    // Start the animation
+    update();
+
+    // Handle keydown events
+    document.addEventListener('keydown', function(event) {
+        if (event.code in keys) {
+            keys[event.code] = true;
+        }
+    });
+
+    // Handle keyup events
+    document.addEventListener('keyup', function(event) {
+        if (event.code in keys) {
+            keys[event.code] = false;
+        }
+    });
 </script>
 
 </body>
