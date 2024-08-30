@@ -65,8 +65,8 @@ class Bullet {
     }
 
     update() {
-        this.x += this.speed * Math.cos(this.angle);
-        this.y += this.speed * Math.sin(this.angle);
+        this.x += this.speed * Math.cos(this.angle) * 0;
+        this.y += this.speed * Math.sin(this.angle) * 0;
     }
 
     draw() {
@@ -128,15 +128,15 @@ function update() {
         x += moveSpeed * Math.cos(angle - (Math.PI / 2));
         y += moveSpeed * Math.sin(angle - (Math.PI / 2));
     }
-    if (keys.Space) {
-        // Shoot a bullet
-        bullets.push(new Bullet(
-            x + Math.cos(angle) * (radius + 10), // Offset from the turret
-            y + Math.sin(angle) * (radius + 10), // Offset from the turret
-            angle
-        ));
-        keys.Space = false; // Comment this line out to enable continuous shooting
-        console.log("Bullet fired!"); // Debug message
+	if (keys.Space) {
+    // Calculate the position at the tip of the turret for the bullet to 	start
+    const bulletX = x + (radius + turretHeight) * Math.cos(angle - 	Math.PI / 2);
+    const bulletY = y + (radius + turretHeight) * Math.sin(angle - Math.PI / 2);
+
+    // Shoot a bullet
+    bullets.push(new Bullet(bulletX, bulletY, angle - Math.PI / 2));
+    keys.Space = false; // Comment this line out to enable continuous shooting
+    console.log("Bullet fired!"); // Debug message
     }
 
     // Remove bullets that are off-screen
