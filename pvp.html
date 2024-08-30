@@ -142,31 +142,31 @@
         drawPlayer(x, y, angle, bullets);
     }
 
-    function drawPlayer(px, py, pAngle, pBullets) {
+    function drawPlayer(px, py, pAngle, pBullets = []) {
         ctx.save(); // Save the current state
 
         // Translate to the center of the turret and rotate
         ctx.translate(px, py - radius); // Move the origin to the center of the turret
         ctx.rotate(pAngle); // Rotate by the current angle
-        
+    
         // Draw the turret rectangle
         ctx.fillStyle = "gray";
         ctx.fillRect(-turretWidth / 2, -turretHeight, turretWidth, turretHeight);
 
-        // Draw the circle
+    // Draw the circle
         ctx.beginPath();
         ctx.arc(0, 0, radius, 0, 2 * Math.PI);
         ctx.fillStyle = "red";
         ctx.fill();
-        
+    
         ctx.lineWidth = 4;
         ctx.strokeStyle = "blue";
         ctx.stroke();
-        
+    
         ctx.restore(); // Restore to the previous state
 
-        // Draw bullets
-        pBullets.forEach(bullet => {
+    // Ensure pBullets is always an array, then draw bullets
+        (pBullets || []).forEach(bullet => {
             ctx.beginPath();
             ctx.arc(bullet.x, bullet.y, 5, 0, 2 * Math.PI);
             ctx.fillStyle = "black";
