@@ -65,8 +65,8 @@ class Bullet {
     }
 
     update() {
-        this.x += this.speed * Math.cos(this.angle) * 0;
-        this.y += this.speed * Math.sin(this.angle) * 0;
+        this.x += this.speed * Math.cos(this.angle);
+        this.y += this.speed * Math.sin(this.angle);
     }
 
     draw() {
@@ -130,8 +130,8 @@ function update() {
     }
 	if (keys.Space) {
     // Calculate the position at the tip of the turret for the bullet to 	start
-    const bulletX = x + (radius + turretHeight) * Math.cos(angle - 	Math.PI / 2);
-    const bulletY = y + (radius + turretHeight) * Math.sin(angle - Math.PI / 2);
+    const bulletX = x + (radius + turretHeight / 2) * Math.cos(angle - 	Math.PI / 2);
+    const bulletY = (y-radius) + (radius + turretHeight / 2) * Math.sin(angle - Math.PI / 2);
 
     // Shoot a bullet
     bullets.push(new Bullet(bulletX, bulletY, angle - Math.PI / 2));
@@ -139,12 +139,18 @@ function update() {
     console.log("Bullet fired!"); // Debug message
     }
 
+
     // Remove bullets that are off-screen
     bullets = bullets.filter(bullet => 
         bullet.x >= 0 && bullet.x <= canvas.width && bullet.y >= 0 && bullet.y <= canvas.height
     );
 
     drawTurret();
+    // old debuging
+    //ctx.beginPath();  
+    //ctx.arc(x, y, 5, 0, 2 * Math.PI);
+    //ctx.fillStyle = "black";
+    //ctx.fill();
     requestAnimationFrame(update); // Continue the animation
 }
 
