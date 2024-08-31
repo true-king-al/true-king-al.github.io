@@ -25,7 +25,6 @@
     // Firebase Imports
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
     import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-analytics.js";
 
     // Your web app's Firebase configuration
     const firebaseConfig = {
@@ -35,15 +34,14 @@
         projectId: "messengerformewebsite",
         storageBucket: "messengerformewebsite.appspot.com",
         messagingSenderId: "317747468617",
-        appId: "1:317747468617:web:66a9ca6c51b6cbf0f12298",
-        measurementId: "G-NVFGPSVEDT"
+        appId: "1:317747468617:web:66a9ca6c51b6cbf0f12298"
     };
 
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const database = getDatabase(app);
 
-    // Player ID - Each player should have a unique ID (could be generated or static for testing)
+    // Player ID - Each player should have a unique ID
     const playerId = Math.random().toString(36).substr(2, 9);
 
     // Firebase References
@@ -51,15 +49,15 @@
     const allPlayersRef = ref(database, 'players');
 
     // Initial player state
-    let angle = 0; // Initial rotation angle
-    const rotationSpeed = 0.05; // Speed of rotation
-    const moveSpeed = 2; // Speed of movement
-    let x = 200; // Initial x position of turret
-    let y = 200; // Initial y position of turret
-    const radius = 40; // Radius of the circle
-    const turretWidth = 20; // Width of the turret rectangle
-    const turretHeight = 70; // Height of the turret rectangle
-    const bulletSpeed = 5; // Speed of the bullets
+    let angle = 0; 
+    const rotationSpeed = 0.05; 
+    const moveSpeed = 2; 
+    let x = 200; 
+    let y = 200; 
+    const radius = 40; 
+    const turretWidth = 20; 
+    const turretHeight = 70; 
+    const bulletSpeed = 5; 
 
     const canvas = document.getElementById("myCanvas");
     const ctx = canvas.getContext("2d");
@@ -109,7 +107,7 @@
     }
 
     let bullets = [];
-    let allPlayersData = {}; // Store data of all players
+    let allPlayersData = {}; 
 
     // Function to update Firebase with current player state
     function updateFirebase() {
@@ -117,7 +115,8 @@
             x: x,
             y: y,
             angle: angle,
-            bullets: bullets.map(bullet => ({ x: bullet.x, y: bullet.y, angle: bullet.angle }))
+            bullets: bullets.map(bullet => ({ x: bullet.x, y: bullet.y, angle: bullet.angle })),
+            lastMove: Date.now() // Store the last movement time
         });
     }
 
@@ -132,7 +131,7 @@
         
         // Draw all players' turrets
         for (let id in allPlayersData) {
-            if (id !== playerId) { // Don't draw yourself twice
+            if (id !== playerId) { 
                 const player = allPlayersData[id];
                 drawPlayer(player.x, player.y, player.angle, player.bullets);
             }
@@ -143,17 +142,14 @@
     }
 
     function drawPlayer(px, py, pAngle, pBullets = []) {
-        ctx.save(); // Save the current state
+        ctx.save(); 
     
-        // Translate to the center of the turret and rotate
-        ctx.translate(px, py - radius); // Move the origin to the center of the turret
-        ctx.rotate(pAngle); // Rotate by the current angle
+        ctx.translate(px, py - radius); 
+        ctx.rotate(pAngle); 
     
-        // Draw the turret rectangle
         ctx.fillStyle = "gray";
         ctx.fillRect(-turretWidth / 2, -turretHeight, turretWidth, turretHeight);
     
-        // Draw the circle
         ctx.beginPath();
         ctx.arc(0, 0, radius, 0, 2 * Math.PI);
         ctx.fillStyle = "red";
@@ -163,57 +159,59 @@
         ctx.strokeStyle = "blue";
         ctx.stroke();
     
-        ctx.restore(); // Restore to the previous state
+        ctx.restore(); 
     
-        // Draw bullets, convert to Bullet instances
         pBullets.forEach(bulletData => {
             const bullet = new Bullet(bulletData.x, bulletData.y, bulletData.angle);
             bullet.draw();
         });
     }
-    
 
     function update() {
-        // Handle rotation
-        if (keys.ArrowLeft) {
-            angle -= rotationSpeed; // Rotate counterclockwise
-        } 
-        if (keys.ArrowRight) {
-            angle += rotationSpeed; // Rotate clockwise
-        } 
-        // Handle movement
-        if (keys.ArrowUp) {
-            x += moveSpeed * Math.cos(angle - (Math.PI / 2));
-            y += moveSpeed * Math.sin(angle - (Math.PI / 2));
+        if (keys.ArrowLeft || keys.ArrowRight || keys.ArrowUp || keys.Space) {
+            // Handle rotation
+            if (keys.ArrowLeft) {
+                angle -= rotationSpeed; 
+            } 
+            if (keys.ArrowRight) {
+                angle += rotationSpeed; 
+            } 
+            // Handle movement
+            if (keys.ArrowUp) {
+                x += moveSpeed * Math.cos(angle - (Math.PI / 2));
+                y += moveSpeed * Math.sin(angle - (Math.PI / 2));
+            }
+            if (keys.Space) {
+                const bulletX = x + (radius + turretHeight / 2) * Math.cos(angle - Math.PI / 2);
+                const bulletY = (y-radius) + (radius + turretHeight / 2) * Math.sin(angle - Math.PI / 2);
+        
+                bullets.push(new Bullet(bulletX, bulletY, angle - Math.PI / 2));
+                keys.Space = false;
+            }
+            updateFirebase(); // Update Firebase with new position only if moved
         }
-        if (keys.Space) {
-            // Calculate the position at the tip of the turret for the bullet to start
-            const bulletX = x + (radius + turretHeight / 2) * Math.cos(angle - Math.PI / 2);
-            const bulletY = (y-radius) + (radius + turretHeight / 2) * Math.sin(angle - Math.PI / 2);
-    
-            // Shoot a bullet
-            bullets.push(new Bullet(bulletX, bulletY, angle - Math.PI / 2));
-            keys.Space = false; // Comment this line out to enable continuous shooting
-        }
-    
-        // Update bullets
+
         bullets.forEach(bullet => bullet.update());
-    
-        // Remove bullets that are off-screen
         bullets = bullets.filter(bullet => 
             bullet.x >= 0 && bullet.x <= canvas.width && bullet.y >= 0 && bullet.y <= canvas.height
         );
     
-        // Update Firebase with the current state
-        updateFirebase();
-    
-        // Draw the scene
         drawTurret();
-    
-        requestAnimationFrame(update); // Continue the animation
+        requestAnimationFrame(update); 
     }
     
-    
+    // Periodically check if players have moved
+    setInterval(() => {
+        const currentTime = Date.now();
+        for (let id in allPlayersData) {
+            if (id !== playerId) { 
+                const player = allPlayersData[id];
+                if (currentTime - player.lastMove > 60000) { 
+                    remove(ref(database, 'players/' + id)); 
+                }
+            }
+        }
+    }, 60000); 
 
     // Start the animation
     update();
@@ -233,7 +231,9 @@
     });
 
     // Remove player from Firebase when they leave the page
-    remove(playerRef);
+    window.addEventListener('beforeunload', () => {
+        remove(playerRef);
+    });
 </script>
 
 </body>
