@@ -231,9 +231,7 @@
     });
 
     // Remove player from Firebase when they leave the page
-    window.addEventListener('beforeunload', () => {
-        remove(playerRef);
-    });
+    onDisconnectRef.remove();
 </script>
 
 </body>
