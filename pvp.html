@@ -24,7 +24,7 @@
 <script type="module">
     // Firebase Imports
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
-    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
+    import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-analytics.js";
 
     // Your web app's Firebase configuration
@@ -48,11 +48,7 @@
 
     // Firebase References
     const playerRef = ref(database, 'players/' + playerId);
-    const onDisconnectRef = playerRef.onDisconnect();
     const allPlayersRef = ref(database, 'players');
-
-    // Schedule the player removal when the client disconnects
-    onDisconnectRef.remove();
 
     // Initial player state
     let angle = 0; // Initial rotation angle
@@ -98,7 +94,6 @@
         }
 
         update() {
-            // Move the bullet in the direction it was fired
             this.x += this.speed * Math.cos(this.angle);
             this.y += this.speed * Math.sin(this.angle);
         }
@@ -158,7 +153,7 @@
         ctx.fillStyle = "gray";
         ctx.fillRect(-turretWidth / 2, -turretHeight, turretWidth, turretHeight);
 
-    // Draw the circle
+        // Draw the circle
         ctx.beginPath();
         ctx.arc(0, 0, radius, 0, 2 * Math.PI);
         ctx.fillStyle = "red";
@@ -170,14 +165,10 @@
     
         ctx.restore(); // Restore to the previous state
 
-    // Ensure pBullets is always an array, then draw bullets
+        // Draw bullets
         (pBullets || []).forEach(bullet => {
-            ctx.beginPath();
-            ctx.arc(bullet.x, bullet.y, 5, 0, 2 * Math.PI);
-            ctx.fillStyle = "black";
-            ctx.fill();
-            ctx.strokeStyle = "white";
-            ctx.stroke();
+            bullet.update(); // Update bullet position
+            bullet.draw(); // Draw the bullet
         });
     }
 
@@ -203,9 +194,6 @@
             bullets.push(new Bullet(bulletX, bulletY, angle - Math.PI / 2));
             keys.Space = false; // Comment this line out to enable continuous shooting
         }
-
-        // Update all bullets
-        bullets.forEach(bullet => bullet.update());
 
         // Remove bullets that are off-screen
         bullets = bullets.filter(bullet => 
@@ -237,6 +225,9 @@
             keys[event.code] = false;
         }
     });
+
+    // Remove player from Firebase when they leave the page
+    remove(playerRef);
 </script>
 
 </body>
