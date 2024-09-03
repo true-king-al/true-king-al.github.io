@@ -3,22 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Drag and Drop Circle</title>
-    <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-        }
-        canvas {
-            display: block;
-        }
-    </style>
+    <title>OpenAI API Example</title>
 </head>
 <body>
-    <canvas id="myCanvas"></canvas>
-    
-    <script type="module" src="example.mjs"></script>
+    <script>
+        async function getCompletion() {
+            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer sk-lD2Iz_FiSpyaDFElw_OXXCHn_HAWj2io6ji5LGqe1sT3BlbkFJW-pu6t0szoXnXqsZiKRRAhl9PjgYBNZqAtOco_6WAA`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: 'gpt-4o-mini',
+                    messages: [
+                        { role: 'system', content: 'You are a helpful assistant.' },
+                        { role: 'user', content: 'hello how are you' },
+                    ],
+                })
+            });
 
+            const data = await response.json();
+            console.log(data.choices[0].message.content);
+        }
+
+        getCompletion();
+    </script>
 </body>
 </html>
