@@ -119,7 +119,7 @@
         // Function to call the OpenAI API
         async function getNewCircleNameFromAPI(text1, text2) {
             const url = 'https://api.openai.com/v1/chat/completions';
-            const apiKey = 'sk-MF3EEFFgw0I9rPx2JOp53LI-VgpKETt4gHrhjK3SpVT3BlbkFJxRNxsL-frIZvEK1cu2PK3M7jJ1UF3gWPLl_v2hOmAA;' // Replace with your actual API key
+            const apiKey = 'sk-MF3EEFFgw0I9rPx2JOp53LI-VgpKETt4gHrhjK3SpVT3BlbkFJxRNxsL-frIZvEK1cu2PK3M7jJ1UF3gWPLl_v2hOmAA'; // Replace with your actual API key
 
             const response = await fetch(url, {
                 method: 'POST',
@@ -128,7 +128,7 @@
                     'Authorization': `Bearer ${apiKey}`
                 },
                 body: JSON.stringify({
-                    model: 'gpt-3.5-turbo',
+                    model: 'gpt-4o-mini',
                     messages: [
                         {
                             role: 'system',
