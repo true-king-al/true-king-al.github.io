@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-const openai = new OpenAI({ apiKey: 'sk-lD2Iz_FiSpyaDFElw_OXXCHn_HAWj2io6ji5LGqe1sT3BlbkFJW-pu6t0szoXnXqsZiKRRAhl9PjgYBNZqAtOco_6WAA' });
+const openai = new OpenAI({ apiKey: 'sk-vcSmsvvSOqxkxcY6q-77bfAydpnUIaRKElZh-F2UIbT3BlbkFJylGciin6Hmn3_MgYwm-OxFlRaa40CXZ0UcXNOqdRcA' });
 
 const completion = await openai.chat.completions.create({
     model: "gpt-4o-mini",
