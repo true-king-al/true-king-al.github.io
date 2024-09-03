@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draggable Circles with API Integration</title>
+    <style>
+        body { margin: 0; }
+        canvas { border: 1px solid black; }
+    </style>
+</head>
+<body>
+    <canvas id="myCanvas"></canvas>
+    <script>
+        // Set up the canvas
+        const canvas = document.getElementById('myCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Set canvas size
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Circle properties
+        const circles = [
+            {
+                x: canvas.width / 2,
+                y: canvas.height / 2,
+                radius: 50,
+                color: 'rgb(30, 30, 30)',
+                borderColor: 'black',
+                text: 'Drag Me',
+                dragging: false
+            }
+        ];
+
+        // Draw all circles
+        function drawCircles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            circles.forEach(circle => {
+                ctx.beginPath();
+                ctx.arc(circle.x, circle.y, circle.radius, 0, Math.PI * 2);
+                ctx.fillStyle = circle.dragging ? 'gray' : circle.color;
+                ctx.strokeStyle = circle.borderColor;
+                ctx.lineWidth = 3;
+                ctx.fill();
+                ctx.stroke();
+                ctx.closePath();
+
+                // Draw the text
+                ctx.font = '16px Arial';
+                ctx.fillStyle = 'white';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(circle.text, circle.x, circle.y);
+            });
+        }
+
+        // Check if the mouse is inside any circle
+        function isInsideCircle(x, y) {
+            return circles.some(circle => {
+                const dx = x - circle.x;
+                const dy = y - circle.y;
+                return dx * dx + dy * dy <= circle.radius * circle.radius;
+            });
+        }
+
+        // Find the circle under the mouse
+        function getCircleUnderMouse(x, y) {
+            return circles.find(circle => {
+                const dx = x - circle.x;
+                const dy = y - circle.y;
+                return dx * dx + dy * dy <= circle.radius * circle.radius;
+            });
+        }
+
+        // Check if two circles overlap
+        function areCirclesOverlapping(c1, c2) {
+            const dx = c1.x - c2.x;
+            const dy = c1.y - c2.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            return distance < c1.radius + c2.radius;
+        }
+
+        // Find overlapping circles
+        function findOverlappingCircles() {
+            let overlappingPairs = [];
+            for (let i = 0; i < circles.length; i++) {
+                for (let j = i + 1; j < circles.length; j++) {
+                    if (areCirclesOverlapping(circles[i], circles[j])) {
+                        overlappingPairs.push([circles[i], circles[j]]);
+                    }
+                }
+            }
+            return overlappingPairs;
+        }
+
+        // Handle creating a new circle based on overlapping circles
+        async function handleOverlappingCircles() {
+            const pairs = findOverlappingCircles();
+            for (const [c1, c2] of pairs) {
+                // Call API to get new circle name
+                const newText = await getNewCircleNameFromAPI(c1.text, c2.text);
+                
+                // Create a new circle
+                const newCircle = {
+                    x: Math.random() * (canvas.width - 100) + 50,
+                    y: Math.random() * (canvas.height - 100) + 50,
+                    radius: 50,
+                    color: 'rgb(30, 30, 30)',
+                    borderColor: 'black',
+                    text: newText,
+                    dragging: false
+                };
+                circles.push(newCircle);
+                drawCircles();
+            }
+        }
+
+        // Function to call the OpenAI API
+        async function getNewCircleNameFromAPI(text1, text2) {
+            const url = 'https://api.openai.com/v1/chat/completions';
+            const apiKey = 'sk-MF3EEFFgw0I9rPx2JOp53LI-VgpKETt4gHrhjK3SpVT3BlbkFJxRNxsL-frIZvEK1cu2PK3M7jJ1UF3gWPLl_v2hOmAA;' // Replace with your actual API key
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: 'gpt-3.5-turbo',
+                    messages: [
+                        {
+                            role: 'system',
+                            content: 'You are a helpful assistant who names circles based on two given names.'
+                        },
+                        {
+                            role: 'user',
+                            content: `Create a name for a new circle combining these two names: "${text1}" and "${text2}".`
+                        }
+                    ]
+                })
+            });
+
+            const data = await response.json();
+            return data.choices[0].message.content.trim();
+        }
+
+        // Mouse down event
+        canvas.addEventListener('mousedown', (event) => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = event.clientX - rect.left;
+            const mouseY = event.clientY - rect.top;
+
+            const circle = getCircleUnderMouse(mouseX, mouseY);
+            if (circle) {
+                circle.dragging = true;
+                canvas.style.cursor = 'move';
+                drawCircles();
+            }
+        });
+
+        // Mouse up event
+        canvas.addEventListener('mouseup', () => {
+            circles.forEach(circle => {
+                if (circle.dragging) {
+                    circle.dragging = false;
+                    canvas.style.cursor = 'default';
+                }
+            });
+            drawCircles();
+            handleOverlappingCircles(); // Check for overlaps after dragging
+        });
+
+        // Mouse move event
+        canvas.addEventListener('mousemove', (event) => {
+            if (circles.some(circle => circle.dragging)) {
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = event.clientX - rect.left;
+                const mouseY = event.clientY - rect.top;
+
+                const circle = circles.find(circle => circle.dragging);
+                if (circle) {
+                    circle.x = mouseX;
+                    circle.y = mouseY;
+                    drawCircles();
+                }
+            }
+        });
+
+        // Keydown event for creating a new circle
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'e' || event.key === 'E') {
+                const newCircle = {
+                    x: Math.random() * (canvas.width - 100) + 50,
+                    y: Math.random() * (canvas.height - 100) + 50,
+                    radius: 50,
+                    color: 'rgb(30, 30, 30)',
+                    borderColor: 'black',
+                    text: 'New Circle',
+                    dragging: false
+                };
+                circles.push(newCircle);
+                drawCircles();
+            }
+        });
+
+        // Initial draw
+        drawCircles();
+    </script>
+</body>
+</html>
