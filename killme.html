@@ -8,23 +8,31 @@
 <body>
     <script>
         async function getCompletion() {
-            const response = await fetch('https://api.openai.com/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer sk-lD2Iz_FiSpyaDFElw_OXXCHn_HAWj2io6ji5LGqe1sT3BlbkFJW-pu6t0szoXnXqsZiKRRAhl9PjgYBNZqAtOco_6WAA`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    model: 'gpt-4o-mini',
-                    messages: [
-                        { role: 'system', content: 'You are a helpful assistant.' },
-                        { role: 'user', content: 'hello how are you' },
-                    ],
-                })
-            });
+            try {
+                const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer sk-lD2Iz_FiSpyaDFElw_OXXCHn_HAWj2io6ji5LGqe1sT3BlbkFJW-pu6t0szoXnXqsZiKRRAhl9PjgYBNZqAtOco_6WAA`, // Replace with your API key
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: 'gpt-4o-mini',
+                        messages: [
+                            { role: 'system', content: 'You are a helpful assistant.' },
+                            { role: 'user', content: 'hello how are you' },
+                        ],
+                    })
+                });
 
-            const data = await response.json();
-            console.log(data.choices[0].message.content);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log(data.choices[0].message.content);
+            } catch (error) {
+                console.error('Error:', error);
+            }
         }
 
         getCompletion();
