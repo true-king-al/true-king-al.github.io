@@ -25,7 +25,7 @@
                     },
                     body: JSON.stringify({
                         model: 'gpt-4o-mini',
-                        prompt: `Generate a creative name for a ball that is a combination of '${text1}' and '${text2}'`,
+                        prompt: `Generate a creative name for a combination of '${text1}' and '${text2}'`,
                         max_tokens: 10
                     })
                 });
@@ -168,10 +168,12 @@
 
         document.addEventListener('keydown', (e) => {
             if (e.key === 'e' || e.key === 'E') {
-                const newText = `Ball ${nextBallText++}`;
-                const newBall = createBall(canvas.width / 2, canvas.height / 2, newText);
-                balls.push(newBall);
-                drawAllBalls();
+                const newText = prompt('Enter the name for the new ball:');
+                if (newText) {
+                    const newBall = createBall(canvas.width / 2, canvas.height / 2, newText);
+                    balls.push(newBall);
+                    drawAllBalls();
+                }
             }
         });
 
