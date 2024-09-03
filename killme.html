@@ -17,16 +17,18 @@
 
         async function generateBallName(text1, text2) {
             try {
-                const response = await fetch('https://api.openai.com/v1/completions', {
+                const response = await fetch('https://api.openai.com/v1/chat/completions', {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${apiKey}`,
+                        'Authorization': `Bearer sk-lD2Iz_FiSpyaDFElw_OXXCHn_HAWj2io6ji5LGqe1sT3BlbkFJW-pu6t0szoXnXqsZiKRRAhl9PjgYBNZqAtOco_6WAA`, // Replace with your API key
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
                         model: 'gpt-4o-mini',
-                        prompt: `Generate a creative name for a combination of '${text1}' and '${text2}'`,
-                        max_tokens: 10
+                        messages: [
+                            { role: 'system', content: 'You are a helpful assistant.' },
+                            { role: 'user', content: 'hello how are you' },
+                        ],
                     })
                 });
 
@@ -35,7 +37,7 @@
                 }
 
                 const data = await response.json();
-                return data.choices[0].text.trim();
+                console.log(data.choices[0].message.content);
             } catch (error) {
                 console.error('Error generating ball name:', error);
                 return 'New Ball';
