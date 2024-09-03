@@ -3,24 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OpenAI API Example</title>
+    <title>OpenAI API and Canvas Example</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        canvas { display: block; }
+    </style>
 </head>
 <body>
+    <canvas id="myCanvas"></canvas>
     <script>
-        async function getCompletion() {
+        // OpenAI API Key (Replace with your API key)
+        const apiKey = 'sk-lD2Iz_FiSpyaDFElw_OXXCHn_HAWj2io6ji5LGqe1sT3BlbkFJW-pu6t0szoXnXqsZiKRRAhl9PjgYBNZqAtOco_6WAA';
+
+        async function generateBallName(text1, text2) {
             try {
-                const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                const response = await fetch('https://api.openai.com/v1/completions', {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer sk-lD2Iz_FiSpyaDFElw_OXXCHn_HAWj2io6ji5LGqe1sT3BlbkFJW-pu6t0szoXnXqsZiKRRAhl9PjgYBNZqAtOco_6WAA`, // Replace with your API key
+                        'Authorization': `Bearer ${apiKey}`,
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
                         model: 'gpt-4o-mini',
-                        messages: [
-                            { role: 'system', content: 'You are a helpful assistant.' },
-                            { role: 'user', content: 'hello how are you' },
-                        ],
+                        prompt: `Generate a creative name for a ball that is a combination of '${text1}' and '${text2}'`,
+                        max_tokens: 10
                     })
                 });
 
@@ -29,13 +35,147 @@
                 }
 
                 const data = await response.json();
-                console.log(data.choices[0].message.content);
+                return data.choices[0].text.trim();
             } catch (error) {
-                console.error('Error:', error);
+                console.error('Error generating ball name:', error);
+                return 'New Ball';
             }
         }
 
-        getCompletion();
+        const canvas = document.getElementById('myCanvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let balls = [];
+        let nextBallText = 1;
+
+        function createBall(x, y, text) {
+            return {
+                x: x,
+                y: y,
+                radius: 50,
+                defaultColor: 'lightgray',
+                borderColor: 'black',
+                draggingColor: 'gray',
+                isDragging: false,
+                offsetX: 0,
+                offsetY: 0,
+                text: text,
+                textColor: 'black'
+            };
+        }
+
+        function drawBall(ball) {
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fillStyle = ball.isDragging ? ball.draggingColor : ball.defaultColor;
+            ctx.fill();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = ball.borderColor;
+            ctx.stroke();
+            ctx.closePath();
+
+            ctx.fillStyle = ball.textColor;
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(ball.text, ball.x, ball.y);
+        }
+
+        function drawAllBalls() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (const ball of balls) {
+                drawBall(ball);
+            }
+        }
+
+        function isInsideBall(ball, x, y) {
+            const distance = Math.sqrt((x - ball.x) ** 2 + (y - ball.y) ** 2);
+            return distance <= ball.radius;
+        }
+
+        async function mergeBalls(ball1, ball2) {
+            const newX = (ball1.x + ball2.x) / 2;
+            const newY = (ball1.y + ball2.y) / 2;
+
+            const newName = await generateBallName(ball1.text, ball2.text);
+            const newBall = createBall(newX, newY, newName);
+
+            balls = balls.filter(ball => ball !== ball1 && ball !== ball2);
+            balls.push(newBall);
+            drawAllBalls();
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+
+            for (const ball of balls) {
+                if (isInsideBall(ball, mouseX, mouseY)) {
+                    ball.isDragging = true;
+                    ball.offsetX = mouseX - ball.x;
+                    ball.offsetY = mouseY - ball.y;
+                    drawAllBalls();
+                    return;
+                }
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (balls.some(ball => ball.isDragging)) {
+                for (const ball of balls) {
+                    if (ball.isDragging) {
+                        ball.x = e.clientX - ball.offsetX;
+                        ball.y = e.clientY - ball.offsetY;
+                        drawAllBalls();
+                        return;
+                    }
+                }
+            }
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            const ballsToMerge = [];
+            for (const ball of balls) {
+                if (ball.isDragging) {
+                    for (const otherBall of balls) {
+                        if (otherBall !== ball && isInsideBall(otherBall, ball.x, ball.y)) {
+                            ballsToMerge.push([ball, otherBall]);
+                        }
+                    }
+                }
+            }
+
+            if (ballsToMerge.length > 0) {
+                const [ball1, ball2] = ballsToMerge[0];
+                mergeBalls(ball1, ball2);
+            }
+
+            for (const ball of balls) {
+                ball.isDragging = false;
+            }
+            drawAllBalls();
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            for (const ball of balls) {
+                ball.isDragging = false;
+            }
+            drawAllBalls();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'e' || e.key === 'E') {
+                const newText = `Ball ${nextBallText++}`;
+                const newBall = createBall(canvas.width / 2, canvas.height / 2, newText);
+                balls.push(newBall);
+                drawAllBalls();
+            }
+        });
+
+        drawAllBalls();
     </script>
 </body>
 </html>
