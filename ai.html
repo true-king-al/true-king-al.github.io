@@ -121,30 +121,14 @@
             const url = 'https://api.openai.com/v1/chat/completions';
             const apiKey = 'sk-MF3EEFFgw0I9rPx2JOp53LI-VgpKETt4gHrhjK3SpVT3BlbkFJxRNxsL-frIZvEK1cu2PK3M7jJ1UF3gWPLl_v2hOmAA'; // Replace with your actual API key
 
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`
-                },
-                body: JSON.stringify({
-                    model: 'gpt-4o-mini',
-                    messages: [
-                        {
-                            role: 'system',
-                            content: 'You are a helpful assistant who names circles based on two given names.'
-                        },
-                        {
-                            role: 'user',
-                            content: `Create a name for a new circle combining these two names: "${text1}" and "${text2}".`
-                        }
-                    ]
-                })
-            });
+            const chatCompletion = await openai.chat.completions.create({
+                messages: [{ role: "user", content: "Say this is a test" }],
+                model: "gpt-4o-mini",
+                });
 
-            const data = await response.json();
-            return data.choices[0].message.content.trim();
-        }
+                    const data = await response.json();
+                    return data.choices[0].message.content.trim();
+                    }
 
         // Mouse down event
         canvas.addEventListener('mousedown', (event) => {
