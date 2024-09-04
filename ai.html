@@ -102,6 +102,7 @@
         }
     </style>
     <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </head>
 <body>
     <div id="name-popup">
@@ -149,6 +150,13 @@
         //let key = prompt("please enter ai api key, this is temp till i get home and can fix", "openai apikey here");
         //console.log(key);
 
+        var key = "bananas";
+        var encryptedText = "U2FsdGVkX18JUFBMwCr2DQDbHSUkYA+vOQKWVsD04Ta7S1kS6fcKd42qDnjvLEr2ZW6AJULNnmXb2S+6JcNtpGYwiRcmr3R9F7RryYgu/j6rBPvQzn8LoR/fMeT7Ogn4aPzcwLYw98nQnCHKPO5Iqw==";
+
+        // Decrypting the text
+        var bytes = CryptoJS.AES.decrypt(encryptedText, key);
+        var decryptedText = bytes.toString(CryptoJS.enc.Utf8);
+
 
         let conversationHistory = [];
         let userName = '';
@@ -176,7 +184,7 @@
                 const response = await fetch('https://api.openai.com/v1/chat/completions', {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`, // Replace with your API key
+                        'Authorization': `Bearer ${decryptedText}`, // Replace with your API key
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
