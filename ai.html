@@ -147,6 +147,7 @@
         const startChatButton = document.getElementById('start-chat');
         const userNameInput = document.getElementById('user-name');
         let key = prompt("please enter ai api key, this is temp till i get home and can fix", "openai apikey here");
+        console.log(key);
 
 
         let conversationHistory = [];
@@ -175,7 +176,7 @@
                 const response = await fetch('https://api.openai.com/v1/chat/completions', {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${key}`, // Replace with your API key
+                        'Authorization': "Bearer " + key, // Replace with your API key
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
@@ -205,6 +206,7 @@
                 return assistantReply;
             } catch (error) {
                 console.error('Error:', error);
+                console.error('Full error:', error);
                 return 'Sorry, there was an error.';
             }
         }
