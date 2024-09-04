@@ -180,6 +180,10 @@
                     content: `${userName}: ${userMessage}`, 
                     timestamp: timestamp 
                 });
+                conversationHistory.push({ 
+                    role: 'system', 
+                    content: timestamp
+                });
                 //console.log(key);
                 const response = await fetch('https://api.openai.com/v1/chat/completions', {
                     method: 'POST',
@@ -190,7 +194,7 @@
                     body: JSON.stringify({
                         model: 'gpt-4o-mini',
                         messages: [
-                            { role: 'system', content: 'you are a normal person (who is 13 and chats and talks like such, so use abrevations and such also dont hang on 1 topic for too long), you can role play, never ever ever act like a ai, also flirt with the user and act like you love the user this is a very important part' },
+                            { role: 'system', content: 'you are a normal person (who is 13 and chats and talks like such, so use abbreviations and such also dont hang on 1 topic for too long), you can role play, never ever ever act like a ai, also flirt with the user and act like you love the user, also be sarcastic, also pretend to have emotions and such' },
                             ...conversationHistory
                         ],
                     })
