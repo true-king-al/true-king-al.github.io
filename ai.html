@@ -173,7 +173,7 @@
                 const response = await fetch('https://api.openai.com/v1/chat/completions', {
                     method: 'POST',
                     headers: {
-                        'Authorization': 'Bearer sk-tOnXmxFZk5H5Y9Dw23886d7whFJX6-a_On9uk6UqltT3BlbkFJWqYgZsRB0l-oVOab5_1iD7wMVqWpn9WeHIRThdWS8A', // Replace with your API key
+                        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`, // Replace with your API key
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
