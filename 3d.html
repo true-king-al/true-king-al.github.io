@@ -1,193 +1,73 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<style>
-body {
-	text-align: center;
-	background: #ccc;
-	text-rendering: optimizeSpeed;
-	-webkit-font-smoothing: none;
-	-moz-osx-font-smoothing: unset;
-}
-#canvas {
-	font-family: Courier, "Courier New", monospace;
-	font-size: 10px;
-	line-height: 6px;
-	display: inline-block;
-	margin-top:50px;
-	text-align: left;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Rotating Cube</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #282c34;
+        }
+
+        .cube-container {
+            perspective: 1000px;
+        }
+
+        .cube {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            transform-style: preserve-3d;
+            transform: rotateX(0deg) rotateY(0deg);
+            animation: rotate 5s infinite linear;
+        }
+
+        .face {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .front  { transform: translateZ(100px); }
+        .back   { transform: rotateY(180deg) translateZ(100px); }
+        .left   { transform: rotateY(-90deg) translateZ(100px); }
+        .right  { transform: rotateY(90deg) translateZ(100px); }
+        .top    { transform: rotateX(90deg) translateZ(100px); }
+        .bottom { transform: rotateX(-90deg) translateZ(100px); }
+
+        @keyframes rotate {
+            from {
+                transform: rotateX(0deg) rotateY(0deg);
+            }
+            to {
+                transform: rotateX(360deg) rotateY(360deg);
+            }
+        }
+    </style>
 </head>
 <body>
-<pre id="canvas"></pre>
-<script>
-var canvas = document.getElementById("canvas");
-var canvasWidth = 100;
-var canvasHeight = 100;
-var delay = 20;
-
-var buffer = new Array(canvasHeight);
-for (var y = 0; y < canvasHeight; y++)
-	buffer[y] = new Array(canvasWidth);
-
-var pitch = -10;
-var yaw = 5;
-var radius = 30;
-
-var positionX = canvasWidth/2;
-var positionY = canvasHeight/2;
-
-function update()
-{
-	clear();
-
-	yaw += horizontal_speed / 10000;
-	pitch += vertical_speed / 10000;
-
-	var topX = [], topY = [], botX = [], botY = [];
-
-	topX.push(sine(yaw+0)*radius+positionX);
-	topY.push(cosse(yaw+0)*radius*sine(pitch)+cosse(pitch)*skrt(radius*radius*2)/2+positionY);
-	topX.push(sine(yaw+1.5708)*radius+positionX);
-	topY.push(cosse(yaw+1.5708)*radius*sine(pitch)+cosse(pitch)*skrt(radius*radius*2)/2+positionY);
-	topX.push(sine(yaw+3.14159)*radius+positionX);
-	topY.push(cosse(yaw+3.14159)*radius*sine(pitch)+cosse(pitch)*skrt(radius*radius*2)/2+positionY);
-	topX.push(sine(yaw+4.71239)*radius+positionX);
-	topY.push(cosse(yaw+4.71239)*radius*sine(pitch)+cosse(pitch)*skrt(radius*radius*2)/2+positionY);
-
-	botX.push(sine(yaw+0)*radius+positionX);
-	botY.push(cosse(yaw+0)*radius*sine(pitch)-cosse(pitch)*skrt(radius*radius*2)/2+positionY);
-	botX.push(sine(yaw+1.5708)*radius+positionX);
-	botY.push(cosse(yaw+1.5708)*radius*sine(pitch)-cosse(pitch)*skrt(radius*radius*2)/2+positionY);
-	botX.push(sine(yaw+3.14159)*radius+positionX);
-	botY.push(cosse(yaw+3.14159)*radius*sine(pitch)-cosse(pitch)*skrt(radius*radius*2)/2+positionY);
-	botX.push(sine(yaw+4.71239)*radius+positionX);
-	botY.push(cosse(yaw+4.71239)*radius*sine(pitch)-cosse(pitch)*skrt(radius*radius*2)/2+positionY);
-
-	// upper face
-	drawLine(topX[0], topY[0], topX[1], topY[1]);
-	drawLine(topX[1], topY[1], topX[2], topY[2]);
-	drawLine(topX[2], topY[2], topX[3], topY[3]);
-	drawLine(topX[3], topY[3], topX[0], topY[0]);
-
-	// lower face
-	drawLine(botX[0], botY[0], botX[1], botY[1]);
-	drawLine(botX[1], botY[1], botX[2], botY[2]);
-	drawLine(botX[2], botY[2], botX[3], botY[3]);
-	drawLine(botX[3], botY[3], botX[0], botY[0]);
-
-	// connections
-	drawLine(topX[0], topY[0], botX[0], botY[0]);
-	drawLine(topX[1], topY[1], botX[1], botY[1]);
-	drawLine(topX[2], topY[2], botX[2], botY[2]);
-	drawLine(topX[3], topY[3], botX[3], botY[3]);
-	console.log(yaw);
-
-	render();
-}
-
-function clear()
-{
-	for (var y = 0; y < canvasHeight; y++)
-		for (var x = 0; x < canvasWidth; x++)
-			buffer[y][x] = false;
-	
-	while (canvas.childNodes.length > 0)
-		canvas.removeChild(canvas.firstChild);
-}
-
-function drawPixel(x, y)
-{
-	buffer[y][x] = true;
-}
-
-function drawLine(x1, y1, x2, y2)
-{
-	x1 = Math.round(x1); y1 = Math.round(y1);
-	x2 = Math.round(x2); y2 = Math.round(y2);
-	var dx = Math.abs(x2-x1), sx = x1<x2?1:-1;
-	var dy = Math.abs(y2-y1), sy = y1<y2?1:-1; 
-	var err = (dx>dy?dx:-dy)/2;
-
-	while(true) {
-		drawPixel(x1, y1);
-		if (x1 === x2 && y1 === y2)
-			break;
-		var e2 = err;
-		if (e2 > -dx) {
-			err -= dy;
-			x1 += sx;
-		}
-		if (e2 < dy) {
-			err += dx;
-			y1 += sy;
-		}
-	}
-}
-
-function render()
-{
-	var t = '';
-	buffer.forEach(function(row) {
-		row.forEach(function(cell) {
-			t += cell===true?'▀':'.';
-		}, t);
-		t += "\n";
-	}, t);
-	t += "\nFPS: "+fps();
-	canvas.appendChild(document.createTextNode(t));
-}
-
-var lastLoop = new Date;
-function fps()
-{
-	var thisLoop = new Date;
-	var fps = 1000/(thisLoop-lastLoop);
-	lastLoop = thisLoop;
-	return fps.toFixed(1);
-}
-
-var horizontal_speed = 0;
-var vertical_speed = 0;
-document.onmousemove = function(event)
-{
-	horizontal_speed = event.pageX - document.body.clientWidth/2;
-	vertical_speed = event.pageY - document.body.clientHeight/2;
-}
-
-setInterval(update, delay);
-
-function sine(x) {
-	x = x%6.28;
-	if (x < -3.14159265)
-		x += 6.28318531;
-	else
-	if (x >  3.14159265)
-		x -= 6.28318531;
-
-	if (x < 0)
-		return 1.27323954 * x + 0.405284735 * x * x;
-
-	return 1.27323954 * x - 0.405284735 * x * x;
-}
-
-function cosse(x) {
-	return sine(x-1.57);
-}
-
-function skrt(x) {
-	var a = 1, b = x;
-	while(abse(a-b)>5) {
-		a = (a+b)/2;
-		b = x/a;
-	}
-	return a;
-}
-
-function abse(x) {
-	return (x > 0) ? x : -x;
-}
-</script>
+    <div class="cube-container">
+        <div class="cube">
+            <div class="face front">Front</div>
+            <div class="face back">Back</div>
+            <div class="face left">Left</div>
+            <div class="face right">Right</div>
+            <div class="face top">Top</div>
+            <div class="face bottom">Bottom</div>
+        </div>
+    </div>
 </body>
 </html>
