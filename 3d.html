@@ -15,39 +15,43 @@
 </head>
 <body>
 <script>
-    // constants
+    // Constants
     const COLOR_BG = "black";
     const COLOR_CUBE = "white";
-    const SPEED_X = 0.00; // rps
-    const SPEED_Y = 0.00; // rps
-    const SPEED_Z = 0.00; // rps
+    const SPEED_X = 0.00; // radians per second
+    const SPEED_Y = 0.00; // radians per second
+    const SPEED_Z = 0.00; // radians per second
     const MOVE_STEP = 10; // pixels moved on each key press
 
-    // initial rotation angles (in radians)
-    let initialRotationX = 0; // 0 degrees
-    let initialRotationY = 0; // 0 degrees
-    let initialRotationZ = 0; // 0 degrees
+    // Initial rotation angles (in radians)
+    let rotationX = 0; // 0 radians
+    let rotationY = 0; // 0 radians
+    let rotationZ = 0; // 0 radians
 
     const POINT3D = function(x, y, z) { this.x = x; this.y = y; this.z = z; };
 
-    // set up the canvas and context
+    // Set up the canvas and context
     var canvas = document.createElement("canvas");
     document.body.appendChild(canvas);
     var ctx = canvas.getContext("2d");
 
-    // dimensions
-    var h = document.documentElement.clientHeight;
-    var w = document.documentElement.clientWidth;
-    canvas.height = h;
-    canvas.width = w;
+    // Dimensions
+    function resizeCanvas() {
+        var h = window.innerHeight;
+        var w = window.innerWidth;
+        canvas.height = h;
+        canvas.width = w;
+        return { w, h };
+    }
+    var { w, h } = resizeCanvas();
 
-    // colours and lines
+    // Colors and lines
     ctx.fillStyle = COLOR_BG;
     ctx.strokeStyle = COLOR_CUBE;
     ctx.lineWidth = w / 100;
     ctx.lineCap = "round";
 
-    // cube parameters
+    // Cube parameters
     var cx = w / 2;
     var cy = h / 2;
     var cz = 0;
@@ -63,41 +67,37 @@
         new POINT3D(cx - size, cy + size, cz + size)
     ];
     var edges = [
-        [0, 1], [1, 2], [2, 3], [3, 0], // back face
-        [4, 5], [5, 6], [6, 7], [7, 4], // front face
-        [0, 4], [1, 5], [2, 6], [3, 7] // connecting sides
+        [0, 1], [1, 2], [2, 3], [3, 0], // Back face
+        [4, 5], [5, 6], [6, 7], [7, 4], // Front face
+        [0, 4], [1, 5], [2, 6], [3, 7] // Connecting sides
     ];
 
-    // rotate the vertices initially
+    // Apply initial rotation
     function applyInitialRotation() {
-        rotateX(initialRotationX);
-        rotateY(initialRotationY);
-        rotateZ(initialRotationZ);
+        rotateX(rotationX);
+        rotateY(rotationY);
+        rotateZ(rotationZ);
     }
 
-    // set up the animation loop
+    // Animation loop
     var timeDelta, timeLast = 0;
     applyInitialRotation();
     requestAnimationFrame(loop);
 
     function loop(timeNow) {
-        // calculate the time difference
+        // Calculate time difference
         timeDelta = timeNow - timeLast;
         timeLast = timeNow;
 
-        // background
+        // Clear the canvas
         ctx.fillRect(0, 0, w, h);
 
-        // rotate the cube along the z axis
+        // Rotate the cube
         rotateZ(timeDelta * 0.001 * SPEED_Z * Math.PI * 2);
-
-        // rotate the cube along the x axis
         rotateX(timeDelta * 0.001 * SPEED_X * Math.PI * 2);
-
-        // rotate the cube along the y axis
         rotateY(timeDelta * 0.001 * SPEED_Y * Math.PI * 2);
 
-        // draw each edge
+        // Draw each edge
         for (let edge of edges) {
             ctx.beginPath();
             ctx.moveTo(vertices[edge[0]].x, vertices[edge[0]].y);
@@ -105,11 +105,11 @@
             ctx.stroke();
         }
 
-        // call the next frame
+        // Request the next frame
         requestAnimationFrame(loop);
     }
 
-    // rotation functions
+    // Rotation functions
     function rotateX(angle) {
         for (let v of vertices) {
             let dy = v.y - cy;
@@ -143,25 +143,38 @@
         }
     }
 
-    // Add event listener for key presses
+    // Handle window resize
+    window.addEventListener('resize', function() {
+        ({ w, h } = resizeCanvas());
+        ctx.lineWidth = w / 100;
+        // Reinitialize cube parameters
+        cx = w / 2;
+        cy = h / 2;
+        size = h / 4;
+        vertices = [
+            new POINT3D(cx - size, cy - size, cz - size),
+            new POINT3D(cx + size, cy - size, cz - size),
+            new POINT3D(cx + size, cy + size, cz - size),
+            new POINT3D(cx - size, cy + size, cz - size),
+            new POINT3D(cx - size, cy - size, cz + size),
+            new POINT3D(cx + size, cy - size, cz + size),
+            new POINT3D(cx + size, cy + size, cz + size),
+            new POINT3D(cx - size, cy + size, cz + size)
+        ];
+    });
+
+    // Key press event listener
     document.addEventListener("keydown", function(event) {
         if (event.key === "ArrowLeft") {
-            cx -= MOVE_STEP; // move left
-            requestAnimationFrame(loop);
-            console.log('left');
+            cx -= MOVE_STEP; // Move left
         } else if (event.key === "ArrowRight") {
-            cx += MOVE_STEP; // move right
-            requestAnimationFrame(loop);
-            console.log('right');
+            cx += MOVE_STEP; // Move right
         } else if (event.key === "ArrowDown") {
-            cz -= MOVE_STEP; // move right
-            requestAnimationFrame(loop);
-            console.log('back');
+            cz -= MOVE_STEP; // Move back
         } else if (event.key === "ArrowUp") {
-            cz += MOVE_STEP; // move right
-            requestAnimationFrame(loop);
-            console.log('forward');
+            cz += MOVE_STEP; // Move forward
         }
+        applyInitialRotation(); // Reapply initial rotation after moving
     });
 
 </script>
