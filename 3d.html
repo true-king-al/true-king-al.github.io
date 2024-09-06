@@ -19,7 +19,7 @@
     const COLOR_BG = "black";
     const COLOR_CUBE = "white";
     const SPEED_X = 0.00; // rps
-    const SPEED_Y = 0.15; // rps
+    const SPEED_Y = 0.00; // rps
     const SPEED_Z = 0.00; // rps
     const MOVE_STEP = 10; // pixels moved on each key press
 
@@ -151,6 +151,12 @@
         } else if (event.key === "ArrowRight") {
             cx += MOVE_STEP; // move right
             console.log('right');
+        } else if (event.key === "ArrowDown") {
+            cz -= MOVE_STEP; // move right
+            console.log('back');
+        } else if (event.key === "ArrowUp") {
+            cz += MOVE_STEP; // move right
+            console.log('forward');
         }
     });
 
