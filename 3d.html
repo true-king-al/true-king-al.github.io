@@ -147,15 +147,19 @@
     document.addEventListener("keydown", function(event) {
         if (event.key === "ArrowLeft") {
             cx -= MOVE_STEP; // move left
+            requestAnimationFrame(loop);
             console.log('left');
         } else if (event.key === "ArrowRight") {
             cx += MOVE_STEP; // move right
+            requestAnimationFrame(loop);
             console.log('right');
         } else if (event.key === "ArrowDown") {
             cz -= MOVE_STEP; // move right
+            requestAnimationFrame(loop);
             console.log('back');
         } else if (event.key === "ArrowUp") {
             cz += MOVE_STEP; // move right
+            requestAnimationFrame(loop);
             console.log('forward');
         }
     });
