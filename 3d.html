@@ -1,182 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rotating Cube</title>
-    <style>
-        body {
-            margin: 0;
-        }
-        canvas {
-            display: block;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Cube with Three.js</title>
+  <style>
+    body { margin: 0; }
+    canvas { display: block; }
+    #controls { position: absolute; top: 10px; left: 10px; }
+  </style>
 </head>
 <body>
-<script>
-    // Constants
-    const COLOR_BG = "black";
-    const COLOR_CUBE = "white";
-    const SPEED_X = 0.00; // radians per second
-    const SPEED_Y = 0.00; // radians per second
-    const SPEED_Z = 0.00; // radians per second
-    const MOVE_STEP = 10; // pixels moved on each key press
+  <div id="controls">
+    <label>X: <input type="range" id="xRange" min="-5" max="5" step="0.1" value="0"></label><br>
+    <label>Y: <input type="range" id="yRange" min="-5" max="5" step="0.1" value="0"></label><br>
+    <label>Z: <input type="range" id="zRange" min="-5" max="5" step="0.1" value="0"></label><br>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    // Set up the scene, camera, and renderer
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
 
-    // Initial rotation angles (in radians)
-    let rotationX = 0; // 0 radians
-    let rotationY = 0; // 0 radians
-    let rotationZ = 0; // 0 radians
+    // Create a cube
+    const geometry = new THREE.BoxGeometry();
+    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+    const cube = new THREE.Mesh(geometry, material);
+    scene.add(cube);
 
-    const POINT3D = function(x, y, z) { this.x = x; this.y = y; this.z = z; };
+    // Position the camera
+    camera.position.z = 5;
 
-    // Set up the canvas and context
-    var canvas = document.createElement("canvas");
-    document.body.appendChild(canvas);
-    var ctx = canvas.getContext("2d");
+    // Get the input sliders for controlling the cube's position
+    const xRange = document.getElementById('xRange');
+    const yRange = document.getElementById('yRange');
+    const zRange = document.getElementById('zRange');
 
-    // Dimensions
-    function resizeCanvas() {
-        var h = window.innerHeight;
-        var w = window.innerWidth;
-        canvas.height = h;
-        canvas.width = w;
-        return { w, h };
-    }
-    var { w, h } = resizeCanvas();
-
-    // Colors and lines
-    ctx.fillStyle = COLOR_BG;
-    ctx.strokeStyle = COLOR_CUBE;
-    ctx.lineWidth = w / 100;
-    ctx.lineCap = "round";
-
-    // Cube parameters
-    var cx = w / 2;
-    var cy = h / 2;
-    var cz = 0;
-    var size = h / 4;
-    var vertices = [
-        new POINT3D(cx - size, cy - size, cz - size),
-        new POINT3D(cx + size, cy - size, cz - size),
-        new POINT3D(cx + size, cy + size, cz - size),
-        new POINT3D(cx - size, cy + size, cz - size),
-        new POINT3D(cx - size, cy - size, cz + size),
-        new POINT3D(cx + size, cy - size, cz + size),
-        new POINT3D(cx + size, cy + size, cz + size),
-        new POINT3D(cx - size, cy + size, cz + size)
-    ];
-    var edges = [
-        [0, 1], [1, 2], [2, 3], [3, 0], // Back face
-        [4, 5], [5, 6], [6, 7], [7, 4], // Front face
-        [0, 4], [1, 5], [2, 6], [3, 7] // Connecting sides
-    ];
-
-    // Apply initial rotation
-    function applyInitialRotation() {
-        rotateX(rotationX);
-        rotateY(rotationY);
-        rotateZ(rotationZ);
+    // Update cube position based on input values
+    function updateCubePosition() {
+      cube.position.x = parseFloat(xRange.value);
+      cube.position.y = parseFloat(yRange.value);
+      cube.position.z = parseFloat(zRange.value);
     }
 
-    // Animation loop
-    var timeDelta, timeLast = 0;
-    applyInitialRotation();
-    requestAnimationFrame(loop);
+    // Animate the scene
+    function animate() {
+      requestAnimationFrame(animate);
 
-    function loop(timeNow) {
-        // Calculate time difference
-        timeDelta = timeNow - timeLast;
-        timeLast = timeNow;
+      // Update cube position based on controls
+      updateCubePosition();
 
-        // Clear the canvas
-        ctx.fillRect(0, 0, w, h);
-
-        // Rotate the cube
-        rotateZ(timeDelta * 0.001 * SPEED_Z * Math.PI * 2);
-        rotateX(timeDelta * 0.001 * SPEED_X * Math.PI * 2);
-        rotateY(timeDelta * 0.001 * SPEED_Y * Math.PI * 2);
-
-        // Draw each edge
-        for (let edge of edges) {
-            ctx.beginPath();
-            ctx.moveTo(vertices[edge[0]].x, vertices[edge[0]].y);
-            ctx.lineTo(vertices[edge[1]].x, vertices[edge[1]].y);
-            ctx.stroke();
-        }
-
-        // Request the next frame
-        requestAnimationFrame(loop);
+      // Render the scene
+      renderer.render(scene, camera);
     }
 
-    // Rotation functions
-    function rotateX(angle) {
-        for (let v of vertices) {
-            let dy = v.y - cy;
-            let dz = v.z - cz;
-            let y = dy * Math.cos(angle) - dz * Math.sin(angle);
-            let z = dy * Math.sin(angle) + dz * Math.cos(angle);
-            v.y = y + cy;
-            v.z = z + cz;
-        }
-    }
-
-    function rotateY(angle) {
-        for (let v of vertices) {
-            let dx = v.x - cx;
-            let dz = v.z - cz;
-            let x = dz * Math.sin(angle) + dx * Math.cos(angle);
-            let z = dz * Math.cos(angle) - dx * Math.sin(angle);
-            v.x = x + cx;
-            v.z = z + cz;
-        }
-    }
-
-    function rotateZ(angle) {
-        for (let v of vertices) {
-            let dx = v.x - cx;
-            let dy = v.y - cy;
-            let x = dx * Math.cos(angle) - dy * Math.sin(angle);
-            let y = dx * Math.sin(angle) + dy * Math.cos(angle);
-            v.x = x + cx;
-            v.y = y + cy;
-        }
-    }
-
-    // Handle window resize
-    window.addEventListener('resize', function() {
-        ({ w, h } = resizeCanvas());
-        ctx.lineWidth = w / 100;
-        // Reinitialize cube parameters
-        cx = w / 2;
-        cy = h / 2;
-        size = h / 4;
-        vertices = [
-            new POINT3D(cx - size, cy - size, cz - size),
-            new POINT3D(cx + size, cy - size, cz - size),
-            new POINT3D(cx + size, cy + size, cz - size),
-            new POINT3D(cx - size, cy + size, cz - size),
-            new POINT3D(cx - size, cy - size, cz + size),
-            new POINT3D(cx + size, cy - size, cz + size),
-            new POINT3D(cx + size, cy + size, cz + size),
-            new POINT3D(cx - size, cy + size, cz + size)
-        ];
-    });
-
-    // Key press event listener
-    document.addEventListener("keydown", function(event) {
-        if (event.key === "ArrowLeft") {
-            cx -= MOVE_STEP; // Move left
-        } else if (event.key === "ArrowRight") {
-            cx += MOVE_STEP; // Move right
-        } else if (event.key === "ArrowDown") {
-            cz -= MOVE_STEP; // Move back
-        } else if (event.key === "ArrowUp") {
-            cz += MOVE_STEP; // Move forward
-        }
-        applyInitialRotation(); // Reapply initial rotation after moving
-    });
-
-</script>
+    animate();
+  </script>
 </body>
 </html>
