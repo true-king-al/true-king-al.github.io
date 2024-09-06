@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>3D Cube Movement and Camera Rotation</title>
+  <title>3D Cube Movement Relative to Camera Rotation</title>
   <style>
     body { margin: 0; }
     canvas { display: block; }
@@ -49,19 +49,38 @@
       keysPressed[event.key.toLowerCase()] = false; // Release keys
     });
 
-    // Function to move the cube
+    // Function to calculate the movement direction relative to the camera's rotation
+    function getMovementDirection() {
+      const direction = new THREE.Vector3();
+      camera.getWorldDirection(direction);
+
+      const forward = new THREE.Vector3(direction.x, 0, direction.z).normalize();
+      const right = new THREE.Vector3().crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
+
+      return { forward, right };
+    }
+
+    // Function to move the cube relative to the camera's orientation
     function moveCube() {
-      if (keysPressed['a']) {
-        cube.position.x += moveSpeed;
-      }
-      if (keysPressed['d']) {
-        cube.position.x -= moveSpeed;
-      }
+      const { forward, right } = getMovementDirection();
+
       if (keysPressed['w']) {
-        cube.position.z += moveSpeed; // Move forward along Z-axis
+        cube.position.add(forward.clone().multiplyScalar(-moveSpeed)); // Move forward
       }
       if (keysPressed['s']) {
-        cube.position.z -= moveSpeed; // Move backward along Z-axis
+        cube.position.add(forward.clone().multiplyScalar(moveSpeed)); // Move backward
+      }
+      if (keysPressed['a']) {
+        cube.position.add(right.clone().multiplyScalar(moveSpeed)); // Move left
+      }
+      if (keysPressed['d']) {
+        cube.position.add(right.clone().multiplyScalar(-moveSpeed)); // Move right
+      }
+      if (keysPressed[' ']) {
+        cube.position.y -= moveSpeed; // Move up
+      }
+      if (keysPressed['shift']) {
+        cube.position.y += moveSpeed; // Move down
       }
 
       // Update the sliders to reflect the cube's current position
