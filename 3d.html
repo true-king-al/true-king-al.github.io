@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>3D Cube with Three.js</title>
+  <title>3D Cube Movement and Camera Rotation</title>
   <style>
     body { margin: 0; }
     canvas { display: block; }
@@ -12,9 +12,9 @@
 </head>
 <body>
   <div id="controls">
-    <label>X: <input type="range" id="xRange" min="-5" max="5" step="0.1" value="0"></label><br>
-    <label>Y: <input type="range" id="yRange" min="-5" max="5" step="0.1" value="0"></label><br>
-    <label>Z: <input type="range" id="zRange" min="-5" max="5" step="0.1" value="0"></label><br>
+    <label>X: <input type="range" id="xRange" min="-5" max="5" step="0.1" value="0" disabled></label><br>
+    <label>Y: <input type="range" id="yRange" min="-5" max="5" step="0.1" value="0" disabled></label><br>
+    <label>Z: <input type="range" id="zRange" min="-5" max="5" step="0.1" value="0" disabled></label><br>
   </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script>
@@ -34,24 +34,67 @@
     // Position the camera
     camera.position.z = 5;
 
-    // Get the input sliders for controlling the cube's position
-    const xRange = document.getElementById('xRange');
-    const yRange = document.getElementById('yRange');
-    const zRange = document.getElementById('zRange');
+    // Variables to track movement and rotation
+    let moveSpeed = 0.05;
+    let rotationSpeed = 0.02;
+    let keysPressed = {};
 
-    // Update cube position based on input values
-    function updateCubePosition() {
-      cube.position.x = parseFloat(xRange.value);
-      cube.position.y = parseFloat(yRange.value);
-      cube.position.z = parseFloat(zRange.value);
+    // Keydown event listener
+    window.addEventListener('keydown', (event) => {
+      keysPressed[event.key.toLowerCase()] = true; // Track pressed keys
+    });
+
+    // Keyup event listener
+    window.addEventListener('keyup', (event) => {
+      keysPressed[event.key.toLowerCase()] = false; // Release keys
+    });
+
+    // Function to move the cube
+    function moveCube() {
+      if (keysPressed['a']) {
+        cube.position.x += moveSpeed;
+      }
+      if (keysPressed['d']) {
+        cube.position.x -= moveSpeed;
+      }
+      if (keysPressed['w']) {
+        cube.position.z += moveSpeed; // Move forward along Z-axis
+      }
+      if (keysPressed['s']) {
+        cube.position.z -= moveSpeed; // Move backward along Z-axis
+      }
+
+      // Update the sliders to reflect the cube's current position
+      document.getElementById('xRange').value = cube.position.x;
+      document.getElementById('yRange').value = cube.position.y;
+      document.getElementById('zRange').value = cube.position.z;
+    }
+
+    // Function to rotate the camera
+    function rotateCamera() {
+      if (keysPressed['arrowup']) {
+        camera.rotation.x += rotationSpeed; // Rotate camera up
+      }
+      if (keysPressed['arrowdown']) {
+        camera.rotation.x -= rotationSpeed; // Rotate camera down
+      }
+      if (keysPressed['arrowleft']) {
+        camera.rotation.y += rotationSpeed; // Rotate camera left
+      }
+      if (keysPressed['arrowright']) {
+        camera.rotation.y -= rotationSpeed; // Rotate camera right
+      }
     }
 
     // Animate the scene
     function animate() {
       requestAnimationFrame(animate);
 
-      // Update cube position based on controls
-      updateCubePosition();
+      // Handle cube movement
+      moveCube();
+
+      // Handle camera rotation
+      rotateCamera();
 
       // Render the scene
       renderer.render(scene, camera);
