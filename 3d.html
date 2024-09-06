@@ -147,8 +147,10 @@
     document.addEventListener("keydown", function(event) {
         if (event.key === "ArrowLeft") {
             cx -= MOVE_STEP; // move left
+            console.log('left');
         } else if (event.key === "ArrowRight") {
             cx += MOVE_STEP; // move right
+            console.log('right');
         }
     });
 
