@@ -21,6 +21,7 @@
     const SPEED_X = 0.00; // rps
     const SPEED_Y = 0.15; // rps
     const SPEED_Z = 0.00; // rps
+    const MOVE_STEP = 10; // pixels moved on each key press
 
     // initial rotation angles (in radians)
     let initialRotationX = 0; // 45 degrees
@@ -141,6 +142,15 @@
             v.y = y + cy;
         }
     }
+
+    // Add event listener for key presses
+    document.addEventListener("keydown", function(event) {
+        if (event.key === "ArrowLeft") {
+            cx -= MOVE_STEP; // move left
+        } else if (event.key === "ArrowRight") {
+            cx += MOVE_STEP; // move right
+        }
+    });
 
 </script>
 </body>
