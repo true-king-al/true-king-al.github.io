@@ -43,10 +43,10 @@
 
     // Variables to track movement and rotation
     let moveSpeed = 0.5;
-    let jumpforce = 2;
+    let jumpforce = 20;
     let velocity = new THREE.Vector3(0, 0, 0);
     let maxVelocity = 200;
-    let gravity = -0.1; // Gravity constant
+    let gravity = -0.01; // Gravity constant
     let isGrounded = false; // Flag to check if standing on a block
     let keysPressed = {};
     let mouseX = 0, mouseY = 0;
@@ -98,9 +98,22 @@
       const origin = new THREE.Vector3(camera.position.x, camera.position.y - 1, camera.position.z);
       raycaster.ray.origin.copy(origin);
       raycaster.ray.direction.copy(direction);
-      const intersects = raycaster.intersectObject(cube);
-      console.log(intersects.point)
-      isGrounded = intersects.length > 0;
+      const intersects = raycaster.intersectObject(cube, true);
+      //isGrounded = intersects.length > 0;
+      let ran = false;
+      isGrounded = true;
+      for ( var i = 0; i < intersects.length; i++ ) {
+
+        console.log(camera.position.y - intersects[ i ].point.y);
+        if (camera.position.y - intersects[ i ].point.y >= 1.5) {
+        	isGrounded = false;
+        }
+		ran = true;
+      }
+      if (ran == false) {
+      	console.log(100);
+        isGrounded = false;
+      }
     }
 
     // Function to move the camera relative to the camera's orientation
@@ -138,7 +151,7 @@
 
       // Apply velocity to camera position
       camera.position.add(velocity);
-      console.log(velocity);
+      //console.log(velocity);
 
       // Cap the velocity to the maximum allowed value
       velocity.clampLength(0, maxVelocity / 100);
