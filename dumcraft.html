@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minecraft but worse</title>
+  <style>
+    body { margin: 0; }
+    canvas { display: block; }
+    #controls { position: absolute; top: 10px; left: 10px; }
+  </style>
+</head>
+<body>
+  <div id="controls">
+    <label>X: <input type="range" id="xRange" min="-5" max="5" step="0.1" value="0" disabled></label><br>
+    <label>Y: <input type="range" id="yRange" min="-5" max="5" step="0.1" value="0" disabled></label><br>
+    <label>Z: <input type="range" id="zRange" min="-5" max="5" step="0.1" value="0" disabled></label><br>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    // Set up the scene, camera, and renderer
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x00ffff); // Set background color to cyan
+    document.body.appendChild(renderer.domElement);
+
+    // Load the texture
+    const textureLoader = new THREE.TextureLoader();
+    const grassTexture = textureLoader.load('https://chmshangout.com/logancraft/grass.png');
+    grassTexture.magFilter = THREE.NearestFilter; // Use nearest filtering to avoid blurring
+    grassTexture.minFilter = THREE.NearestFilter; // Ensure the texture stays pixelated
+
+    // Create a cube
+    const geometry = new THREE.BoxGeometry();
+    const material = new THREE.MeshBasicMaterial({ map: grassTexture });
+    const cube = new THREE.Mesh(geometry, material);
+    scene.add(cube);
+    
+    // Position the camera
+    camera.position.y = 2;
+
+    // Variables to track movement and rotation
+    let moveSpeed = 0.5;
+    let jumpforce = 2;
+    let velocity = new THREE.Vector3(0, 0, 0);
+    let maxVelocity = 200;
+    let gravity = -0.1; // Gravity constant
+    let isGrounded = false; // Flag to check if standing on a block
+    let keysPressed = {};
+    let mouseX = 0, mouseY = 0;
+    let mouseSensitivity = 0.002;  // Fixed mouse sensitivity
+    let maxYAngle = Math.PI / 4;
+
+    // Keydown event listener
+    window.addEventListener('keydown', (event) => {
+      keysPressed[event.key.toLowerCase()] = true; // Track pressed keys
+    });
+
+    // Keyup event listener
+    window.addEventListener('keyup', (event) => {
+      keysPressed[event.key.toLowerCase()] = false; // Release keys
+    });
+
+    // Mouse move event listener
+    window.addEventListener('mousemove', (event) => {
+      if (document.pointerLockElement === renderer.domElement) {
+        mouseX = event.movementX * mouseSensitivity;
+        mouseY = event.movementY * mouseSensitivity;
+      }
+    });
+
+    // Request pointer lock
+    document.body.addEventListener('click', () => {
+      renderer.domElement.requestPointerLock();
+    });
+
+    // Function to calculate the movement direction relative to the camera's rotation
+    function getMovementDirection() {
+      const direction = new THREE.Vector3();
+      camera.getWorldDirection(direction);
+  
+      // Get the yaw angle (rotation around the Y-axis)
+      const yaw = Math.atan2(direction.x, direction.z);
+  
+      // Calculate forward and right directions based on yaw
+      const forward = new THREE.Vector3(Math.sin(yaw), 0, Math.cos(yaw)).normalize();
+      const right = new THREE.Vector3(Math.cos(yaw), 0, -Math.sin(yaw)).normalize();
+  
+      return { forward, right };
+    }
+
+    // Function to check if the camera is standing on a block
+    function checkGround() {
+      const raycaster = new THREE.Raycaster();
+      const direction = new THREE.Vector3(0, -1, 0);
+      const origin = new THREE.Vector3(camera.position.x, camera.position.y - 1, camera.position.z);
+      raycaster.ray.origin.copy(origin);
+      raycaster.ray.direction.copy(direction);
+      const intersects = raycaster.intersectObject(cube);
+      console.log(intersects.point)
+      isGrounded = intersects.length > 0;
+    }
+
+    // Function to move the camera relative to the camera's orientation
+    function moveCamera() {
+      const { forward, right } = getMovementDirection();
+      
+      checkGround(); // Check if the camera is standing on a block
+
+      // Adjust velocity based on key inputs
+      if (keysPressed['w']) {
+        velocity.add(forward.clone().multiplyScalar(moveSpeed / 100)); // Accelerate forward
+      }
+      if (keysPressed['s']) {
+        velocity.add(forward.clone().multiplyScalar(-moveSpeed / 100)); // Accelerate backward
+      }
+      if (keysPressed['a']) {
+        velocity.add(right.clone().multiplyScalar(moveSpeed / 100)); // Accelerate left
+      }
+      if (keysPressed['d']) {
+        velocity.add(right.clone().multiplyScalar(-moveSpeed / 100)); // Accelerate right
+      }
+      if (keysPressed[' '] && isGrounded) {
+        velocity.y += jumpforce / 100; // Accelerate upward (jump)
+      }
+      if (keysPressed['shift']) {
+        velocity.y -= moveSpeed / 100; // Accelerate downward (fall)
+      }
+
+      // Apply gravity if not grounded
+      if (!isGrounded) {
+        velocity.y += gravity;
+      } else if (velocity.y < 0) {
+        velocity.y = 0; // Stop downward movement when grounded
+      }
+
+      // Apply velocity to camera position
+      camera.position.add(velocity);
+      console.log(velocity);
+
+      // Cap the velocity to the maximum allowed value
+      velocity.clampLength(0, maxVelocity / 100);
+
+      // Apply some damping to simulate friction (slow down over time)
+      velocity.multiplyScalar(0.9);
+
+      // Update the sliders to reflect the camera's current position
+      document.getElementById('xRange').value = camera.position.x;
+      document.getElementById('yRange').value = camera.position.y;
+      document.getElementById('zRange').value = camera.position.z;
+    }
+
+    // Function to rotate the camera
+    function rotateCamera() {
+      if (document.pointerLockElement === renderer.domElement) {
+        camera.rotation.order = 'YXZ';
+        
+        // Update rotation based on mouse movement and sensitivity
+        camera.rotation.y -= mouseX; // Horizontal rotation (Y-axis)
+        camera.rotation.x -= mouseY; // Vertical rotation (X-axis)
+    
+        // Constrain the vertical rotation to avoid flipping
+        camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
+    
+        // Ensure the Y rotation wraps around 360 degrees
+        camera.rotation.y = (camera.rotation.y + Math.PI * 2) % (Math.PI * 2);  // Wrap the Y rotation (left/right)
+    
+        // Reset mouse movement values to ensure consistent rotation
+        mouseX = 0;
+        mouseY = 0;
+      }
+    }
+
+    // Animate the scene
+    function animate() {
+      requestAnimationFrame(animate);
+
+      // Handle camera movement
+      moveCamera();
+
+      // Handle camera rotation
+      rotateCamera();
+
+      // Render the scene
+      renderer.render(scene, camera);
+    }
+
+    animate();
+  </script>
+</body>
+</html>
