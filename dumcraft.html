@@ -8,6 +8,15 @@
     body { margin: 0; }
     canvas { display: block; }
     #controls { position: absolute; top: 10px; left: 10px; }
+    #plusSymbol {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 50px; /* Adjust size as needed */
+      height: auto;
+      z-index: 10; /* Ensure it's on top of other content */
+    }
   </style>
 </head>
 <body>
@@ -16,6 +25,9 @@
     <label>Y: <input type="range" id="yRange" min="-5" max="5" step="0.1" value="0" disabled></label><br>
     <label>Z: <input type="range" id="zRange" min="-5" max="5" step="0.1" value="0" disabled></label><br>
   </div>
+  <!-- Add the plus symbol image -->
+  <img id="plusSymbol" src="https://chmshangout.com/logancraft/800px-Plus_symbol.svg.png" alt="Plus Symbol">
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script>
     // Set up the scene, camera, and renderer
@@ -32,18 +44,73 @@
     grassTexture.magFilter = THREE.NearestFilter; // Use nearest filtering to avoid blurring
     grassTexture.minFilter = THREE.NearestFilter; // Ensure the texture stays pixelated
 
-    // Create a cube
-    const geometry = new THREE.BoxGeometry();
-    const material = new THREE.MeshBasicMaterial({ map: grassTexture });
-    const cube = new THREE.Mesh(geometry, material);
-    scene.add(cube);
+    // Create a function to add a cube at a specific position
+    function addCube(x, y, z) {
+      const geometry = new THREE.BoxGeometry();
+      const material = new THREE.MeshBasicMaterial({ map: grassTexture });
+      const cube = new THREE.Mesh(geometry, material);
+      cube.position.set(x, y, z);
+      scene.add(cube);
+    }
+
+    // Create a 10x10 grid of cubes
+    const gridSize = 10;
+    const spacing = 1; // Spacing between cubes
+    for (let i = 0; i < gridSize; i++) {
+      for (let j = 0; j < gridSize; j++) {
+        addCube(i * spacing, 0, j * spacing);
+      }
+    }
+    camera.position.set((gridSize / 2) * spacing, 5, (gridSize / 2) * spacing);
     
     // Position the camera
-    camera.position.y = 2;
+    camera.position.y = 5;
+
+    // Raycaster for detecting object clicks
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    // Function to handle clicks on the scene
+    function onMouseClick(event) {
+      // Convert mouse position to normalized device coordinates (-1 to +1)
+      mouse.x = (((window.innerWidth / 2) / window.innerWidth) * 2 - 1);
+      mouse.y = -(((window.innerHeight / 2) / window.innerHeight) * 2 - 1);
+
+      // Update the raycaster with the camera and mouse position
+      raycaster.setFromCamera(mouse, camera);
+
+      // Calculate objects intersected by the ray
+      const intersects = raycaster.intersectObjects(scene.children, true);
+
+      if (event.button === 0) {
+        // Left-click: Remove the block
+        if (intersects.length > 0) {
+          const clickedObject = intersects[0].object;
+          scene.remove(clickedObject);
+        }
+      } else if (event.button === 2) {
+        // Right-click: Place a block
+        if (intersects.length > 0) {
+          const point = intersects[0].point;
+          const position = new THREE.Vector3(
+            Math.floor(point.x) + 0.5,
+            Math.floor(point.y) + 1,
+            Math.floor(point.z) + 0.5
+          );
+          addCube(position.x, position.y, position.z);
+        }
+      }
+
+      // Prevent the context menu from appearing on right-click
+      event.preventDefault();
+    }
+
+    // Add an event listener for clicks
+    window.addEventListener('click', onMouseClick);
 
     // Variables to track movement and rotation
     let moveSpeed = 0.5;
-    let jumpforce = 20;
+    let jumpforce = 40;
     let velocity = new THREE.Vector3(0, 0, 0);
     let maxVelocity = 200;
     let gravity = -0.01; // Gravity constant
@@ -98,7 +165,7 @@
       const origin = new THREE.Vector3(camera.position.x, camera.position.y - 1, camera.position.z);
       raycaster.ray.origin.copy(origin);
       raycaster.ray.direction.copy(direction);
-      const intersects = raycaster.intersectObject(cube, true);
+      const intersects = raycaster.intersectObjects(scene.children, true);
       //isGrounded = intersects.length > 0;
       let ran = false;
       isGrounded = true;
@@ -151,7 +218,6 @@
 
       // Apply velocity to camera position
       camera.position.add(velocity);
-      //console.log(velocity);
 
       // Cap the velocity to the maximum allowed value
       velocity.clampLength(0, maxVelocity / 100);
