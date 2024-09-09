@@ -91,12 +91,13 @@
       } else if (event.button === 2) {
         // Right-click: Place a block
         if (intersects.length > 0) {
-          const point = intersects[0].point;
+          const point = intersects[0].object.position;
           const position = new THREE.Vector3(
-            Math.floor(point.x) + 0.5,
-            Math.floor(point.y) + 1,
-            Math.floor(point.z) + 0.5
+            point.x + intersects[0].face.normal.x,
+            point.y + intersects[0].face.normal.y,
+            point.z + intersects[0].face.normal.z
           );
+          console.log(intersects[0]);
           addCube(position.x, position.y, position.z);
         }
       }
@@ -171,7 +172,7 @@
       isGrounded = true;
       for ( var i = 0; i < intersects.length; i++ ) {
 
-        console.log(camera.position.y - intersects[ i ].point.y);
+        //console.log(camera.position.y - intersects[ i ].point.y);
         if (camera.position.y - intersects[ i ].point.y >= 1.5) {
         	isGrounded = false;
         }
