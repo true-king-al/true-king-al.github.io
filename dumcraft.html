@@ -158,6 +158,19 @@
   
       return { forward, right };
     }
+    
+    
+    function getAllObjectsInScene(scene) {
+	    let objects = [];
+
+	    scene.traverse((child) => {
+	        objects.push(child); // Add all objects, not just meshes
+	    });
+
+	    return objects;
+	}
+
+
 
     // Function to check if the camera is standing on a block
     function checkGround() {
@@ -166,7 +179,8 @@
       const origin = new THREE.Vector3(camera.position.x, camera.position.y - 1, camera.position.z);
       raycaster.ray.origin.copy(origin);
       raycaster.ray.direction.copy(direction);
-      const intersects = raycaster.intersectObjects(scene.children, true);
+      const allstuff = getAllObjectsInScene(scene)
+      const intersects = raycaster.intersectObjects(allstuff, true);
       //isGrounded = intersects.length > 0;
       let ran = false;
       isGrounded = true;
