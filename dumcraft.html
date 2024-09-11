@@ -173,30 +173,37 @@
 
 
     // Function to check if the camera is standing on a block
-    function checkGround() {
-      const raycaster = new THREE.Raycaster();
-      const direction = new THREE.Vector3(0, -1, 0);
-      const origin = new THREE.Vector3(camera.position.x, camera.position.y - 1, camera.position.z);
-      raycaster.ray.origin.copy(origin);
-      raycaster.ray.direction.copy(direction);
-      const allstuff = getAllObjectsInScene(scene)
-      const intersects = raycaster.intersectObjects(allstuff, true);
-      //isGrounded = intersects.length > 0;
-      let ran = false;
-      isGrounded = true;
-      for ( var i = 0; i < intersects.length; i++ ) {
+	function checkGround() {
+	  const raycaster = new THREE.Raycaster();
+	  const direction = new THREE.Vector3(0, -1, 0);
+	  const origin = new THREE.Vector3(camera.position.x, 	camera.position.y - 1, camera.position.z);
 
-        //console.log(camera.position.y - intersects[ i ].point.y);
-        if (camera.position.y - intersects[ i ].point.y >= 1.5) {
-        	isGrounded = false;
-        }
-		ran = true;
-      }
-      if (ran == false) {
-      	console.log(100);
-        isGrounded = false;
-      }
-    }
+	  raycaster.ray.origin.copy(origin);
+	  raycaster.ray.direction.copy(direction);
+
+	  const allObjects = getAllObjectsInScene(scene);
+	  const intersects = raycaster.intersectObjects(allObjects, true);
+
+	  // Assume initially that the object is not grounded
+	  isGrounded = false;
+	  if (intersects.length > 0) {
+   	  // Check the distance between the camera and the ground
+		const distanceToGround = camera.position.y - intersects[1].point.y;
+
+    	// Debugging information
+    	//console.log(intersects[1]);
+    	//intersects[1].object.material.color.set(0xff0000);
+
+    	// If the distance to the ground is less than a certain threshold, consider the object grounded
+    	if (distanceToGround < 1.5) {
+      		isGrounded = true;
+    	}
+  	  }
+
+  		// Debugging output
+  		//console.log(isGrounded ? 'Grounded' : 'Not Grounded');
+	}
+
 
     // Function to move the camera relative to the camera's orientation
     function moveCamera() {
