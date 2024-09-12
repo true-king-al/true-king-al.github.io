@@ -233,11 +233,11 @@
 	
 	      if (playerHitbox.intersectsBox(objBoundingBox)) {
 	        console.log('Player hitbox is colliding with cube', obj);
-            let diffrence = new THREE.Vector3(camera.position.x - obj.position.x, obj.position.y, camera.position.z - obj.position.z)
+            let diffrence = new THREE.Vector3(camera.position.x - obj.position.x, 0, camera.position.z - obj.position.z)
 			
     	    // Perform a raycast to determine which side of the cube was collided with
             console.log(diffrence);  
-	    diffrence.divideScalar(20);
+	    diffrence.divideScalar(100);
             velocity.addVectors(velocity, diffrence);
             
       	  }
