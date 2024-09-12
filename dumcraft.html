@@ -13,9 +13,9 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 50px; /* Adjust size as needed */
+      width: 50px;
       height: auto;
-      z-index: 10; /* Ensure it's on top of other content */
+      z-index: 10;
     }
   </style>
 </head>
@@ -25,7 +25,6 @@
     <label>Y: <input type="range" id="yRange" min="-5" max="5" step="0.1" value="0" disabled></label><br>
     <label>Z: <input type="range" id="zRange" min="-5" max="5" step="0.1" value="0" disabled></label><br>
   </div>
-  <!-- Add the plus symbol image -->
   <img id="plusSymbol" src="https://chmshangout.com/logancraft/800px-Plus_symbol.svg.png" alt="Plus Symbol">
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -62,7 +61,7 @@
       }
     }
     camera.position.set((gridSize / 2) * spacing, 5, (gridSize / 2) * spacing);
-    
+
     // Position the camera
     camera.position.y = 5;
 
@@ -72,24 +71,18 @@
 
     // Function to handle clicks on the scene
     function onMouseClick(event) {
-      // Convert mouse position to normalized device coordinates (-1 to +1)
       mouse.x = (((window.innerWidth / 2) / window.innerWidth) * 2 - 1);
       mouse.y = -(((window.innerHeight / 2) / window.innerHeight) * 2 - 1);
 
-      // Update the raycaster with the camera and mouse position
       raycaster.setFromCamera(mouse, camera);
-
-      // Calculate objects intersected by the ray
       const intersects = raycaster.intersectObjects(scene.children, true);
 
       if (event.button === 0) {
-        // Left-click: Remove the block
         if (intersects.length > 0) {
           const clickedObject = intersects[0].object;
           scene.remove(clickedObject);
         }
       } else if (event.button === 2) {
-        // Right-click: Place a block
         if (intersects.length > 0) {
           const point = intersects[0].object.position;
           const position = new THREE.Vector3(
@@ -102,36 +95,30 @@
         }
       }
 
-      // Prevent the context menu from appearing on right-click
       event.preventDefault();
     }
 
-    // Add an event listener for clicks
     window.addEventListener('click', onMouseClick);
 
-    // Variables to track movement and rotation
     let moveSpeed = 0.5;
     let jumpforce = 40;
     let velocity = new THREE.Vector3(0, 0, 0);
     let maxVelocity = 200;
-    let gravity = -0.01; // Gravity constant
-    let isGrounded = false; // Flag to check if standing on a block
+    let gravity = -0.01;
+    let isGrounded = false;
     let keysPressed = {};
     let mouseX = 0, mouseY = 0;
-    let mouseSensitivity = 0.002;  // Fixed mouse sensitivity
+    let mouseSensitivity = 0.002;
     let maxYAngle = Math.PI / 4;
 
-    // Keydown event listener
     window.addEventListener('keydown', (event) => {
-      keysPressed[event.key.toLowerCase()] = true; // Track pressed keys
+      keysPressed[event.key.toLowerCase()] = true;
     });
 
-    // Keyup event listener
     window.addEventListener('keyup', (event) => {
-      keysPressed[event.key.toLowerCase()] = false; // Release keys
+      keysPressed[event.key.toLowerCase()] = false;
     });
 
-    // Mouse move event listener
     window.addEventListener('mousemove', (event) => {
       if (document.pointerLockElement === renderer.domElement) {
         mouseX = event.movementX * mouseSensitivity;
@@ -139,152 +126,130 @@
       }
     });
 
-    // Request pointer lock
     document.body.addEventListener('click', () => {
       renderer.domElement.requestPointerLock();
     });
 
-    // Function to calculate the movement direction relative to the camera's rotation
     function getMovementDirection() {
       const direction = new THREE.Vector3();
       camera.getWorldDirection(direction);
-  
-      // Get the yaw angle (rotation around the Y-axis)
+
       const yaw = Math.atan2(direction.x, direction.z);
-  
-      // Calculate forward and right directions based on yaw
       const forward = new THREE.Vector3(Math.sin(yaw), 0, Math.cos(yaw)).normalize();
       const right = new THREE.Vector3(Math.cos(yaw), 0, -Math.sin(yaw)).normalize();
-  
+
       return { forward, right };
     }
-    
-    
+
     function getAllObjectsInScene(scene) {
-	    let objects = [];
+      let objects = [];
+      scene.traverse((child) => {
+        objects.push(child);
+      });
+      return objects;
+    }
 
-	    scene.traverse((child) => {
-	        objects.push(child); // Add all objects, not just meshes
-	    });
+    function checkGround() {
+      const raycaster = new THREE.Raycaster();
+      const direction = new THREE.Vector3(0, -1, 0);
+      const origin = new THREE.Vector3(camera.position.x, camera.position.y - 1, camera.position.z);
 
-	    return objects;
-	}
+      raycaster.ray.origin.copy(origin);
+      raycaster.ray.direction.copy(direction);
 
+      const allObjects = getAllObjectsInScene(scene);
+      const intersects = raycaster.intersectObjects(allObjects, true);
 
+      isGrounded = false;
+      if (intersects.length > 0) {
+        const distanceToGround = camera.position.y - intersects[1].point.y;
+        if (distanceToGround < 1.5) {
+          isGrounded = true;
+        }
+      }
+    }
 
-    // Function to check if the camera is standing on a block
-	function checkGround() {
-	  const raycaster = new THREE.Raycaster();
-	  const direction = new THREE.Vector3(0, -1, 0);
-	  const origin = new THREE.Vector3(camera.position.x, 	camera.position.y - 1, camera.position.z);
-
-	  raycaster.ray.origin.copy(origin);
-	  raycaster.ray.direction.copy(direction);
-
-	  const allObjects = getAllObjectsInScene(scene);
-	  const intersects = raycaster.intersectObjects(allObjects, true);
-
-	  // Assume initially that the object is not grounded
-	  isGrounded = false;
-	  if (intersects.length > 0) {
-   	  // Check the distance between the camera and the ground
-		const distanceToGround = camera.position.y - intersects[1].point.y;
-
-    	// Debugging information
-    	//console.log(intersects[1]);
-    	//intersects[1].object.material.color.set(0xff0000);
-
-    	// If the distance to the ground is less than a certain threshold, consider the object grounded
-    	if (distanceToGround < 1.5) {
-      		isGrounded = true;
-    	}
-  	  }
-
-  		// Debugging output
-  		//console.log(isGrounded ? 'Grounded' : 'Not Grounded');
-	}
-
-
-    // Function to move the camera relative to the camera's orientation
     function moveCamera() {
       const { forward, right } = getMovementDirection();
-      
-      checkGround(); // Check if the camera is standing on a block
+      checkGround();
 
-      // Adjust velocity based on key inputs
       if (keysPressed['w']) {
-        velocity.add(forward.clone().multiplyScalar(moveSpeed / 100)); // Accelerate forward
+        velocity.add(forward.clone().multiplyScalar(moveSpeed / 100));
       }
       if (keysPressed['s']) {
-        velocity.add(forward.clone().multiplyScalar(-moveSpeed / 100)); // Accelerate backward
+        velocity.add(forward.clone().multiplyScalar(-moveSpeed / 100));
       }
       if (keysPressed['a']) {
-        velocity.add(right.clone().multiplyScalar(moveSpeed / 100)); // Accelerate left
+        velocity.add(right.clone().multiplyScalar(moveSpeed / 100));
       }
       if (keysPressed['d']) {
-        velocity.add(right.clone().multiplyScalar(-moveSpeed / 100)); // Accelerate right
+        velocity.add(right.clone().multiplyScalar(-moveSpeed / 100));
       }
       if (keysPressed[' '] && isGrounded) {
-        velocity.y += jumpforce / 100; // Accelerate upward (jump)
+        velocity.y += jumpforce / 100;
       }
       if (keysPressed['shift']) {
-        velocity.y -= moveSpeed / 100; // Accelerate downward (fall)
+        velocity.y -= moveSpeed / 100;
       }
 
-      // Apply gravity if not grounded
       if (!isGrounded) {
         velocity.y += gravity;
       } else if (velocity.y < 0) {
-        velocity.y = 0; // Stop downward movement when grounded
+        velocity.y = 0;
       }
 
-      // Apply velocity to camera position
       camera.position.add(velocity);
-
-      // Cap the velocity to the maximum allowed value
       velocity.clampLength(0, maxVelocity / 100);
-
-      // Apply some damping to simulate friction (slow down over time)
       velocity.multiplyScalar(0.9);
 
-      // Update the sliders to reflect the camera's current position
       document.getElementById('xRange').value = camera.position.x;
       document.getElementById('yRange').value = camera.position.y;
       document.getElementById('zRange').value = camera.position.z;
     }
 
-    // Function to rotate the camera
     function rotateCamera() {
       if (document.pointerLockElement === renderer.domElement) {
         camera.rotation.order = 'YXZ';
-        
-        // Update rotation based on mouse movement and sensitivity
-        camera.rotation.y -= mouseX; // Horizontal rotation (Y-axis)
-        camera.rotation.x -= mouseY; // Vertical rotation (X-axis)
-    
-        // Constrain the vertical rotation to avoid flipping
+        camera.rotation.y -= mouseX;
+        camera.rotation.x -= mouseY;
         camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
-    
-        // Ensure the Y rotation wraps around 360 degrees
-        camera.rotation.y = (camera.rotation.y + Math.PI * 2) % (Math.PI * 2);  // Wrap the Y rotation (left/right)
-    
-        // Reset mouse movement values to ensure consistent rotation
+        camera.rotation.y = (camera.rotation.y + Math.PI * 2) % (Math.PI * 2);
         mouseX = 0;
         mouseY = 0;
       }
     }
 
-    // Animate the scene
+    // Player's hitbox setup
+    const playerHitbox = new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(), new THREE.Vector3(0.6, 1.8, 0.6));
+
+    // Check collision with cubes
+	function checkCollision() {
+	  playerHitbox.setFromCenterAndSize(camera.position, new THREE.Vector3(0.6, 1.8, 0.6));
+	  const allObjects = getAllObjectsInScene(scene);
+
+	  allObjects.forEach((obj) => {
+	    if (obj.geometry && obj !== camera) {
+	      const objBoundingBox = new THREE.Box3().setFromObject(obj);
+	
+	      if (playerHitbox.intersectsBox(objBoundingBox)) {
+	        console.log('Player hitbox is colliding with cube', obj);
+            let diffrence = new THREE.Vector3(camera.position.x - obj.position.x, obj.position.y, camera.position.z - obj.position.z)
+			
+    	    // Perform a raycast to determine which side of the cube was collided with
+            console.log(diffrence);  
+            velocity.addVectors(velocity, diffrence)
+            
+      	  }
+    	}
+  	});
+	}
+
+
     function animate() {
       requestAnimationFrame(animate);
-
-      // Handle camera movement
       moveCamera();
-
-      // Handle camera rotation
       rotateCamera();
-
-      // Render the scene
+      checkCollision();
       renderer.render(scene, camera);
     }
 
@@ -292,3 +257,5 @@
   </script>
 </body>
 </html>
+
+
