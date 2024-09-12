@@ -163,7 +163,7 @@
       isGrounded = false;
       if (intersects.length > 0) {
         const distanceToGround = camera.position.y - intersects[1].point.y;
-        if (distanceToGround < 1.5) {
+        if (distanceToGround < 1.8) {
           isGrounded = true;
         }
       }
@@ -237,7 +237,7 @@
 			
     	    // Perform a raycast to determine which side of the cube was collided with
             console.log(diffrence);  
-            velocity.addVectors(velocity, (diffrence*5))
+            velocity.addVectors(velocity, diffrence.clone().divide(20))
             
       	  }
     	}
