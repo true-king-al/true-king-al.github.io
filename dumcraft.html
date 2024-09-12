@@ -237,7 +237,8 @@
 			
     	    // Perform a raycast to determine which side of the cube was collided with
             console.log(diffrence);  
-            velocity.addVectors(velocity, diffrence.clone().divide(20))
+	    diffrence.divide(2)
+            velocity.addVectors(velocity, diffrence)
             
       	  }
     	}
