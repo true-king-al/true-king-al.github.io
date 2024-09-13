@@ -53,7 +53,7 @@
             border-color: #a9a9a9;
             color: rgb(255, 255, 255);
         }
-        .button-minecraft, .button-retro, .button-textinorsm, .button-pixelplace, .button-2048, .button-lol, .button-ai {
+        .button-minecraft, .button-retro, .button-textinorsm, .button-pixelplace, .button-2048, .button-lol, .button-ai, .button-bitlife {
             padding: 32px 64px;
             border-radius: 19px;
             background-size: cover;
@@ -126,6 +126,15 @@
             background-color: #357ABD;
             border-color: #2A65A4;
         }
+        .button-bitlife {
+            background-image: url('Bitlife/logo.png');
+            border: 2px solid #357ABD;
+        }
+        .button-bitlife:hover {
+            background-color: #357ABD;
+            background-blend-mode: overlay;
+            border-color: #2A65A4;
+        }
         .container {
             height: 200px;
             position: relative;
@@ -147,6 +156,12 @@
             gap: 10px;
             justify-content: center;
             margin-top: 100px;
+        }
+        .button-row2 {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 210px;
         }
     </style>
 </head>
@@ -184,12 +199,17 @@
             <a href="pvp.html">
                 <button class="button button2 button-lol">1v0.lol</button>
             </a>
+            
+        </div>
+        <div class="ucenter button-row2">
             <a href="ai.html">
                 <button class="button button2 button-ai">AI</button>
+            </a>
+            <a href="Bitlife/index.html">
+                <button class="button button2 button-bitlife">Bitlife</button>
             </a>
         </div>
     </div>
     <br><br><br><br><br><br><br><br><br>
-    <h2 style="color:#cdcdcd;">there's little games yet :(</h2>
 </body>
 </html>
