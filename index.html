@@ -165,7 +165,7 @@ body {
 
     // Reference to the visitors count in the database
     const visitorsRef = ref(database, 'visitorCount');
-    set(visitorsRef, 1);
+    //set(visitorsRef, 1);
     // Increment the visitor count whenever someone visits the page
     function incrementVisitorCount() {
         set(visitorsRef, increment(1));
