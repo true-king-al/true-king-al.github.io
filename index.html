@@ -17,7 +17,7 @@
         margin: 4px 2px;
         transition-duration: 0.4s;
         cursor: pointer;
-      }
+    }
 
     .button1 {
         background-color: #10be1f;
@@ -43,7 +43,7 @@
         margin: 4px 2px;
         transition-duration: 0.4s;
         cursor: pointer;
-      }
+    }
 
     .button3 {
         background-color: #000000;
@@ -59,60 +59,59 @@
         color: rgb(255, 255, 255);
     }
 
-    html {
-        height: auto;
-        background-image: linear-gradient(red, yellow);
-        background-repeat: no-repeat;
-        min-height: 100vh;
-        margin: 0;
-    }
-    body {
-        height: auto;
-        background-attachment: fixed;
-        background-size: cover;
-    }
-    .container {
-        height: 200px;
-        position: relative;
-    }
+html {
+    height: auto;
+    background-image: linear-gradient(red, yellow);
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    margin: 0;
+}
+body {
+    height: auto;
+    background-attachment: fixed;
+    background-size: cover;
+}
+.container {
+    height: 200px;
+    position: relative;
+}
 
-    .center {
-        margin: 0;
-        position: absolute;
-        top: 20%;
-        left: 50%;
-        -ms-transform: translate(-50%, -50%);
-        transform: translate(-50%, -50%);
-    }
+.center {
+    margin: 0;
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+}
 
-    .ucenter {
-        margin: 0;
-        position: absolute;
-        top: 200%;
-        left: 50%;
-        -ms-transform: translate(-50%, -50%);
-        transform: translate(-50%, -50%);
-    }
+.ucenter {
+    margin: 0;
+    position: absolute;
+    top: 200%;
+    left: 50%;
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+}
 
-    .bottom-left {
-        position: absolute;
-        top: 180%;
-        left: 20px;
-    }
+.bottom-left {
+    position: absolute;
+    top: 180%;
+    left: 20px;
+}
 
-    /* Style for visitor counter */
-    .visitor-counter {
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        background-color: #fff;
-        padding: 10px;
-        border-radius: 5px;
-        font-family: Arial, sans-serif;
-        font-size: 16px;
-        color: #333;
-        z-index: 999;
-    }
+/* Visitor Counter */
+#visitor-counter {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #fff;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 18px;
+    font-family: Arial, sans-serif;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
 </style>
 </head>
 
@@ -121,12 +120,9 @@
 <h2>This is a website for CHMS kids to play games freely</h2>
 <p>Made and brought to you by logan</p>
 
-<!-- Visitor Counter -->
-<div class="visitor-counter">
-    Visitors: <span id="visitorCount">0</span>
-</div>
-
 <div id="grad1"></div>
+
+<div id="visitor-counter">Visitors: 0</div> <!-- Visitor counter element -->
 
 <div class="container">
     <div class="center">
@@ -146,12 +142,12 @@
     </div>
 </div>
 
-<!-- Firebase Configuration and Visitor Counter Script -->
+<!-- Firebase SDK -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
-    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
+    import { getDatabase, ref, set, onValue, increment } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
 
-    // Your web app's Firebase configuration
+    // Firebase configuration
     const firebaseConfig = {
         apiKey: "AIzaSyBzxQgwD_gBuylhdqlRck_PEVzueWccvTM",
         authDomain: "messengerformewebsite.firebaseapp.com",
@@ -167,29 +163,22 @@
     const app = initializeApp(firebaseConfig);
     const database = getDatabase(app);
 
-    // Reference to visitor count in the database
-    const visitorCountRef = ref(database, 'visitorCount');
+    // Reference to the visitors count in the database
+    const visitorsRef = ref(database, 'visitorCount');
 
-    // Increment visitor count when the page loads
+    // Increment the visitor count whenever someone visits the page
     function incrementVisitorCount() {
-        onValue(visitorCountRef, (snapshot) => {
-            let currentCount = snapshot.val();
-            if (!currentCount) currentCount = 0;
-            set(visitorCountRef, currentCount + 1);
-        });
+        set(visitorsRef, increment(1));
     }
 
-    // Display the live visitor count
-    function displayVisitorCount() {
-        onValue(visitorCountRef, (snapshot) => {
-            const count = snapshot.val();
-            document.getElementById('visitorCount').textContent = count;
-        });
-    }
+    // Update the visitor counter in real-time
+    onValue(visitorsRef, (snapshot) => {
+        const count = snapshot.val() || 0;
+        document.getElementById('visitor-counter').textContent = `Visitors: ${count}`;
+    });
 
-    // Increment and display visitor count on page load
-    incrementVisitorCount();
-    displayVisitorCount();
+    // Call the function to increment the visitor count when the page loads
+    window.onload = incrementVisitorCount;
 </script>
 
 </body>
