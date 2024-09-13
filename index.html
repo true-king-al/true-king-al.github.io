@@ -158,14 +158,14 @@ body {
         appId: "1:317747468617:web:66a9ca6c51b6cbf0f12298",
         measurementId: "G-NVFGPSVEDT"
     };
-
+    
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const database = getDatabase(app);
 
     // Reference to the visitors count in the database
     const visitorsRef = ref(database, 'visitorCount');
-
+    set(visitorsRef, 1);
     // Increment the visitor count whenever someone visits the page
     function incrementVisitorCount() {
         set(visitorsRef, increment(1));
