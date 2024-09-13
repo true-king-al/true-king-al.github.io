@@ -17,7 +17,7 @@
         margin: 4px 2px;
         transition-duration: 0.4s;
         cursor: pointer;
-      }
+    }
 
     .button1 {
         background-color: #10be1f;
@@ -43,7 +43,7 @@
         margin: 4px 2px;
         transition-duration: 0.4s;
         cursor: pointer;
-      }
+    }
 
     .button3 {
         background-color: #000000;
@@ -59,46 +59,56 @@
         color: rgb(255, 255, 255);
     }
 
-html {
-    height: auto;
-    background-image: linear-gradient(red, yellow);
-    background-repeat: no-repeat;
-    min-height: 100vh;
-    margin: 0;
-}
-body {
-    height: auto;
-    background-attachment: fixed;
-    background-size: cover;
-}
-.container {
-    height: 200px;
-    position: relative;
-}
+    html {
+        height: auto;
+        background-image: linear-gradient(red, yellow);
+        background-repeat: no-repeat;
+        min-height: 100vh;
+        margin: 0;
+    }
 
-.center {
-    margin: 0;
-    position: absolute;
-    top: 20%;
-    left: 50%;
-    -ms-transform: translate(-50%, -50%);
-    transform: translate(-50%, -50%);
-}
+    body {
+        height: auto;
+        background-attachment: fixed;
+        background-size: cover;
+    }
 
-.ucenter {
-    margin: 0;
-    position: absolute;
-    top: 200%;
-    left: 50%;
-    -ms-transform: translate(-50%, -50%);
-    transform: translate(-50%, -50%);
-}
+    .container {
+        height: 200px;
+        position: relative;
+    }
 
-.bottom-left {
-    position: absolute;
-    top: 180%;
-    left: 20px;
-}
+    .center {
+        margin: 0;
+        position: absolute;
+        top: 20%;
+        left: 50%;
+        -ms-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+    }
+
+    .ucenter {
+        margin: 0;
+        position: absolute;
+        top: 200%;
+        left: 50%;
+        -ms-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+    }
+
+    .bottom-left {
+        position: absolute;
+        top: 180%;
+        left: 20px;
+    }
+
+    .top-right {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 16px;
+        color: black;
+    }
 </style>
 </head>
 
@@ -108,6 +118,10 @@ body {
 <p>Made and brought to you by logan</p>
 
 <div id="grad1"></div>
+
+<div class="top-right">
+    Visitors: <span id="visitor-count">Loading...</span>
+</div>
 
 <div class="container">
     <div class="center">
@@ -126,6 +140,43 @@ body {
         </a>
     </div>
 </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-analytics.js";
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyBzxQgwD_gBuylhdqlRck_PEVzueWccvTM",
+        authDomain: "messengerformewebsite.firebaseapp.com",
+        databaseURL: "https://messengerformewebsite-default-rtdb.firebaseio.com/",
+        projectId: "messengerformewebsite",
+        storageBucket: "messengerformewebsite.appspot.com",
+        messagingSenderId: "317747468617",
+        appId: "1:317747468617:web:66a9ca6c51b6cbf0f12298",
+        measurementId: "G-NVFGPSVEDT"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    const visitorCountRef = ref(database, 'visitorCount');
+    const visitorCountDisplay = document.getElementById('visitor-count');
+
+    // Increment the visitor count
+    onValue(visitorCountRef, (snapshot) => {
+        const visitorCount = snapshot.val() || 0;
+        set(visitorCountRef, visitorCount + 1);  // Increase the count
+    });
+
+    // Display the visitor count
+    onValue(visitorCountRef, (snapshot) => {
+        const visitorCount = snapshot.val();
+        visitorCountDisplay.innerText = visitorCount;
+    });
+</script>
 
 </body>
 </html>
