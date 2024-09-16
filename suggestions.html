@@ -7,9 +7,9 @@
             background-color: #f4f4f4;
             text-align: center;
             padding: 50px;
-            position: relative; /* Ensure positioning context for the button */
+            position: relative;
         }
-        input[type="text"] {
+        input[type="text"], input[type="password"] {
             padding: 10px;
             font-size: 16px;
             margin-right: 10px;
@@ -55,6 +55,14 @@
             margin-left: 10px;
             color: #888;
         }
+        .delete-button {
+            display: none; /* Hidden by default */
+            background-color: red;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+        }
         .plus-button {
             position: absolute;
             top: 10px;
@@ -90,6 +98,12 @@
     <h1>Suggestions</h1>
     <button class="plus-button"></button>
     <div id="display-suggestions">Loading...</div>
+
+    <!-- Admin Login -->
+    <div>
+        <input type="password" id="admin-password" placeholder="Enter Admin Password">
+        <button onclick="checkAdmin()">Enter Admin Mode</button>
+    </div>
     
     <!-- Suggestion Modal -->
     <div class="suggestion-modal" id="suggestion-modal">
@@ -104,10 +118,9 @@
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue, query, orderByKey, limitToLast } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
+        import { getDatabase, ref, set, remove, onValue, query, orderByKey, limitToLast } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-analytics.js";
 
-        // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBzxQgwD_gBuylhdqlRck_PEVzueWccvTM",
             authDomain: "messengerformewebsite.firebaseapp.com",
@@ -119,13 +132,25 @@
             measurementId: "G-NVFGPSVEDT"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
+        let suggestionLimit = 50;
+        let isAdmin = false;
 
-        let suggestionLimit = 50; // Default suggestion limit
+        // Check if the entered password is correct
+        function checkAdmin() {
+            const password = document.getElementById('admin-password').value;
+            if (password === 'your-admin-password') {
+                isAdmin = true;
+                document.querySelectorAll('.delete-button').forEach(button => {
+                    button.style.display = 'inline'; // Show delete buttons
+                });
+            } else {
+                alert('Incorrect password');
+            }
+        }
 
-        // Function to fetch and display suggestions
+        // Fetch and display suggestions
         function fetchSuggestions() {
             const suggestionsRef = ref(database, 'suggestions');
             const latestSuggestionsQuery = query(suggestionsRef, orderByKey(), limitToLast(suggestionLimit));
@@ -138,13 +163,14 @@
                     const suggestionsArray = Object.entries(data).map(([timestamp, suggestion]) => {
                         const suggestionTime = new Date(parseInt(timestamp));
                         const timeDiff = now - suggestionTime.getTime();
-                        const minutes = Math.floor(timeDiff / 60000); // Time difference in minutes
+                        const minutes = Math.floor(timeDiff / 60000);
                         const hours = Math.floor(minutes / 60);
                         const displayDiff = hours > 0 ? `${hours}h` : `${minutes}m`;
                         return `
                             <div class="suggestion-container">
                                 <div class="suggestion-text">${suggestion}</div>
                                 <div class="suggestion-time">${displayDiff} ago</div>
+                                <button class="delete-button" onclick="deleteSuggestion('${timestamp}')">X</button>
                             </div>
                         `;
                     }).reverse();
@@ -152,10 +178,17 @@
                 }
 
                 document.getElementById('display-suggestions').innerHTML = displayText;
+
+                // Hide delete buttons initially
+                if (!isAdmin) {
+                    document.querySelectorAll('.delete-button').forEach(button => {
+                        button.style.display = 'none';
+                    });
+                }
             });
         }
 
-        // Function to save the suggestion
+        // Save a suggestion
         function saveSuggestion(event) {
             event.preventDefault();
             const suggestion = document.getElementById('suggestion-input').value;
@@ -163,13 +196,23 @@
                 const newSuggestionRef = ref(database, 'suggestions/' + Date.now());
                 set(newSuggestionRef, suggestion)
                     .then(() => {
-                        console.log('Suggestion saved successfully');
-                        document.getElementById('suggestion-input').value = ''; // Clear input field
-                        fetchSuggestions(); // Refresh suggestions
+                        document.getElementById('suggestion-input').value = '';
+                        fetchSuggestions();
                     })
-                    .catch(error => {
-                        console.error('Error saving suggestion:', error);
-                    });
+                    .catch(error => console.error('Error saving suggestion:', error));
+            }
+        }
+
+        // Delete a suggestion
+        function deleteSuggestion(timestamp) {
+            if (isAdmin) {
+                const suggestionRef = ref(database, 'suggestions/' + timestamp);
+                remove(suggestionRef)
+                    .then(() => {
+                        console.log('Suggestion deleted successfully');
+                        fetchSuggestions();
+                    })
+                    .catch(error => console.error('Error deleting suggestion:', error));
             }
         }
 
@@ -185,7 +228,6 @@
 
         document.getElementById('suggestion-form').addEventListener('submit', saveSuggestion);
 
-        // Load suggestions on page load
         window.onload = function() {
             fetchSuggestions();
         }
