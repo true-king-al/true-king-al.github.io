@@ -139,9 +139,11 @@
 
         // Check if the entered password is correct
         function checkAdmin() {
-            const password = document.getElementById('admin-password').value;
-            if (password === 'your-admin-password') {
+            let password = document.getElementById('admin-password').value;
+            console.log(document.getElementById('admin-password'));
+            if (password == 'loganiscool') {
                 isAdmin = true;
+                alert('password correct');
                 document.querySelectorAll('.delete-button').forEach(button => {
                     button.style.display = 'inline'; // Show delete buttons
                 });
