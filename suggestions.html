@@ -102,7 +102,7 @@
     <!-- Admin Login -->
     <div>
         <input type="password" id="admin-password" placeholder="Enter Admin Password">
-        <button onclick="checkAdmin()">Enter Admin Mode</button>
+        <button id="enteradmin">Enter Admin Mode</button>
     </div>
     
     <!-- Suggestion Modal -->
@@ -229,6 +229,10 @@
         });
 
         document.getElementById('suggestion-form').addEventListener('submit', saveSuggestion);
+        
+        document.getElementById('enteradmin').addEventListener('click', () => {
+            checkAdmin();
+        });
 
         window.onload = function() {
             fetchSuggestions();
