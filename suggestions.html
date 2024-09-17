@@ -169,10 +169,10 @@
                         const hours = Math.floor(minutes / 60);
                         const displayDiff = hours > 0 ? `${hours}h` : `${minutes}m`;
                         return `
-                            <div class="suggestion-container">
+                            <div class="suggestion-container" data-timestamp="${timestamp}">
                                 <div class="suggestion-text">${suggestion}</div>
                                 <div class="suggestion-time">${displayDiff} ago</div>
-                                <button class="delete-button" onclick="deleteSuggestion('${timestamp}')">X</button>
+                                <button class="delete-button">X</button>
                             </div>
                         `;
                     }).reverse();
@@ -180,6 +180,13 @@
                 }
 
                 document.getElementById('display-suggestions').innerHTML = displayText;
+
+                // Add event listeners for delete buttons
+                document.querySelectorAll('.delete-button').forEach(button => {
+                    const container = button.closest('.suggestion-container');
+                    const timestamp = container.getAttribute('data-timestamp');
+                    button.addEventListener('click', () => deleteSuggestion(timestamp));
+                });
 
                 // Hide delete buttons initially
                 if (!isAdmin) {
