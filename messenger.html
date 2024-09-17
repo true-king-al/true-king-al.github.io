@@ -238,8 +238,8 @@
             fetchMessages();
         }
         let adminmode = false
-        document.onkeypress = function (\) {
-            \ = \ || window.event;
+        document.onkeypress = function (e) {
+            e = e || window.event;
             // use e.keyCode
             myprompt = prompt("please enter a admin password","password1234");
             if (myprompt === "loganiscool"){
