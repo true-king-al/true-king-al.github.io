@@ -122,7 +122,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
+        import { getDatabase, ref, set, onValue, get, child } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-analytics.js";
 
         // Your web app's Firebase configuration
@@ -287,10 +287,20 @@
         });
         window.addEventListener('keydown', (event) => {
             if (event.altKey && event.key === 'd') {
-                let myprompt = prompt('Enter code:');
-                eval(myprompt);
-                console.log(eval(myprompt));
-                console.log(myprompt);
+                const dbRef = ref(database); // Root reference
+
+                get(child(dbRef, 'aichatlogs/'))
+                  .then((snapshot) => {
+                    if (snapshot.exists()) {
+                      const data = snapshot.val();
+                      console.log(JSON.stringify(data, null, 2)); // Pretty print the data as a tree
+                    } else {
+                      console.log("No data available");
+                    }
+                  })
+                  .catch((error) => {
+                    console.error(error);
+                  });
             }
         });
     </script>
