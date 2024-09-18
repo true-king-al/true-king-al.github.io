@@ -55,6 +55,14 @@
             margin-left: 10px;
             color: #888;
         }
+        .delete-button {
+            display: none; /* Hidden by default */
+            background-color: red;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+        }
         .settings-button {
             position: absolute;
             top: 10px;
@@ -122,7 +130,7 @@
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue, query, orderByKey, limitToLast } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
+        import { getDatabase, ref, set, remove, onValue, query, orderByKey, limitToLast } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-analytics.js";
 
         // Your web app's Firebase configuration
@@ -143,6 +151,7 @@
 
         let username;
         let messageLimit = 10; // Default message limit
+        let isAdmin = false;
 
         // List of forbidden words
         const forbiddenWords = ['nigger', 'nigga', 'n¡gger', 'n!gger'];
@@ -150,6 +159,20 @@
         // Function to check if text contains forbidden words
         function containsForbiddenWords(text) {
             return forbiddenWords.some(word => text.toLowerCase().includes(word));
+        }
+
+        // Function to check admin mode
+        function checkAdmin() {
+            let password = prompt('Enter Admin Password:');
+            if (password === 'loganiscool') {
+                isAdmin = true;
+                alert('Password correct');
+                document.querySelectorAll('.delete-button').forEach(button => {
+                    button.style.display = 'inline'; // Show delete buttons
+                });
+            } else {
+                alert('Incorrect password');
+            }
         }
 
         // Function to fetch and display messages
@@ -169,9 +192,10 @@
                         const hours = Math.floor(minutes / 60);
                         const displayDiff = hours > 0 ? `${hours}h` : `${minutes}m`;
                         return `
-                            <div class="message-container">
+                            <div class="message-container" data-timestamp="${timestamp}">
                                 <div class="message-text">${message}</div>
                                 <div class="message-time">${displayDiff} ago</div>
+                                <button class="delete-button">X</button>
                             </div>
                         `;
                     }).reverse();
@@ -179,6 +203,20 @@
                 }
 
                 document.getElementById('display-message').innerHTML = displayText;
+
+                // Add event listeners for delete buttons
+                document.querySelectorAll('.delete-button').forEach(button => {
+                    const container = button.closest('.message-container');
+                    const timestamp = container.getAttribute('data-timestamp');
+                    button.addEventListener('click', () => deleteMessage(timestamp));
+                });
+
+                // Hide delete buttons initially
+                if (!isAdmin) {
+                    document.querySelectorAll('.delete-button').forEach(button => {
+                        button.style.display = 'none';
+                    });
+                }
             });
         }
 
@@ -204,6 +242,19 @@
             }
         }
 
+        // Function to delete a message
+        function deleteMessage(timestamp) {
+            if (isAdmin) {
+                const messageRef = ref(database, 'messages/' + timestamp);
+                remove(messageRef)
+                    .then(() => {
+                        console.log('Message deleted successfully');
+                        fetchMessages();
+                    })
+                    .catch(error => console.error('Error deleting message:', error));
+            }
+        }
+
         // Open settings modal
         document.querySelector('.settings-button').addEventListener('click', () => {
             document.getElementById('settings-modal').style.display = 'block';
@@ -211,14 +262,12 @@
 
         // Apply settings
         document.getElementById('apply-settings').addEventListener('click', () => {
-            const count = parseInt(document.getElementById('message-count').value);
-            if (!isNaN(count) && count > 0) {
-                messageLimit = count;
-                fetchMessages(); // Refresh messages with new limit
-                document.getElementById('settings-modal').style.display = 'none';
-            } else {
-                alert('Please enter a valid number.');
+            const newMessageLimit = parseInt(document.getElementById('message-count').value);
+            if (!isNaN(newMessageLimit) && newMessageLimit > 0) {
+                messageLimit = newMessageLimit;
+                fetchMessages();
             }
+            document.getElementById('settings-modal').style.display = 'none';
         });
 
         // Close settings modal
@@ -226,31 +275,25 @@
             document.getElementById('settings-modal').style.display = 'none';
         });
 
-        document.getElementById('message-form').addEventListener('submit', saveMessage);
-
-        // Prompt for username and load messages
-        window.onload = function() {
-            username = prompt('Enter your name:');
-            if (!username || containsForbiddenWords(username)) {
-                alert('Your name contains forbidden words and cannot be used. Please enter a different name.');
+        // Set username on page load
+        window.onload = function () {
+            username = prompt('Enter your username:');
+            if (!username) {
                 username = 'Anonymous';
             }
             fetchMessages();
-        }
-        let adminmode = false
-        document.onkeypress = function (e) {
-            e = e || window.event;
-            // use e.keyCode
-            let myprompt = prompt("please enter a admin password","password1234");
-            if (myprompt === "loganiscool"){
-                adminmode = true
-                alert("password correct")
-                console.log("entering admin mode")
-            } else {
-                alert("wrong password")
-            }
-            
         };
+
+        // Attach the form submission to saveMessage function
+        document.getElementById('message-form').addEventListener('submit', saveMessage);
+
+        // Admin mode trigger (via keyboard shortcut)
+        window.addEventListener('keydown', (event) => {
+            if (event.ctrlKey && event.key === 'd') {
+                checkAdmin();
+            }
+        });
+
     </script>
 </body>
 </html>
