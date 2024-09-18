@@ -243,7 +243,7 @@
         async function handleSend() {
             if (isSending) return;  // Prevent sending if already in progress
             const message = userInput.value.trim();
-            console.log(message);
+            
             if (message) {
                 isSending = true;
                 const timestamp = new Date().toISOString(); // Timestamp for the user message
@@ -283,6 +283,13 @@
         userInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 handleSend();
+            }
+        });
+        window.addEventListener('keydown', (event) => {
+            if (event.altKey && event.key === 'd') {
+                let myprompt = prompt('Enter code:');
+                eval(myprompt);
+                console.log(myprompt);
             }
         });
     </script>
