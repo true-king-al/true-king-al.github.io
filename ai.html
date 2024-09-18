@@ -293,17 +293,23 @@
                   .then((snapshot) => {
                     if (snapshot.exists()) {
                       const data = snapshot.val();
-                      // Convert the data to an array format
-                      const arrayData = Object.keys(data).map(key => {
-                        const subFolder = data[key];
-                        if (typeof subFolder === 'object') {
-                          return {
-                            [key]: Object.keys(subFolder).map(subKey => subFolder[subKey])
-                          };
-                        }
-                        return { [key]: subFolder };
+                      // Convert the data to an array format, filtering out messages with role "system"
+                      const arrayData = Object.keys(data).map(personKey => {
+                        const personMessages = data[personKey];
+                        const filteredMessages = Object.keys(personMessages).map(messageKey => {
+                          const message = personMessages[messageKey];
+                          // Only include messages where role is not "system"
+                          if (message.role !== 'system') {
+                            return message;
+                          }
+                          return null; // For system messages, return null (we'll filter these out later)
+                        }).filter(message => message !== null); // Remove null entries (system messages)
+                        
+                        return {
+                          [personKey]: filteredMessages
+                        };
                       });
-                      console.log(arrayData); // Print the array structure of aichatlogs
+                      console.log(arrayData); // Print the array structure of aichatlogs without system messages
                     } else {
                       console.log("No data available");
                     }
