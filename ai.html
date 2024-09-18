@@ -243,6 +243,7 @@
         async function handleSend() {
             if (isSending) return;  // Prevent sending if already in progress
             const message = userInput.value.trim();
+            console.log(message);
             if (message) {
                 isSending = true;
                 const timestamp = new Date().toISOString(); // Timestamp for the user message
