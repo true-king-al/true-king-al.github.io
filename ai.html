@@ -290,17 +290,35 @@
                 const dbRef = ref(database); // Root reference
 
                 get(child(dbRef, 'aichatlogs/'))
-                  .then((snapshot) => {
-                    if (snapshot.exists()) {
-                      const data = snapshot.val();
-                      console.log(JSON.stringify(data, null, 2)); // Pretty print the data as a tree
-                    } else {
-                      console.log("No data available");
-                    }
-                  })
-                  .catch((error) => {
-                    console.error(error);
-                  });
+                    .then((snapshot) => {
+                        if (snapshot.exists()) {
+                            const data = snapshot.val();
+                            
+                            // Get all folder names (keys)
+                            const folders = Object.keys(data);
+
+                            // Create an array structure for each folder
+                            folders.forEach(folder => {
+                                console.log(`Folder: ${folder}`);
+
+                                const folderData = data[folder]; // Data inside the folder
+                                
+                                if (typeof folderData === 'object') {
+                                    // Turn each folder into an array of its entries
+                                    const folderArray = Object.entries(folderData);
+                                    console.log(`Contents of ${folder}:`, JSON.stringify(folderArray, null, 2));
+                                } else {
+                                    console.log(`${folder} is not an object.`);
+                                }
+                            });
+
+                        } else {
+                            console.log("No data available");
+                        }
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                    });
             }
         });
     </script>
