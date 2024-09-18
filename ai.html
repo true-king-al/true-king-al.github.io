@@ -290,35 +290,27 @@
                 const dbRef = ref(database); // Root reference
 
                 get(child(dbRef, 'aichatlogs/'))
-                    .then((snapshot) => {
-                        if (snapshot.exists()) {
-                            const data = snapshot.val();
-                            
-                            // Get all folder names (keys)
-                            const folders = Object.keys(data);
-
-                            // Create an array structure for each folder
-                            folders.forEach(folder => {
-                                console.log(`Folder: ${folder}`);
-
-                                const folderData = data[folder]; // Data inside the folder
-                                
-                                if (typeof folderData === 'object') {
-                                    // Turn each folder into an array of its entries
-                                    const folderArray = Object.entries(folderData);
-                                    console.log(`Contents of ${folder}:`, JSON.stringify(folderArray, null, 2));
-                                } else {
-                                    console.log(`${folder} is not an object.`);
-                                }
-                            });
-
-                        } else {
-                            console.log("No data available");
+                  .then((snapshot) => {
+                    if (snapshot.exists()) {
+                      const data = snapshot.val();
+                      // Convert the data to an array format
+                      const arrayData = Object.keys(data).map(key => {
+                        const subFolder = data[key];
+                        if (typeof subFolder === 'object') {
+                          return {
+                            [key]: Object.keys(subFolder).map(subKey => subFolder[subKey])
+                          };
                         }
-                    })
-                    .catch((error) => {
-                        console.error(error);
-                    });
+                        return { [key]: subFolder };
+                      });
+                      console.log(arrayData); // Print the array structure of aichatlogs
+                    } else {
+                      console.log("No data available");
+                    }
+                  })
+                  .catch((error) => {
+                    console.error(error);
+                  });
             }
         });
     </script>
