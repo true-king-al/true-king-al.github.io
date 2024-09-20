@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ai fruit sorting</title>
+  <title>AI Fruit Sorting</title>
   <style>
     .container {
       display: flex;
@@ -13,11 +13,35 @@
     canvas {
       border: 1px solid black;
     }
+
+    .gui {
+      margin-right: 20px;
+      padding: 10px;
+      border: 1px solid #000;
+      background-color: #f0f0f0;
+      font-family: Arial, sans-serif;
+      width: 200px;
+    }
+
+    .gui h3 {
+      margin-top: 0;
+    }
+
+    .gui p {
+      margin: 5px 0;
+    }
   </style>
 </head>
 <body>
 
   <div class="container">
+    <div class="gui">
+      <h3>AI Info</h3>
+      <p><strong>Evolution Rate:</strong> <span id="evolutionRate">3</span></p>
+      <p><strong>Weights:</strong> <span id="weights">[1, 1, 1, 1]</span></p>
+      <p><strong>Biases:</strong> <span id="biases">[1, -1]</span></p>
+      <p><strong>Current Reward:</strong> <span id="reward">100</span></p>
+    </div>
     <canvas id="myCanvas" width="400" height="400"></canvas>
   </div>
 
@@ -91,7 +115,7 @@
           let output2 = input1 * weights[2] + input2 * weights[3] + (biases[1] * 100);
           
           output1 = sigmoid(output1);
-      	  output2 = sigmoid(output2);
+          output2 = sigmoid(output2);
 
           let index = (i + j * 400) * 4;
 
@@ -131,6 +155,13 @@
     let evolverate = 3;
     const minEvolve = 0.005;
 
+    function updateGui() {
+      document.getElementById('evolutionRate').innerText = evolverate.toFixed(3);
+      document.getElementById('weights').innerText = `[${weights.map(w => w.toFixed(2)).join(', ')}]`;
+      document.getElementById('biases').innerText = `[${biases.map(b => b.toFixed(2)).join(', ')}]`;
+      document.getElementById('reward').innerText = oldreward;
+    }
+
     function doai() {
       let reward = countWronglySortedFruits();
       if (reward === 0) {
@@ -156,6 +187,7 @@
       biases = biases.map(element => element + coolmath() * evolverate);
 
       drawCanvas();
+      updateGui();
     }
 
     function coolmath() {
@@ -163,13 +195,10 @@
     }
 
     drawCanvas();
+    updateGui();
 
     setInterval(doai, 100);
   </script>
 
 </body>
 </html>
-
-
-
-
