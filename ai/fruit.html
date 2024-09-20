@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ai fruit sorting</title>
+  <style>
+    .container {
+      display: flex;
+      align-items: flex-start;
+    }
+
+    canvas {
+      border: 1px solid black;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <canvas id="myCanvas" width="400" height="400"></canvas>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('myCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const badFruit = [
+      {x: 150, y: 100}, {x: 310, y: 270}, {x: 200, y: 120}, {x: 270, y: 240},
+      {x: 240, y: 100}, {x: 250, y: 200}, {x: 260, y: 100}, {x: 230, y: 150},
+      {x: 260, y: 100}, {x: 210, y: 170},
+    ];
+    const goodFruit = [
+      {x: 100, y: 120}, {x: 130, y: 340}, {x: 80, y: 150}, {x: 80, y: 300},
+      {x: 270, y: 320}, {x: 80, y: 300}, {x: 180, y: 190}, {x: 210, y: 230},
+      {x: 120, y: 250}, {x: 300, y: 300}, {x: 210, y: 290}
+    ];
+
+    let weights = [1, 1, 1, 1];
+    let biases = [1, -1];
+    let oldweights = [...weights];
+    let oldbiases = [...biases];
+    let oldreward = 100;
+    
+    function isInBlueArea(x, y) {
+      let input1 = x;
+      let input2 = y;
+
+      let output1 = input1 * weights[0] + input2 * weights[1] + (biases[0] * 100);
+      let output2 = input1 * weights[2] + input2 * weights[3] + (biases[1] * 100);
+      
+      output1 = sigmoid(output1);
+      output2 = sigmoid(output2);
+      
+      return output1 >= output2;
+    }
+
+    function sigmoid(x) {
+      return 1 / (1 + Math.exp(-x));
+    }
+
+    function countWronglySortedFruits() {
+      let wrongCount = 0;
+
+      badFruit.forEach(fruit => {
+        if (isInBlueArea(fruit.x, fruit.y)) {
+          wrongCount++;
+        }
+      });
+
+      goodFruit.forEach(fruit => {
+        if (!isInBlueArea(fruit.x, fruit.y)) {
+          wrongCount++;
+        }
+      });
+
+      console.log(`Total wrongly sorted fruits: ${wrongCount}`);
+      return wrongCount;
+    }
+
+    function drawCanvas() {
+      const imgData = ctx.createImageData(canvas.width, canvas.height);
+      const data = imgData.data;
+
+      for (let i = 0; i < 400; i++) {
+        for (let j = 0; j < 400; j++) {
+          let input1 = i;
+          let input2 = j;
+
+          let output1 = input1 * weights[0] + input2 * weights[1] + (biases[0] * 100);
+          let output2 = input1 * weights[2] + input2 * weights[3] + (biases[1] * 100);
+          
+          output1 = sigmoid(output1);
+      	  output2 = sigmoid(output2);
+
+          let index = (i + j * 400) * 4;
+
+          if (output1 < output2) {
+            data[index] = 170;
+            data[index + 1] = 0;
+            data[index + 2] = 0;
+            data[index + 3] = 255;
+          } else {
+            data[index] = 0;
+            data[index + 1] = 0;
+            data[index + 2] = 200;
+            data[index + 3] = 255;
+          }
+        }
+      }
+
+      ctx.putImageData(imgData, 0, 0);
+
+      ctx.fillStyle = 'Red';
+      badFruit.forEach(fruit => {
+        ctx.beginPath();
+        ctx.arc(fruit.x, fruit.y, 5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      ctx.fillStyle = '#19e8ff';
+      goodFruit.forEach(fruit => {
+        ctx.beginPath();
+        ctx.arc(fruit.x, fruit.y, 5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      countWronglySortedFruits();
+    }
+    
+    let evolverate = 3;
+    const minEvolve = 0.005;
+
+    function doai() {
+      let reward = countWronglySortedFruits();
+      if (reward === 0) {
+      	evolverate = evolverate / 1.5;
+        
+      }
+
+      if (reward < oldreward) {
+        oldreward = reward;
+        evolverate = evolverate / 1.1;
+        
+      } else if (reward < oldreward) {
+        weights = [...oldweights];
+        biases = [...oldbiases];
+      }
+
+      oldweights = [...weights];
+      oldbiases = [...biases];
+      evolverate = Math.max(minEvolve, evolverate);
+      console.log("evolverate:" + evolverate);
+
+      weights = weights.map(element => element + coolmath() * evolverate);
+      biases = biases.map(element => element + coolmath() * evolverate);
+
+      drawCanvas();
+    }
+
+    function coolmath() {
+      return Math.random() * 2 - 1;
+    }
+
+    drawCanvas();
+
+    setInterval(doai, 100);
+  </script>
+
+</body>
+</html>
+
+
+
+
