@@ -41,6 +41,7 @@
       <p><strong>Weights:</strong> <span id="weights">[1, 1, 1, 1]</span></p>
       <p><strong>Biases:</strong> <span id="biases">[1, -1]</span></p>
       <p><strong>Current Reward:</strong> <span id="reward">100</span></p>
+      <p><strong>best Reward:</strong> <span id="Breward">100</span></p>
     </div>
     <canvas id="myCanvas" width="400" height="400"></canvas>
   </div>
@@ -159,7 +160,9 @@
       document.getElementById('evolutionRate').innerText = evolverate.toFixed(3);
       document.getElementById('weights').innerText = `[${weights.map(w => w.toFixed(2)).join(', ')}]`;
       document.getElementById('biases').innerText = `[${biases.map(b => b.toFixed(2)).join(', ')}]`;
-      document.getElementById('reward').innerText = oldreward;
+      let reward = countWronglySortedFruits();
+      document.getElementById('reward').innerText = reward;
+      document.getElementById('Breward').innerText = oldreward;
     }
 
     function doai() {
