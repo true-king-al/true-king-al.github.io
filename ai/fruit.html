@@ -74,8 +74,8 @@
       let output1 = input1 * weights[0] + input2 * weights[1] + (biases[0] * 100);
       let output2 = input1 * weights[2] + input2 * weights[3] + (biases[1] * 100);
       
-      output1 = sigmoid(output1);
-      output2 = sigmoid(output2);
+      //output1 = sigmoid(output1);
+      //output2 = sigmoid(output2);
       
       return output1 >= output2;
     }
@@ -115,8 +115,8 @@
           let output1 = input1 * weights[0] + input2 * weights[1] + (biases[0] * 100);
           let output2 = input1 * weights[2] + input2 * weights[3] + (biases[1] * 100);
           
-          output1 = sigmoid(output1);
-          output2 = sigmoid(output2);
+          //output1 = sigmoid(output1);
+          //output2 = sigmoid(output2);
 
           let index = (i + j * 400) * 4;
 
