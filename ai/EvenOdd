@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fun Neural Network with TensorFlow.js</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background-color: #f0f8ff;
+    }
+    h1 {
+      text-align: center;
+    }
+    #result {
+      font-size: 1.5em;
+      margin-top: 20px;
+      text-align: center;
+    }
+    #train-status {
+      margin-top: 20px;
+      text-align: center;
+    }
+    input {
+      margin: 10px auto;
+      display: block;
+      font-size: 1.2em;
+    }
+    button {
+      padding: 10px;
+      font-size: 1.2em;
+      margin-top: 20px;
+      display: block;
+      width: 100px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Neural Network: Even or Odd?</h1>
+
+<input type="number" id="numberInput" placeholder="Enter a number">
+<button onclick="predict()">Predict</button>
+
+<div id="result"></div>
+<div id="train-status">Training in progress...</div>
+
+<script>
+  // Neural Network to predict if a number is even or odd
+  let model;
+
+  // Data: Numbers (inputs) and labels (even=0, odd=1)
+  const xs = tf.tensor2d([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [11, 1]);
+  const ys = tf.tensor2d([0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0], [11, 1]);
+
+  async function createModel() {
+    // Create a simple sequential model
+    model = tf.sequential();
+
+    // Add layers
+    model.add(tf.layers.dense({inputShape: [1], units: 10, activation: 'relu'}));
+    model.add(tf.layers.dense({units: 1, activation: 'sigmoid'}));
+
+    // Compile the model
+    model.compile({
+      optimizer: 'adam',
+      loss: 'binaryCrossentropy',
+      metrics: ['accuracy']
+    });
+
+    // Train the model
+    await model.fit(xs, ys, {
+      epochs: 100,
+      callbacks: {
+        onEpochEnd: (epoch, logs) => {
+          document.getElementById('train-status').innerText =
+            `Training... Epoch: ${epoch + 1}, Loss: ${logs.loss.toFixed(4)}, Accuracy: ${(logs.acc * 100).toFixed(2)}%`;
+        }
+      }
+    });
+
+    document.getElementById('train-status').innerText = "Training complete!";
+  }
+
+  // Function to predict if a number is even or odd
+  async function predict() {
+    const inputNumber = parseFloat(document.getElementById('numberInput').value);
+    
+    if (isNaN(inputNumber)) {
+      document.getElementById('result').innerText = "Please enter a valid number!";
+      return;
+    }
+
+    // Predict using the trained model
+    const prediction = model.predict(tf.tensor2d([inputNumber], [1, 1]));
+    const predictedValue = (await prediction.data())[0];
+    
+    const result = predictedValue > 0.5 ? 'Odd' : 'Even';
+    document.getElementById('result').innerText = `The number ${inputNumber} is ${result}!`;
+  }
+
+  // Initialize the model
+  createModel();
+</script>
+
+</body>
+</html>
