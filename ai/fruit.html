@@ -73,8 +73,8 @@
       let input1 = x;
       let input2 = y;
 
-      let output1 = input1 * weights[0] + input2 * weights[1] + (biases[0] * 10);
-      let output2 = input1 * weights[2] + input2 * weights[3] + (biases[1] * 10);
+      let output1 = input1 * weights[0] + input2 * weights[1] + (biases[0] * 40);
+      let output2 = input1 * weights[2] + input2 * weights[3] + (biases[1] * 40);
       
       output1 = sigmoid(output1);
       output2 = sigmoid(output2);
@@ -182,7 +182,7 @@
         //weights = [...oldweights];
         //biases = [...oldbiases];
         badweights = [...weights];
-    	badbiases = [...biases];
+    	  badbiases = [...biases];
       }
 
       //oldweights = [...weights];
