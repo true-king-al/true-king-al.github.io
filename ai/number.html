@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draw and Guess</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+        #output {
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Draw something!</h1>
+    <canvas id="canvas" width="280" height="280"></canvas>
+    <br>
+    <button id="clear">Clear</button>
+    <button id="guess">Guess</button>
+    <input type="text" id="label" placeholder="What did you draw?">
+    <button id="train">Train</button>
+    <div id="output"></div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let drawing = false;
+
+        canvas.addEventListener('mousedown', () => { drawing = true; });
+        canvas.addEventListener('mouseup', () => { drawing = false; });
+        canvas.addEventListener('mousemove', draw);
+
+        document.getElementById('clear').addEventListener('click', clearCanvas);
+        document.getElementById('guess').addEventListener('click', guessDrawing);
+        document.getElementById('train').addEventListener('click', trainModel);
+
+        function draw(event) {
+            if (!drawing) return;
+            ctx.lineWidth = 10;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = 'black';
+            ctx.lineTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.beginPath();
+        }
+
+        function getImageData() {
+            let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            let grayImage = [];
+            
+            // Convert to grayscale by using the red channel
+            for (let i = 0; i < imageData.data.length; i += 4) {
+                let grayscaleValue = imageData.data[i] / 255; // Normalize to [0, 1]
+                grayImage.push(grayscaleValue);
+            }
+            
+            // Resize 280x280 image to 28x28 for the model
+            const smallImageTensor = tf.image.resizeBilinear(tf.tensor(grayImage, [280, 280, 1]), [28, 28]);
+
+            // Reshape to [1, 28, 28, 1] for the model input
+            return smallImageTensor.reshape([1, 28, 28, 1]);
+        }
+
+        // Simple model: 2 Conv2D layers followed by Dense layers
+        const model = tf.sequential();
+        model.add(tf.layers.conv2d({
+            inputShape: [28, 28, 1],
+            kernelSize: 3,
+            filters: 16,
+            activation: 'relu'
+        }));
+        model.add(tf.layers.maxPooling2d({poolSize: [2, 2]}));
+        model.add(tf.layers.conv2d({
+            kernelSize: 3,
+            filters: 32,
+            activation: 'relu'
+        }));
+        model.add(tf.layers.maxPooling2d({poolSize: [2, 2]}));
+        model.add(tf.layers.flatten());
+        model.add(tf.layers.dense({units: 64, activation: 'relu'}));
+        model.add(tf.layers.dense({units: 10, activation: 'softmax'})); // Assume 10 possible classes
+        model.compile({optimizer: 'adam', loss: 'categoricalCrossentropy', metrics: ['accuracy']});
+
+        // Arrays to store images and labels
+        const labels = [];
+        const images = [];
+
+        function guessDrawing() {
+            const input = getImageData();
+            const prediction = model.predict(input);
+            const guessedLabel = tf.argMax(prediction, 1).dataSync()[0];
+            document.getElementById('output').innerText = `Model thinks: ${guessedLabel}`;
+        }
+
+        function trainModel() {
+            const label = parseInt(document.getElementById('label').value);
+            if (isNaN(label) || label < 0 || label > 9) {
+                alert('Please enter a number between 0 and 9');
+                return;
+            }
+
+            const input = getImageData();
+            images.push(input);
+            labels.push(label);
+
+            const xs = tf.concat(images);
+            const ys = tf.oneHot(labels, 10);
+            model.fit(xs, ys, {
+                epochs: 5,
+                batchSize: 1
+            }).then(() => {
+                document.getElementById('output').innerText = 'Training complete';
+            });
+        }
+    </script>
+</body>
+</html>
