@@ -65,6 +65,8 @@
     let biases = [1, -1];
     let oldweights = [...weights];
     let oldbiases = [...biases];
+    let badweights = [...weights];
+    let badbiases = [...biases];
     let oldreward = 100;
     
     function isInBlueArea(x, y) {
@@ -112,8 +114,8 @@
           let input1 = i;
           let input2 = j;
 
-          let output1 = input1 * weights[0] + input2 * weights[1] + (biases[0] * 10);
-          let output2 = input1 * weights[2] + input2 * weights[3] + (biases[1] * 10);
+          let output1 = input1 * weights[0] + input2 * weights[1] + (biases[0] * 40);
+          let output2 = input1 * weights[2] + input2 * weights[3] + (biases[1] * 40);
           
           output1 = sigmoid(output1);
           output2 = sigmoid(output2);
@@ -153,8 +155,8 @@
       countWronglySortedFruits();
     }
     
-    let evolverate = 1;
-    const minEvolve = 0.005;
+    let evolverate = 5;
+    const minEvolve = 0.01;
 
     function updateGui() {
       document.getElementById('evolutionRate').innerText = evolverate.toFixed(3);
@@ -176,13 +178,19 @@
         oldreward = reward;
         evolverate = evolverate / 1.1;
         
-      } else if (reward < oldreward) {
-        weights = [...oldweights];
-        biases = [...oldbiases];
+      } else {
+        //weights = [...oldweights];
+        //biases = [...oldbiases];
+        badweights = [...weights];
+    	badbiases = [...biases];
       }
 
-      oldweights = [...weights];
-      oldbiases = [...biases];
+      //oldweights = [...weights];
+      //oldbiases = [...biases];
+      weights = weights.map((w, i) => w + evolverate * (w - badweights[i]));
+  	  biases = biases.map((b, i) => b + evolverate * (b - badbiases[i]));
+
+      
       evolverate = Math.max(minEvolve, evolverate);
       console.log("evolverate:" + evolverate);
 
