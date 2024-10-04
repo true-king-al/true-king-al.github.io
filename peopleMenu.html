@@ -68,7 +68,30 @@
             background-size: cover;
             cursor: pointer;
         }
+        .admin-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: url('admin-3d-illustration-icon-png-ezgif.com-webp-to-png-converter.png') no-repeat center center;
+            background-size: cover;
+            cursor: pointer;
+        }
         .QandA-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background: white;
+            border: 1px solid #ddd;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        .Admin-modal {
             display: none;
             position: fixed;
             top: 50%;
@@ -91,6 +114,7 @@
 <body>
     <h1>people menu</h1>
     <button class="plus-button"></button>
+    <button class="admin-button"></button>
     <div id="display-suggestions">Loading people</div>
 
     
