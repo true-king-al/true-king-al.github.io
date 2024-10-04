@@ -109,6 +109,9 @@
         .QandA-modal button {
             background-color: #007BFF;
         }
+        .Admin-modal button {
+            background-color: #007BFF;
+        }
     </style>
 </head>
 <body>
@@ -134,6 +137,13 @@
         </form>
         <button id="close-QandA">Close</button>
     </div>
+    <div class="Admin-modal" id="Admin-modal">
+        <h2>Enter password to enter admin mode</h2>
+        <form id="Admin-form">
+        <p>make paswordthing here k?</p>
+        </form>
+        <button id="close-Admin">Close</button>
+    </div>
     
     <script type="module">
         document.querySelector('.plus-button').addEventListener('click', () => {
@@ -144,6 +154,16 @@
         document.getElementById('close-QandA').addEventListener('click', () => {
             document.getElementById('QandA-modal').style.display = 'none';
         });
+
+        document.querySelector('.admin-button').addEventListener('click', () => {
+            document.getElementById('Admin-modal').style.display = 'block';
+        });
+
+        // Close suggestion modal
+        document.getElementById('close-Admin').addEventListener('click', () => {
+            document.getElementById('Admin-modal').style.display = 'none';
+        });
+
 
         
     </script>
