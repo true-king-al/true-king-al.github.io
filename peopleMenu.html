@@ -110,5 +110,18 @@
         </form>
         <button id="close-suggestion">Close</button>
     </div>
+    
+    <script type="module">
+        document.querySelector('.plus-button').addEventListener('click', () => {
+            document.getElementById('suggestion-modal').style.display = 'block';
+        });
+
+        // Close suggestion modal
+        document.getElementById('close-suggestion').addEventListener('click', () => {
+            document.getElementById('suggestion-modal').style.display = 'none';
+        });
+
+        
+    </script>
 </body>
 </html>
