@@ -1,1 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 50px;
+            position: relative;
+            margin: 0;
+            padding-bottom: 100px; /* Reserve space at the bottom for the footer */
+        }
+        input[type="text"], input[type="password"] {
+            padding: 10px;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:active {
+            background-color: #45a049;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        #display-suggestions {
+            max-height: 400px;
+            overflow-y: auto;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .QandA-container {
+            text-align: left;
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            justify-content: space-between;
+            padding: 5px;
+            border-bottom: 1px solid #ddd;
+            box-sizing: border-box;
+        }
+        .suggestion-text {
+            flex: 1;
+        }
+        .suggestion-time {
+            white-space: nowrap;
+            margin-left: 10px;
+            color: #888;
+        }
+        .delete-button {
+            display: none; /* Hidden by default */
+            background-color: red;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+        }
+        .plus-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: url('plus.png') no-repeat center center;
+            background-size: cover;
+            cursor: pointer;
+        }
+        .QandA-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background: white;
+            border: 1px solid #ddd;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        .QandA-modal input[type="text"] {
+            width: 100%;
+        }
+        .QandA-modal button {
+            background-color: #007BFF;
+        }
+    </style>
+</head>
+<body>
+    <h1>Suggestions</h1>
+    <button class="plus-button"></button>
+    <div id="display-suggestions">Loading...</div>
 
+    
+    <!-- Suggestion Modal -->
+    <div class="QandA-modal" id="QandA-modal">
+        <h2>Q and a</h2>
+        <form id="QandA-form">
+            <p>hi</p>
+        </form>
+        <button id="close-suggestion">Close</button>
+    </div>
+</body>
+</html>
