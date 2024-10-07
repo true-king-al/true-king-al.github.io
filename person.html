@@ -10,7 +10,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
-        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
+        import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
 
         // Firebase configuration
         const firebaseConfig = {
@@ -55,6 +55,28 @@
         } else {
             document.getElementById('person-name').innerText = 'No person ID provided in the URL';
         }
+
+        // Function to log all people to the console
+        function logAllPeople() {
+            const peopleRef = ref(database, 'people');
+            get(peopleRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const peopleData = snapshot.val();
+                    console.log('All people:', peopleData);
+                } else {
+                    console.log('No people found.');
+                }
+            }).catch((error) => {
+                console.error('Error retrieving people:', error);
+            });
+        }
+
+        // Add an event listener for Alt+D
+        document.addEventListener('keydown', function(event) {
+            if (event.altKey && event.key === 'd') {
+                logAllPeople();
+            }
+        });
     </script>
 </body>
 </html>
