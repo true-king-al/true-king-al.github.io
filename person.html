@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Person Info</title>
+</head>
+<body>
+    <h1 id="person-name"></h1>
+
+    <script>
+        // Function to get query string parameter
+        function getQueryStringParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // Get the name from the query string
+        const fullName = getQueryStringParameter('name');
+
+        if (fullName) {
+            // Split the name by the underscore
+            const nameParts = fullName.split('_');
+            if (nameParts.length === 2) {
+                const firstName = nameParts[0];
+                const lastName = nameParts[1];
+                // Set the <h1> text with a space between first and last name
+                document.getElementById('person-name').innerText = `${firstName} ${lastName}`;
+            } else {
+                document.getElementById('person-name').innerText = 'Invalid name format';
+            }
+        } else {
+            document.getElementById('person-name').innerText = 'No name provided';
+        }
+    </script>
+</body>
+</html>
