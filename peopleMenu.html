@@ -28,6 +28,9 @@
         button:active {
             background-color: #45a049;
         }
+        button:hover {
+            opacity: 0.9;
+        }
         h1, h2 {
             color: #333;
         }
@@ -91,7 +94,7 @@
             cursor: pointer;
             display: none;
         }
-        .QandA-modal {
+        .QandA-modal, .Admin-modal, .AddPeople-modal {
             display: none;
             position: fixed;
             top: 50%;
@@ -103,112 +106,81 @@
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
             z-index: 1000;
         }
-        .Admin-modal {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 20px;
-            background: white;
-            border: 1px solid #ddd;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-        }
-        .AddPeople-modal {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 20px;
-            background: white;
-            border: 1px solid #ddd;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-        }
-        .QandA-modal input[type="text"] {
+        .QandA-modal input[type="text"], .Admin-modal input[type="text"], .AddPeople-modal input[type="text"] {
             width: 100%;
         }
-        .QandA-modal button {
-            background-color: #007BFF;
-        }
-        .Admin-modal button {
-            background-color: #007BFF;
-        }
-        .AddPeople-modal button {
+        .QandA-modal button, .Admin-modal button, .AddPeople-modal button {
             background-color: #007BFF;
         }
     </style>
 </head>
 <body>
-    <h1>people menu</h1>
+    <h1>People Menu</h1>
     <button class="plus-button"></button>
     <button class="admin-button"></button>
-    <button class="addPeople-button"></button>
+    <button class="addPeople-button" id="addPeople-button"></button>
     <div id="display-suggestions">Loading people</div>
 
-    
     <!-- Suggestion Modal -->
     <div class="QandA-modal" id="QandA-modal">
-        <h2>Q and a</h2>
+        <h2>Q and A</h2>
         <form id="QandA-form">
             <p>Questions and Answers</p>
-            <p>Q: what is this</p>
-            <p>A: its a area where i will documentate people</p>
+            <p>Q: What is this?</p>
+            <p>A: It's an area where I will document people.</p>
             <hr>
-            <p>A: will my personal info be here?</p>
-            <p>Q: yes but the more cofidental stuff will be hidden and only be seen in admin mode</p>
+            <p>Q: Will my personal info be here?</p>
+            <p>A: Yes, but more confidential stuff will be hidden and only visible in admin mode.</p>
             <hr>
-            <p>Q: Will you fix this goofy ah ai</p>
-            <p>A: yes</p>        
+            <p>Q: Will you fix this goofy AI?</p>
+            <p>A: Yes.</p>        
         </form>
         <button id="close-QandA">Close</button>
     </div>
+
+    <!-- Admin Modal -->
     <div class="Admin-modal" id="Admin-modal">
-        <h2>Enter password to enter admin mode</h2>
+        <h2>Enter password to access admin mode</h2>
         <form id="Admin-form">
             <input type="text" id="admin-password" placeholder="Enter Admin Password">
             <button id="enteradmin">Enter Admin Mode</button>
         </form>
         <button id="close-Admin">Close</button>
     </div>
-    
-    <script type="module">
 
-        function checkAdmin() {
+    <script type="module">
+        let isAdmin = false; // Declare this globally
+
+        function checkAdmin(event) {
+            event.preventDefault(); // Prevent the form from submitting
             let password = document.getElementById('admin-password').value;
-            if (password == 'loganiscool') {
+            if (password === 'loganiscool') {
                 isAdmin = true;
-                alert('password correct');
+                alert('Password correct!');
                 document.getElementById('addPeople-button').style.display = 'inline';
             } else {
                 alert('Incorrect password');
             }
         }
+
+        // Open and close the Q&A modal
         document.querySelector('.plus-button').addEventListener('click', () => {
             document.getElementById('QandA-modal').style.display = 'block';
         });
-
-        // Close suggestion modal
         document.getElementById('close-QandA').addEventListener('click', () => {
             document.getElementById('QandA-modal').style.display = 'none';
         });
 
+        // Open and close the Admin modal
         document.querySelector('.admin-button').addEventListener('click', () => {
             document.getElementById('Admin-modal').style.display = 'block';
         });
-
-        // Close suggestion modal
         document.getElementById('close-Admin').addEventListener('click', () => {
             document.getElementById('Admin-modal').style.display = 'none';
         });
-        document.getElementById('enteradmin').addEventListener('click', () => {
-            checkAdmin();
-        });
 
-
-        
+        // Check admin password
+        document.getElementById('enteradmin').addEventListener('click', checkAdmin);
     </script>
 </body>
 </html>
