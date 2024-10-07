@@ -148,6 +148,16 @@
         <button id="close-Admin">Close</button>
     </div>
 
+    <!-- Add people Modal -->
+    <div class="AddPeople-modal" id="AddPeople-modal">
+        <h2>add people to the system here</h2>
+        <form id="AddPeople-form">
+            <input type="text" id="addPeople-name" placeholder="Enter persons name">
+            <button id="enteraddPeople">Add someone</button>
+        </form>
+        <button id="close-AddPeople">Close</button>
+    </div>
+
     <script type="module">
         let isAdmin = false; // Declare this globally
 
@@ -177,6 +187,13 @@
         });
         document.getElementById('close-Admin').addEventListener('click', () => {
             document.getElementById('Admin-modal').style.display = 'none';
+        });
+        
+        document.querySelector('.addPeople-button').addEventListener('click', () => {
+            document.getElementById('AddPeople-modal').style.display = 'block';
+        });
+        document.getElementById('close-AddPeople').addEventListener('click', () => {
+            document.getElementById('AddPeople-modal').style.display = 'none';
         });
 
         // Check admin password
