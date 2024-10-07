@@ -289,7 +289,7 @@
             if (event.altKey && event.key === 'd') {
                 const dbRef = ref(database); // Root reference
 
-                get(child(dbRef, 'aichatlogs/'))
+                get(child(dbRef, ''))
                   .then((snapshot) => {
                     if (snapshot.exists()) {
                       const data = snapshot.val();
