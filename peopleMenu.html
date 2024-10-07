@@ -153,6 +153,7 @@
         <h2>add people to the system here</h2>
         <form id="AddPeople-form">
             <input type="text" id="addPeople-name" placeholder="Enter persons name">
+            <input type="text" id="addPeople-Bd" placeholder="Enter persons Birthday">
             <button id="enteraddPeople">Add someone</button>
         </form>
         <button id="close-AddPeople">Close</button>
@@ -194,6 +195,7 @@
         function addperson(event) {
             event.preventDefault(); // Prevent form submission
             let name = document.getElementById('addPeople-name').value;
+            let bd = document.getElementById('addPeople-Bd').value;
     
             if (name.trim() === "") {
                 alert("Please enter a name");
@@ -203,11 +205,13 @@
             // Firebase database reference and set operation
             set(ref(database, 'people/' + name), {
                 name: name
+                Bd: bd
             })
             .then(() => {
                 alert('Person added successfully!');
                 document.getElementById('AddPeople-modal').style.display = 'none'; // Close the modal
                 document.getElementById('addPeople-name').value = ''; // Clear the input field
+                document.getElementById('addPeople-Bd').value = ''; // Clear the input field
             })
             .catch((error) => {
                 alert('Error adding person: ' + error);
