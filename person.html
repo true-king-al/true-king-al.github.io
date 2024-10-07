@@ -8,29 +8,52 @@
 <body>
     <h1 id="person-name"></h1>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBzxQgwD_gBuylhdqlRck_PEVzueWccvTM",
+            authDomain: "messengerformewebsite.firebaseapp.com",
+            databaseURL: "https://messengerformewebsite-default-rtdb.firebaseio.com/",
+            projectId: "messengerformewebsite",
+            storageBucket: "messengerformewebsite.appspot.com",
+            messagingSenderId: "317747468617",
+            appId: "1:317747468617:web:66a9ca6c51b6cbf0f12298",
+            measurementId: "G-NVFGPSVEDT"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
         // Function to get query string parameter
-        function getQueryStringParameter(name) {
+        function getQueryStringParameter(id) {
             const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(name);
+            return urlParams.get(id);
         }
 
-        // Get the name from the query string
-        const fullName = getQueryStringParameter('name');
+        // Get the person ID from the query string (which is the folder name)
+        const personId = getQueryStringParameter('id');
 
-        if (fullName) {
-            // Split the name by the underscore
-            const nameParts = fullName.split('_');
-            if (nameParts.length === 2) {
-                const firstName = nameParts[0];
-                const lastName = nameParts[1];
-                // Set the <h1> text with a space between first and last name
-                document.getElementById('person-name').innerText = `${firstName} ${lastName}`;
-            } else {
-                document.getElementById('person-name').innerText = 'Invalid name format';
-            }
+        if (personId) {
+            // Firebase reference to the person folder
+            const personRef = ref(database, 'people/' + personId);
+
+            // Get the person's data from Firebase
+            get(personRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const personData = snapshot.val();
+                    document.getElementById('person-name').innerText = personData.name;
+                } else {
+                    document.getElementById('person-name').innerText = 'Person not found';
+                }
+            }).catch((error) => {
+                document.getElementById('person-name').innerText = 'Error retrieving person data: ' + error;
+            });
         } else {
-            document.getElementById('person-name').innerText = 'No name provided';
+            document.getElementById('person-name').innerText = 'No person ID provided in the URL';
         }
     </script>
 </body>
