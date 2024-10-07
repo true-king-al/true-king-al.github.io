@@ -1,6 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>People Menu</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -152,8 +155,8 @@
     <div class="AddPeople-modal" id="AddPeople-modal">
         <h2>add people to the system here</h2>
         <form id="AddPeople-form">
-            <input type="text" id="addPeople-name" placeholder="Enter persons name">
-            <input type="text" id="addPeople-Bd" placeholder="Enter persons Birthday">
+            <input type="text" id="addPeople-name" placeholder="Enter person's name">
+            <input type="text" id="addPeople-Bd" placeholder="Enter person's Birthday">
             <button id="enteraddPeople">Add someone</button>
         </form>
         <button id="close-AddPeople">Close</button>
@@ -161,8 +164,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
-        import { getDatabase, ref, set, remove, onValue, query, orderByKey, limitToLast } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-analytics.js";
+        import { getDatabase, ref, set, remove, onValue, get, child } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -181,6 +183,7 @@
         const database = getDatabase(app);
         let isAdmin = false; // Declare this globally
 
+        // Check admin password
         function checkAdmin(event) {
             event.preventDefault(); // Prevent the form from submitting
             let password = document.getElementById('admin-password').value;
@@ -192,11 +195,13 @@
                 alert('Incorrect password');
             }
         }
+
+        // Add a person to Firebase
         function addperson(event) {
             event.preventDefault(); // Prevent form submission
             let name = document.getElementById('addPeople-name').value;
             let bd = document.getElementById('addPeople-Bd').value;
-    
+
             if (name.trim() === "") {
                 alert("Please enter a name");
                 return;
@@ -204,7 +209,7 @@
 
             // Firebase database reference and set operation
             set(ref(database, 'people/' + name), {
-                name: name
+                name: name,
                 Bd: bd
             })
             .then(() => {
@@ -218,6 +223,27 @@
             });
         }
 
+        // Log all people when Alt+D is pressed
+        function logAllPeople() {
+            const peopleRef = ref(database, 'people');
+            get(peopleRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const peopleData = snapshot.val();
+                    console.log('All people:', peopleData);
+                } else {
+                    console.log('No people found.');
+                }
+            }).catch((error) => {
+                console.error('Error retrieving people:', error);
+            });
+        }
+
+        // Add event listener for Alt+D
+        window.addEventListener('keydown', (event) => {
+            if (event.altKey && event.key === 'd') {
+                logAllPeople();
+            }
+        });
 
         // Open and close the Q&A modal
         document.querySelector('.plus-button').addEventListener('click', () => {
@@ -234,7 +260,8 @@
         document.getElementById('close-Admin').addEventListener('click', () => {
             document.getElementById('Admin-modal').style.display = 'none';
         });
-        
+
+        // Open and close the AddPeople modal
         document.querySelector('.addPeople-button').addEventListener('click', () => {
             document.getElementById('AddPeople-modal').style.display = 'block';
         });
@@ -242,10 +269,9 @@
             document.getElementById('AddPeople-modal').style.display = 'none';
         });
 
-        // Check admin password
+        // Event listeners
         document.getElementById('enteradmin').addEventListener('click', checkAdmin);
         document.getElementById('enteraddPeople').addEventListener('click', addperson);
-
     </script>
 </body>
 </html>
