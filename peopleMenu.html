@@ -79,6 +79,18 @@
             background-size: cover;
             cursor: pointer;
         }
+        .addPeople-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: url('plus.png') no-repeat center center;
+            background-size: cover;
+            cursor: pointer;
+            display: none;
+        }
         .QandA-modal {
             display: none;
             position: fixed;
@@ -103,6 +115,18 @@
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
             z-index: 1000;
         }
+        .AddPeople-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background: white;
+            border: 1px solid #ddd;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
         .QandA-modal input[type="text"] {
             width: 100%;
         }
@@ -112,12 +136,16 @@
         .Admin-modal button {
             background-color: #007BFF;
         }
+        .AddPeople-modal button {
+            background-color: #007BFF;
+        }
     </style>
 </head>
 <body>
     <h1>people menu</h1>
     <button class="plus-button"></button>
     <button class="admin-button"></button>
+    <button class="addPeople-button"></button>
     <div id="display-suggestions">Loading people</div>
 
     
@@ -147,6 +175,17 @@
     </div>
     
     <script type="module">
+
+        function checkAdmin() {
+            let password = document.getElementById('admin-password').value;
+            if (password == 'loganiscool') {
+                isAdmin = true;
+                alert('password correct');
+                document.getElementById('addPeople-button').style.display = 'inline';
+            } else {
+                alert('Incorrect password');
+            }
+        }
         document.querySelector('.plus-button').addEventListener('click', () => {
             document.getElementById('QandA-modal').style.display = 'block';
         });
@@ -163,6 +202,9 @@
         // Close suggestion modal
         document.getElementById('close-Admin').addEventListener('click', () => {
             document.getElementById('Admin-modal').style.display = 'none';
+        });
+        document.getElementById('enteradmin').addEventListener('click', () => {
+            checkAdmin();
         });
 
 
