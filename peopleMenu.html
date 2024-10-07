@@ -159,6 +159,25 @@
     </div>
 
     <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
+        import { getDatabase, ref, set, remove, onValue, query, orderByKey, limitToLast } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-analytics.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBzxQgwD_gBuylhdqlRck_PEVzueWccvTM",
+            authDomain: "messengerformewebsite.firebaseapp.com",
+            databaseURL: "https://messengerformewebsite-default-rtdb.firebaseio.com/",
+            projectId: "messengerformewebsite",
+            storageBucket: "messengerformewebsite.appspot.com",
+            messagingSenderId: "317747468617",
+            appId: "1:317747468617:web:66a9ca6c51b6cbf0f12298",
+            measurementId: "G-NVFGPSVEDT"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
         let isAdmin = false; // Declare this globally
 
         function checkAdmin(event) {
@@ -171,6 +190,10 @@
             } else {
                 alert('Incorrect password');
             }
+        }
+        function addperson(event) {
+            event.preventDefault();
+            let name = document.getElementById('addPeople-name').value;
         }
 
         // Open and close the Q&A modal
@@ -198,6 +221,8 @@
 
         // Check admin password
         document.getElementById('enteradmin').addEventListener('click', checkAdmin);
+        document.getElementById('enteraddPeople').addEventListener('click', addperson);
+
     </script>
 </body>
 </html>
