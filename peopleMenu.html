@@ -192,9 +192,28 @@
             }
         }
         function addperson(event) {
-            event.preventDefault();
+            event.preventDefault(); // Prevent form submission
             let name = document.getElementById('addPeople-name').value;
+    
+            if (name.trim() === "") {
+                alert("Please enter a name");
+                return;
+            }
+
+            // Firebase database reference and set operation
+            set(ref(database, 'people/' + name), {
+                name: name
+            })
+            .then(() => {
+                alert('Person added successfully!');
+                document.getElementById('AddPeople-modal').style.display = 'none'; // Close the modal
+                document.getElementById('addPeople-name').value = ''; // Clear the input field
+            })
+            .catch((error) => {
+                alert('Error adding person: ' + error);
+            });
         }
+
 
         // Open and close the Q&A modal
         document.querySelector('.plus-button').addEventListener('click', () => {
