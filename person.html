@@ -2,17 +2,32 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Person Info</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .person-info {
+            font-size: 18px;
+            color: #555;
+        }
+    </style>
 </head>
 <body>
-    <h1 id="person-name"></h1>
+    <h1 id="person-name">Loading...</h1>
+    <p class="person-info" id="person-bd"></p>
+    <p class="person-info" id="person-id"></p>
+    <p class="person-info" id="person-address"></p>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
-        import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
 
-        // Firebase configuration
+        // Firebase configuration (use the same as in your main page)
         const firebaseConfig = {
             apiKey: "AIzaSyBzxQgwD_gBuylhdqlRck_PEVzueWccvTM",
             authDomain: "messengerformewebsite.firebaseapp.com",
@@ -29,23 +44,26 @@
         const database = getDatabase(app);
 
         // Function to get query string parameter
-        function getQueryStringParameter(id) {
+        function getQueryStringParameter(param) {
             const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(id);
+            return urlParams.get(param);
         }
 
-        // Get the person ID from the query string (which is the folder name)
+        // Get the person ID from the query string
         const personId = getQueryStringParameter('id');
 
         if (personId) {
-            // Firebase reference to the person folder
+            // Reference to the person's data in Firebase
             const personRef = ref(database, 'people/' + personId);
 
-            // Get the person's data from Firebase
+            // Retrieve the person's data
             get(personRef).then((snapshot) => {
                 if (snapshot.exists()) {
                     const personData = snapshot.val();
-                    document.getElementById('person-name').innerText = personData.name;
+                    document.getElementById('person-name').innerText = personData.name || 'Name not provided';
+                    document.getElementById('person-bd').innerText = 'Birthday: ' + (personData.Bd || 'Not provided');
+                    document.getElementById('person-id').innerText = 'ID: ' + (personData.id || 'Not provided');
+                    document.getElementById('person-address').innerText = 'Address: ' + (personData.address || 'Not provided');
                 } else {
                     document.getElementById('person-name').innerText = 'Person not found';
                 }
@@ -56,25 +74,15 @@
             document.getElementById('person-name').innerText = 'No person ID provided in the URL';
         }
 
-        // Function to log all people to the console
-        function logAllPeople() {
-            const peopleRef = ref(database, 'people');
-            get(peopleRef).then((snapshot) => {
-                if (snapshot.exists()) {
-                    const peopleData = snapshot.val();
-                    console.log('All people:', peopleData);
-                } else {
-                    console.log('No people found.');
-                }
-            }).catch((error) => {
-                console.error('Error retrieving people:', error);
-            });
-        }
-
-        // Add an event listener for Alt+D
-        document.addEventListener('keydown', function(event) {
+        // Log person data when Alt+D is pressed
+        window.addEventListener('keydown', (event) => {
             if (event.altKey && event.key === 'd') {
-                logAllPeople();
+                console.log('Person data:', {
+                    name: document.getElementById('person-name').innerText,
+                    birthday: document.getElementById('person-bd').innerText,
+                    id: document.getElementById('person-id').innerText,
+                    address: document.getElementById('person-address').innerText
+                });
             }
         });
     </script>
