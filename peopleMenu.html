@@ -250,6 +250,30 @@
                 logAllPeople();
             }
         });
+        // Function to display list of people
+        function displayPeople() {
+            const peopleRef = ref(database, 'people');
+            onValue(peopleRef, (snapshot) => {
+                const displayDiv = document.getElementById('display-suggestions');
+                displayDiv.innerHTML = ''; // Clear existing content
+                if (snapshot.exists()) {
+                    const peopleData = snapshot.val();
+                    for (const personKey in peopleData) {
+                        const person = peopleData[personKey];
+                        const personLink = document.createElement('a');
+                        personLink.href = `people.html?id=${personKey}`;
+                        personLink.innerText = person.name;
+                        personLink.style.display = 'block';
+                        displayDiv.appendChild(personLink);
+                    }
+                } else {
+                    displayDiv.innerText = 'No people found.';
+                }
+            });
+        }
+
+        // Call displayPeople on page load
+        displayPeople();
 
         // Open and close the Q&A modal
         document.querySelector('.plus-button').addEventListener('click', () => {
