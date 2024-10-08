@@ -261,7 +261,7 @@
                     for (const personKey in peopleData) {
                         const person = peopleData[personKey];
                         const personLink = document.createElement('a');
-                        personLink.href = `people.html?id=${personKey}`;
+                        personLink.href = `person.html?id=${personKey}`;
                         personLink.innerText = person.name;
                         personLink.style.display = 'block';
                         displayDiv.appendChild(personLink);
