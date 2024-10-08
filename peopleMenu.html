@@ -157,6 +157,8 @@
         <form id="AddPeople-form">
             <input type="text" id="addPeople-name" placeholder="Enter person's name">
             <input type="text" id="addPeople-Bd" placeholder="Enter person's Birthday">
+            <input type="text" id="addPeople-id" placeholder="Enter person's id">
+            <input type="text" id="addPeople-address" placeholder="Enter person's address">
             <button id="enteraddPeople">Add someone</button>
         </form>
         <button id="close-AddPeople">Close</button>
@@ -201,6 +203,8 @@
             event.preventDefault(); // Prevent form submission
             let name = document.getElementById('addPeople-name').value;
             let bd = document.getElementById('addPeople-Bd').value;
+            let id = document.getElementById('addPeople-id').value;
+            let address = document.getElementById('addPeople-address').value;
 
             if (name.trim() === "") {
                 alert("Please enter a name");
@@ -210,7 +214,9 @@
             // Firebase database reference and set operation
             set(ref(database, 'people/' + name), {
                 name: name,
-                Bd: bd
+                Bd: bd,
+                id: id,
+                address: address
             })
             .then(() => {
                 alert('Person added successfully!');
