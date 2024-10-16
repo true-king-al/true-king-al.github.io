@@ -56,7 +56,6 @@
             box-sizing: border-box;
         }
         .delete-button {
-            display: none; /* Hidden by default */
             background-color: red;
             color: white;
             border: none;
@@ -229,22 +228,22 @@
             });
         }
 
-        // Delete a person from Firebase
-        function deletePerson(personKey) {
-            const personRef = ref(database, 'people/' + personKey);
-            if (confirm('Are you sure you want to delete this person?')) {
-                remove(personRef)
-                .then(() => {
-                    alert('Person deleted successfully!');
-                    displayPeople(); // Refresh the list after deletion
-                })
-                .catch((error) => {
-                    alert('Error deleting person: ' + error);
-                });
-            }
+        // Log all people when Alt+D is pressed
+        function logAllPeople() {
+            const peopleRef = ref(database, 'people');
+            get(peopleRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const peopleData = snapshot.val();
+                    console.log('All people:', peopleData);
+                } else {
+                    console.log('No people found.');
+                }
+            }).catch((error) => {
+                console.error('Error fetching people:', error);
+            });
         }
 
-        // Display all people from Firebase
+        // Display all people in the displayDiv
         function displayPeople() {
             const peopleRef = ref(database, 'people');
             onValue(peopleRef, (snapshot) => {
@@ -281,33 +280,59 @@
             });
         }
 
-        // Event listeners for opening and closing modals
+        // Function to delete a person from Firebase
+        function deletePerson(personKey) {
+            const personRef = ref(database, 'people/' + personKey);
+            if (confirm('Are you sure you want to delete this person?')) {
+                remove(personRef)
+                .then(() => {
+                    alert('Person deleted successfully!');
+                    displayPeople(); // Refresh the list after deletion
+                })
+                .catch((error) => {
+                    alert('Error deleting person: ' + error);
+                });
+            }
+        }
+
+        // Event listeners for modals and buttons
         document.querySelector('.plus-button').addEventListener('click', () => {
             document.getElementById('QandA-modal').style.display = 'block';
         });
+
         document.querySelector('.admin-button').addEventListener('click', () => {
             document.getElementById('Admin-modal').style.display = 'block';
         });
-        document.querySelector('#addPeople-button').addEventListener('click', () => {
+
+        document.querySelector('.addPeople-button').addEventListener('click', () => {
             document.getElementById('AddPeople-modal').style.display = 'block';
         });
 
-        document.querySelector('#close-QandA').addEventListener('click', () => {
+        document.getElementById('close-QandA').addEventListener('click', () => {
             document.getElementById('QandA-modal').style.display = 'none';
         });
-        document.querySelector('#close-Admin').addEventListener('click', () => {
+
+        document.getElementById('close-Admin').addEventListener('click', () => {
             document.getElementById('Admin-modal').style.display = 'none';
         });
-        document.querySelector('#close-AddPeople').addEventListener('click', () => {
+
+        document.getElementById('close-AddPeople').addEventListener('click', () => {
             document.getElementById('AddPeople-modal').style.display = 'none';
         });
 
-        // Event listeners for form submissions
+        // Handle form submission for admin login and adding people
         document.getElementById('Admin-form').addEventListener('submit', checkAdmin);
         document.getElementById('AddPeople-form').addEventListener('submit', addperson);
 
-        // Call displayPeople to show the list of people initially
-        displayPeople();
+        // Display people on page load
+        window.addEventListener('DOMContentLoaded', displayPeople);
+
+        // Listen for Alt+D key press to log all people
+        window.addEventListener('keydown', (event) => {
+            if (event.altKey && event.code === 'KeyD') {
+                logAllPeople();
+            }
+        });
     </script>
 </body>
 </html>
