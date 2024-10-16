@@ -56,7 +56,6 @@
             box-sizing: border-box;
         }
         .delete-button {
-            display: none; /* Hidden by default */
             background-color: red;
             color: white;
             border: none;
@@ -122,7 +121,7 @@
     <button class="plus-button"></button>
     <button class="admin-button"></button>
     <button class="addPeople-button" id="addPeople-button"></button>
-    <div id="display-suggestions">Loading people</div>
+    <div id="display-suggestions">Loading people...</div>
 
     <!-- Suggestion Modal -->
     <div class="QandA-modal" id="QandA-modal">
@@ -153,7 +152,7 @@
 
     <!-- Add people Modal -->
     <div class="AddPeople-modal" id="AddPeople-modal">
-        <h2>add people to the system here</h2>
+        <h2>Add people to the system here</h2>
         <form id="AddPeople-form">
             <input type="text" id="addPeople-name" placeholder="Enter person's name">
             <input type="text" id="addPeople-Bd" placeholder="Enter person's Birthday">
@@ -166,7 +165,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
-        import { getDatabase, ref, set, remove, onValue, get, child } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
+        import { getDatabase, ref, set, remove, onValue, get } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -193,6 +192,7 @@
                 isAdmin = true;
                 alert('Password correct!');
                 document.getElementById('addPeople-button').style.display = 'inline';
+                displayPeople(); // Refresh display with delete buttons visible
             } else {
                 alert('Incorrect password');
             }
@@ -221,36 +221,33 @@
             .then(() => {
                 alert('Person added successfully!');
                 document.getElementById('AddPeople-modal').style.display = 'none'; // Close the modal
-                document.getElementById('addPeople-name').value = ''; // Clear the input field
-                document.getElementById('addPeople-Bd').value = ''; // Clear the input field
+                document.getElementById('addPeople-name').value = ''; // Clear the input fields
+                document.getElementById('addPeople-Bd').value = ''; 
+                document.getElementById('addPeople-id').value = ''; 
+                document.getElementById('addPeople-address').value = ''; 
+                displayPeople(); // Refresh the people list
             })
             .catch((error) => {
                 alert('Error adding person: ' + error);
             });
         }
 
-        // Log all people when Alt+D is pressed
-        function logAllPeople() {
-            const peopleRef = ref(database, 'people');
-            get(peopleRef).then((snapshot) => {
-                if (snapshot.exists()) {
-                    const peopleData = snapshot.val();
-                    console.log('All people:', peopleData);
-                } else {
-                    console.log('No people found.');
-                }
-            }).catch((error) => {
-                console.error('Error retrieving people:', error);
-            });
+        // Delete a person from Firebase
+        function deletePerson(personKey) {
+            const personRef = ref(database, 'people/' + personKey);
+            if (confirm('Are you sure you want to delete this person?')) {
+                remove(personRef)
+                .then(() => {
+                    alert('Person deleted successfully!');
+                    displayPeople(); // Refresh the list after deletion
+                })
+                .catch((error) => {
+                    alert('Error deleting person: ' + error);
+                });
+            }
         }
 
-        // Add event listener for Alt+D
-        window.addEventListener('keydown', (event) => {
-            if (event.altKey && event.key === 'd') {
-                logAllPeople();
-            }
-        });
-        // Function to display list of people
+        // Display people list and add delete buttons if in admin mode
         function displayPeople() {
             const peopleRef = ref(database, 'people');
             onValue(peopleRef, (snapshot) => {
@@ -260,11 +257,26 @@
                     const peopleData = snapshot.val();
                     for (const personKey in peopleData) {
                         const person = peopleData[personKey];
+                        const personDiv = document.createElement('div');
+                        personDiv.className = 'QandA-container';
+
                         const personLink = document.createElement('a');
                         personLink.href = `person.html?id=${personKey}`;
                         personLink.innerText = person.name;
-                        personLink.style.display = 'block';
-                        displayDiv.appendChild(personLink);
+
+                        personDiv.appendChild(personLink);
+
+                        // Only show delete button in admin mode
+                        if (isAdmin) {
+                            const deleteBtn = document.createElement('button');
+                            deleteBtn.className = 'delete-button';
+                            deleteBtn.innerText = 'Delete';
+                            deleteBtn.addEventListener('click', () => deletePerson(personKey));
+
+                            personDiv.appendChild(deleteBtn);
+                        }
+
+                        displayDiv.appendChild(personDiv);
                     }
                 } else {
                     displayDiv.innerText = 'No people found.';
@@ -272,36 +284,24 @@
             });
         }
 
-        // Call displayPeople on page load
-        displayPeople();
-
-        // Open and close the Q&A modal
-        document.querySelector('.plus-button').addEventListener('click', () => {
-            document.getElementById('QandA-modal').style.display = 'block';
-        });
-        document.getElementById('close-QandA').addEventListener('click', () => {
-            document.getElementById('QandA-modal').style.display = 'none';
-        });
-
-        // Open and close the Admin modal
-        document.querySelector('.admin-button').addEventListener('click', () => {
-            document.getElementById('Admin-modal').style.display = 'block';
-        });
-        document.getElementById('close-Admin').addEventListener('click', () => {
-            document.getElementById('Admin-modal').style.display = 'none';
-        });
-
-        // Open and close the AddPeople modal
-        document.querySelector('.addPeople-button').addEventListener('click', () => {
+        // Event Listeners
+        document.getElementById('enteradmin').addEventListener('click', checkAdmin);
+        document.getElementById('enteraddPeople').addEventListener('click', addperson);
+        document.getElementById('addPeople-button').addEventListener('click', () => {
             document.getElementById('AddPeople-modal').style.display = 'block';
         });
         document.getElementById('close-AddPeople').addEventListener('click', () => {
             document.getElementById('AddPeople-modal').style.display = 'none';
         });
+        document.getElementById('close-Admin').addEventListener('click', () => {
+            document.getElementById('Admin-modal').style.display = 'none';
+        });
+        document.getElementById('close-QandA').addEventListener('click', () => {
+            document.getElementById('QandA-modal').style.display = 'none';
+        });
 
-        // Event listeners
-        document.getElementById('enteradmin').addEventListener('click', checkAdmin);
-        document.getElementById('enteraddPeople').addEventListener('click', addperson);
+        // Load people on page load
+        displayPeople();
     </script>
 </body>
 </html>
