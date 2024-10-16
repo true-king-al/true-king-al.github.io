@@ -56,6 +56,7 @@
             box-sizing: border-box;
         }
         .delete-button {
+            display: none; /* Hidden by default */
             background-color: red;
             color: white;
             border: none;
@@ -239,11 +240,17 @@
                     console.log('No people found.');
                 }
             }).catch((error) => {
-                console.error('Error fetching people:', error);
+                console.error('Error retrieving people:', error);
             });
         }
 
-        // Display all people in the displayDiv
+        // Add event listener for Alt+D
+        window.addEventListener('keydown', (event) => {
+            if (event.altKey && event.key === 'd') {
+                logAllPeople();
+            }
+        });
+        // Function to display list of people
         function displayPeople() {
             const peopleRef = ref(database, 'people');
             onValue(peopleRef, (snapshot) => {
@@ -253,26 +260,11 @@
                     const peopleData = snapshot.val();
                     for (const personKey in peopleData) {
                         const person = peopleData[personKey];
-                        const personDiv = document.createElement('div');
-                        personDiv.className = 'QandA-container';
-
                         const personLink = document.createElement('a');
                         personLink.href = `person.html?id=${personKey}`;
                         personLink.innerText = person.name;
-
-                        personDiv.appendChild(personLink);
-
-                        // Only show delete button in admin mode
-                        if (isAdmin) {
-                            const deleteBtn = document.createElement('button');
-                            deleteBtn.className = 'delete-button';
-                            deleteBtn.innerText = 'Delete';
-                            deleteBtn.addEventListener('click', () => deletePerson(personKey));
-
-                            personDiv.appendChild(deleteBtn);
-                        }
-
-                        displayDiv.appendChild(personDiv);
+                        personLink.style.display = 'block';
+                        displayDiv.appendChild(personLink);
                     }
                 } else {
                     displayDiv.innerText = 'No people found.';
@@ -280,59 +272,81 @@
             });
         }
 
-        // Function to delete a person from Firebase
-        function deletePerson(personKey) {
-            const personRef = ref(database, 'people/' + personKey);
-            if (confirm('Are you sure you want to delete this person?')) {
-                remove(personRef)
-                .then(() => {
-                    alert('Person deleted successfully!');
-                    displayPeople(); // Refresh the list after deletion
-                })
-                .catch((error) => {
-                    alert('Error deleting person: ' + error);
-                });
-            }
-        }
 
-        // Event listeners for modals and buttons
+        // Function to delete a person by name
+function deletePersonByName() {
+    if (!isAdmin) {
+        alert('You must be in admin mode to delete people.');
+        return;
+    }
+
+    const personName = prompt('Enter the name of the person to delete:');
+
+    if (personName) {
+        const personRef = ref(database, 'people/' + personName);
+        
+        // Check if the person exists
+        get(personRef).then((snapshot) => {
+            if (snapshot.exists()) {
+                if (confirm(`Are you sure you want to delete ${personName}?`)) {
+                    remove(personRef)
+                    .then(() => {
+                        alert(`${personName} was deleted successfully!`);
+                        displayPeople(); // Refresh the list after deletion
+                    })
+                    .catch((error) => {
+                        alert('Error deleting person: ' + error);
+                    });
+                }
+            } else {
+                alert(`${personName} does not exist in the system.`);
+            }
+        }).catch((error) => {
+            alert('Error fetching person: ' + error);
+        });
+    } else {
+        alert('No name entered. Deletion cancelled.');
+    }
+}
+
+// Add event listener for Shift+D
+window.addEventListener('keydown', (event) => {
+    if (event.shiftKey && event.key.toLowerCase() === 'd') {
+        deletePersonByName();
+    }
+});
+
+
+        // Call displayPeople on page load
+        displayPeople();
+
+        // Open and close the Q&A modal
         document.querySelector('.plus-button').addEventListener('click', () => {
             document.getElementById('QandA-modal').style.display = 'block';
         });
-
-        document.querySelector('.admin-button').addEventListener('click', () => {
-            document.getElementById('Admin-modal').style.display = 'block';
-        });
-
-        document.querySelector('.addPeople-button').addEventListener('click', () => {
-            document.getElementById('AddPeople-modal').style.display = 'block';
-        });
-
         document.getElementById('close-QandA').addEventListener('click', () => {
             document.getElementById('QandA-modal').style.display = 'none';
         });
 
+        // Open and close the Admin modal
+        document.querySelector('.admin-button').addEventListener('click', () => {
+            document.getElementById('Admin-modal').style.display = 'block';
+        });
         document.getElementById('close-Admin').addEventListener('click', () => {
             document.getElementById('Admin-modal').style.display = 'none';
         });
 
+        // Open and close the AddPeople modal
+        document.querySelector('.addPeople-button').addEventListener('click', () => {
+            document.getElementById('AddPeople-modal').style.display = 'block';
+        });
         document.getElementById('close-AddPeople').addEventListener('click', () => {
             document.getElementById('AddPeople-modal').style.display = 'none';
         });
 
-        // Handle form submission for admin login and adding people
-        document.getElementById('Admin-form').addEventListener('submit', checkAdmin);
-        document.getElementById('AddPeople-form').addEventListener('submit', addperson);
-
-        // Display people on page load
-        window.addEventListener('DOMContentLoaded', displayPeople);
-
-        // Listen for Alt+D key press to log all people
-        window.addEventListener('keydown', (event) => {
-            if (event.altKey && event.code === 'KeyD') {
-                logAllPeople();
-            }
-        });
+        // Event listeners
+        document.getElementById('enteradmin').addEventListener('click', checkAdmin);
+        document.getElementById('enteraddPeople').addEventListener('click', addperson);
     </script>
 </body>
 </html>
