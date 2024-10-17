@@ -164,7 +164,6 @@
         <button id="close-AddPeople">Close</button>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
         import { getDatabase, ref, set, remove, onValue, get, child } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
@@ -185,44 +184,32 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
         let isAdmin = false; // Declare this globally
+        const encryptedPassword = "zl5zU6x3hxU7HT2eN+3qyw==";  // The encrypted admin password
+        const aesKey = "password12345678";  // The AES key used to encrypt/decrypt
+
+        // Function to decrypt the password
+        function decryptPassword(encryptedText, key) {
+            let decrypted = CryptoJS.AES.decrypt(encryptedText, CryptoJS.enc.Utf8.parse(key), {
+                mode: CryptoJS.mode.ECB,
+                padding: CryptoJS.pad.Pkcs7
+            });
+            return decrypted.toString(CryptoJS.enc.Utf8);
+        }
 
         // Check admin password
-        // Encrypt password with AES
-function encryptPassword(password, key) {
-    return CryptoJS.AES.encrypt(password, key).toString();
-}
+        function checkAdmin(event) {
+            event.preventDefault();
+            let enteredPassword = document.getElementById('admin-password').value;
+            let decryptedPassword = decryptPassword(encryptedPassword, aesKey);
 
-// Decrypt password with AES
-function decryptPassword(encryptedPassword, key) {
-    let bytes = CryptoJS.AES.decrypt(encryptedPassword, key);
-    return bytes.toString(CryptoJS.enc.Utf8);
-}
-
-// Check admin password
-function checkAdmin(event) {
-    event.preventDefault(); // Prevent the form from submitting
-
-    // AES key for encryption/decryption
-    let aesKey = 'password12345678'; // Ensure this is kept secret in a real system
-
-    // Encrypted password
-    let encryptedPassword = 'zl5zU6x3hxU7HT2eN+3qyw=='; // Example encrypted password
-
-    // User input
-    let inputPassword = document.getElementById('admin-password').value;
-
-    // Decrypt stored password and check if it matches user input
-    let decryptedPassword = decryptPassword(encryptedPassword, aesKey);
-    console.log(decryptedPassword);
-    if (inputPassword === decryptedPassword) {
-        isAdmin = true;
-        alert('Password correct!');
-        document.getElementById('addPeople-button').style.display = 'inline';
-    } else {
-        alert('Incorrect password');
-    }
-}
-
+            if (enteredPassword === decryptedPassword) {
+                isAdmin = true;
+                alert('Password correct!');
+                document.getElementById('addPeople-button').style.display = 'inline';
+            } else {
+                alert('Incorrect password');
+            }
+        }
 
         // Add a person to Firebase
         function addperson(event) {
