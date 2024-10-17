@@ -153,86 +153,24 @@
             measurementId: "G-NVFGPSVEDT"
         };
 
-
-        const aesKey = 'password12345678'; // Should be 16 characters long for AES-128
-        const encryptedPassword = 'zl5zU6x3hxU7HT2eN+3qyw=='; // Your encrypted password
-
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
         let suggestionLimit = 50;
         let isAdmin = false;
 
-            // Function to convert a string to ArrayBuffer (required by the Web Crypto API)
-    function str2ab(str) {
-        const buf = new ArrayBuffer(str.length);
-        const bufView = new Uint8Array(buf);
-        for (let i = 0, strLen = str.length; i < strLen; i++) {
-            bufView[i] = str.charCodeAt(i);
+        // Check if the entered password is correct
+        function checkAdmin() {
+            let password = document.getElementById('admin-password').value;
+            if (password == 'loganiscool') {
+                isAdmin = true;
+                alert('password correct');
+                document.querySelectorAll('.delete-button').forEach(button => {
+                    button.style.display = 'inline'; // Show delete buttons
+                });
+            } else {
+                alert('Incorrect password');
+            }
         }
-        return buf;
-    }
-
-    // Function to convert base64 string to ArrayBuffer
-    function base64ToArrayBuffer(base64) {
-        const binary_string = window.atob(base64);
-        const len = binary_string.length;
-        const bytes = new Uint8Array(len);
-        for (let i = 0; i < len; i++) {
-            bytes[i] = binary_string.charCodeAt(i);
-        }
-        return bytes.buffer;
-    }
-
-    // Function to convert ArrayBuffer to base64 string
-    function arrayBufferToBase64(buffer) {
-        const bytes = new Uint8Array(buffer);
-        let binary = '';
-        for (let i = 0; i < bytes.byteLength; i++) {
-            binary += String.fromCharCode(bytes[i]);
-        }
-        return window.btoa(binary);
-    }
-
-    // Decrypt the password using AES-CBC
-    async function decryptPassword(encryptedData, key) {
-        const iv = new Uint8Array(16); // Initialization vector with all zeros (for simplicity)
-        const keyMaterial = await crypto.subtle.importKey(
-            'raw',
-            str2ab(key),
-            { name: 'AES-CBC' },
-            false,
-            ['decrypt']
-        );
-
-        const decrypted = await crypto.subtle.decrypt(
-            {
-                name: 'AES-CBC',
-                iv: iv,
-            },
-            keyMaterial,
-            base64ToArrayBuffer(encryptedData)
-        );
-
-        const decoder = new TextDecoder();
-        return decoder.decode(decrypted);
-    }
-
-    // Check if the entered password is correct
-    async function checkAdmin() {
-        const enteredPassword = document.getElementById('admin-password').value;
-        const decryptedPassword = await decryptPassword(encryptedPassword, aesKey);
-
-        if (enteredPassword === decryptedPassword) {
-            isAdmin = true;
-            alert('Password correct');
-            document.querySelectorAll('.delete-button').forEach(button => {
-                button.style.display = 'inline'; // Show delete buttons
-            });
-        } else {
-            alert('Incorrect password');
-        }
-    }
-
 
         // Fetch and display suggestions
         function fetchSuggestions() {
