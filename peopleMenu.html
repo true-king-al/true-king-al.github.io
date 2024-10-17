@@ -116,6 +116,7 @@
             background-color: #007BFF;
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
 </head>
 <body>
     <h1>People Menu</h1>
@@ -163,7 +164,7 @@
         </form>
         <button id="close-AddPeople">Close</button>
     </div>
-
+    
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
         import { getDatabase, ref, set, remove, onValue, get, child } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
