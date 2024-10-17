@@ -213,7 +213,7 @@ function checkAdmin(event) {
 
     // Decrypt stored password and check if it matches user input
     let decryptedPassword = decryptPassword(encryptedPassword, aesKey);
-    
+    console.log(decryptedPassword);
     if (inputPassword === decryptedPassword) {
         isAdmin = true;
         alert('Password correct!');
