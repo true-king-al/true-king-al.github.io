@@ -285,8 +285,7 @@
                 handleSend();
             }
         });
-        window.addEventListener('keydown', (event) => {
-    window.addEventListener('keydown', (event) => {
+window.addEventListener('keydown', (event) => {
     if (event.altKey && event.key === 'd') {
         const dbRef = ref(database); // Root reference
 
@@ -328,9 +327,8 @@
             .catch((error) => {
                 console.error(error);
             });
-        }
-    });
-
+    }
+});
 
     </script>
 </body>
