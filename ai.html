@@ -286,39 +286,51 @@
             }
         });
         window.addEventListener('keydown', (event) => {
-            if (event.altKey && event.key === 'd') {
-                const dbRef = ref(database); // Root reference
+    if (event.altKey && event.key === 'd') {
+        const dbRef = ref(database); // Root reference
 
-                get(child(dbRef, 'aichatlogs/'))
-                  .then((snapshot) => {
-                    if (snapshot.exists()) {
-                      const data = snapshot.val();
-                      // Convert the data to an array format, filtering out messages with role "system"
-                      const arrayData = Object.keys(data).map(personKey => {
+        get(child(dbRef, 'aichatlogs/'))
+            .then((snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    // Convert the data to an array format, filtering out messages with role "system"
+                    const arrayData = Object.keys(data).map(personKey => {
                         const personMessages = data[personKey];
                         const filteredMessages = Object.keys(personMessages).map(messageKey => {
-                          const message = personMessages[messageKey];
-                          // Only include messages where role is not "system"
-                          if (message.role !== 'system') {
-                            return message;
-                          }
-                          return null; // For system messages, return null (we'll filter these out later)
+                            const message = personMessages[messageKey];
+                            // Only include messages where role is not "system"
+                            if (message.role !== 'system') {
+                                return message;
+                            }
+                            return null; // For system messages, return null (we'll filter these out later)
                         }).filter(message => message !== null); // Remove null entries (system messages)
-                        
+
+                        // Find the most recent message's timestamp
+                        const mostRecentMessage = filteredMessages.reduce((latest, current) => {
+                            return current.timestamp > latest.timestamp ? current : latest;
+                        }, filteredMessages[0]);
+
                         return {
-                          [personKey]: filteredMessages
+                            personKey,
+                            mostRecentTimestamp: mostRecentMessage.timestamp,
+                            filteredMessages
                         };
-                      });
-                      console.log(arrayData); // Print the array structure of aichatlogs without system messages
-                    } else {
-                      console.log("No data available");
-                    }
-                  })
-                  .catch((error) => {
-                    console.error(error);
-                  });
-            }
-        });
+                    });
+
+                    // Sort arrayData by mostRecentTimestamp
+                    arrayData.sort((a, b) => b.mostRecentTimestamp - a.mostRecentTimestamp);
+
+                    console.log(arrayData); // Print the sorted array structure of aichatlogs without system messages
+                } else {
+                    console.log("No data available");
+                }
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+        }
+    });
+
     </script>
 </body>
 </html>
