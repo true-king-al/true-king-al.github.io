@@ -286,6 +286,7 @@
             }
         });
         window.addEventListener('keydown', (event) => {
+    window.addEventListener('keydown', (event) => {
     if (event.altKey && event.key === 'd') {
         const dbRef = ref(database); // Root reference
 
@@ -305,22 +306,21 @@
                             return null; // For system messages, return null (we'll filter these out later)
                         }).filter(message => message !== null); // Remove null entries (system messages)
 
-                        // Find the most recent message's timestamp
-                        const mostRecentMessage = filteredMessages.reduce((latest, current) => {
-                            return current.timestamp > latest.timestamp ? current : latest;
-                        }, filteredMessages[0]);
+                        // Sort the messages by timestamp, assuming there's a 'timestamp' field
+                        filteredMessages.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
                         return {
                             personKey,
-                            mostRecentTimestamp: mostRecentMessage.timestamp,
-                            filteredMessages
+                            recentMessage: filteredMessages[0] // Get the most recent message for this person
                         };
                     });
 
-                    // Sort arrayData by mostRecentTimestamp
-                    arrayData.sort((a, b) => b.mostRecentTimestamp - a.mostRecentTimestamp);
+                    // Sort the people by their most recent message's timestamp
+                    const sortedPeople = arrayData.sort((a, b) => {
+                        return new Date(b.recentMessage.timestamp) - new Date(a.recentMessage.timestamp);
+                    });
 
-                    console.log(arrayData); // Print the sorted array structure of aichatlogs without system messages
+                    console.log(sortedPeople); // Print the sorted array of people by their most recent message
                 } else {
                     console.log("No data available");
                 }
@@ -330,6 +330,7 @@
             });
         }
     });
+
 
     </script>
 </body>
