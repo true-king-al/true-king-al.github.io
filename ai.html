@@ -306,11 +306,12 @@ window.addEventListener('keydown', (event) => {
                         }).filter(message => message !== null); // Remove null entries (system messages)
 
                         // Sort the messages by timestamp, assuming there's a 'timestamp' field
-                        filteredMessages.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                        const sortedMessages = filteredMessages.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
                         return {
                             personKey,
-                            recentMessage: filteredMessages[0] // Get the most recent message for this person
+                            messages: sortedMessages, // Keep all messages, sorted by timestamp
+                            recentMessage: sortedMessages[0] // Get the most recent message for sorting purposes
                         };
                     });
 
@@ -329,6 +330,7 @@ window.addEventListener('keydown', (event) => {
             });
     }
 });
+
 
     </script>
 </body>
