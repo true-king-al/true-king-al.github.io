@@ -14,7 +14,7 @@
         <input type="text" id="signUpFirstName" placeholder="First Name">
         <input type="text" id="signUpLastName" placeholder="Last Name">
         <input type="password" id="signUpPassword" placeholder="Password">
-        <button onclick="signUp()">Sign Up</button>
+        <button id="signUpbutton">Sign Up</button>
     </div>
 
     <!-- Login Form -->
@@ -23,7 +23,7 @@
         <input type="text" id="loginFirstName" placeholder="First Name">
         <input type="text" id="loginLastName" placeholder="Last Name">
         <input type="password" id="loginPassword" placeholder="Password">
-        <button onclick="login()">Login</button>
+        <button id="logInbutton">Login</button>
     </div>
 
     <script type="module">
@@ -101,6 +101,8 @@
                 alert('User does not exist. Please sign up first.');
             }
         }
+        document.getElementById("signUpbutton").addEventListener("click", signUp());
+        document.getElementById("logInbutton").addEventListener("click", login());
     </script>
 </body>
 </html>
