@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login and Sign Up</title>
+</head>
+<body>
+    <h1>Sign Up / Login</h1>
+
+    <!-- Sign Up Form -->
+    <div>
+        <h2>Sign Up</h2>
+        <input type="text" id="signUpFirstName" placeholder="First Name">
+        <input type="text" id="signUpLastName" placeholder="Last Name">
+        <input type="password" id="signUpPassword" placeholder="Password">
+        <button onclick="signUp()">Sign Up</button>
+    </div>
+
+    <!-- Login Form -->
+    <div>
+        <h2>Login</h2>
+        <input type="text" id="loginFirstName" placeholder="First Name">
+        <input type="text" id="loginLastName" placeholder="Last Name">
+        <input type="password" id="loginPassword" placeholder="Password">
+        <button onclick="login()">Login</button>
+    </div>
+
+    <script type="module">
+        // Import Firebase SDKs
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
+        import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBzxQgwD_gBuylhdqlRck_PEVzueWccvTM",
+            authDomain: "messengerformewebsite.firebaseapp.com",
+            databaseURL: "https://messengerformewebsite-default-rtdb.firebaseio.com/",
+            projectId: "messengerformewebsite",
+            storageBucket: "messengerformewebsite.appspot.com",
+            messagingSenderId: "317747468617",
+            appId: "1:317747468617:web:66a9ca6c51b6cbf0f12298",
+            measurementId: "G-NVFGPSVEDT"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Function to create a unique username
+        function createUsername(firstName, lastName) {
+            return `${firstName}-${lastName}`.toLowerCase();
+        }
+
+        // Sign Up function
+        async function signUp() {
+            const firstName = document.getElementById('signUpFirstName').value;
+            const lastName = document.getElementById('signUpLastName').value;
+            const password = document.getElementById('signUpPassword').value;
+
+            const username = createUsername(firstName, lastName);
+
+            const userRef = ref(database, 'users/' + username);
+
+            // Check if the user already exists
+            const snapshot = await get(userRef);
+            if (snapshot.exists()) {
+                alert('User already exists. Please login instead.');
+            } else {
+                // Save the new user
+                set(userRef, {
+                    firstName: firstName,
+                    lastName: lastName,
+                    password: password  // In production, hash the password!
+                });
+                alert('Sign up successful!');
+            }
+        }
+
+        // Login function
+        async function login() {
+            const firstName = document.getElementById('loginFirstName').value;
+            const lastName = document.getElementById('loginLastName').value;
+            const password = document.getElementById('loginPassword').value;
+
+            const username = createUsername(firstName, lastName);
+
+            const userRef = ref(database, 'users/' + username);
+
+            // Check if the user exists
+            const snapshot = await get(userRef);
+            if (snapshot.exists()) {
+                const userData = snapshot.val();
+                // Check password
+                if (userData.password === password) {
+                    alert('Login successful!');
+                } else {
+                    alert('Incorrect password.');
+                }
+            } else {
+                alert('User does not exist. Please sign up first.');
+            }
+        }
+    </script>
+</body>
+</html>
