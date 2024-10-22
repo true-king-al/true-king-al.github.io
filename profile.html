@@ -69,6 +69,7 @@
                     if (userData.activated === 'true') {
                         activationBanner.style.display = 'none';
                     }
+                    console.log(userData.activated);
 
                     welcomeMessage.innerText = `Welcome, ${userData.firstName}!`;
                     usernameDisplay.innerText = `Your username: ${username}`;
