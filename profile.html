@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+</head>
+<body>
+    <h1 id="welcomeMessage"></h1>
+    <h2 id="usernameDisplay"></h2>
+
+    <button id="logoutButton">Log Out</button>
+
+    <script>
+        // Function to check if the user is logged in
+        function checkLoginStatus() {
+            const firstName = localStorage.getItem('userFirstName');
+            const username = localStorage.getItem('username');
+
+            if (!username) {
+                // Redirect to login if no user is logged in
+                window.location.href = 'login-signup.html';
+            } else {
+                // Display user information
+                document.getElementById('welcomeMessage').innerText = `Welcome, ${firstName}!`;
+                document.getElementById('usernameDisplay').innerText = `Your username: ${username}`;
+            }
+        }
+
+        // Function to log out and clear local storage
+        function logout() {
+            localStorage.removeItem('userFirstName');
+            localStorage.removeItem('userLastName');
+            localStorage.removeItem('username');
+            window.location.href = 'login-signup.html';  // Redirect to login page
+        }
+
+        // Check login status when the page loads
+        window.onload = checkLoginStatus;
+
+        // Log out the user when clicking the button
+        document.getElementById('logoutButton').addEventListener('click', logout);
+    </script>
+</body>
+</html>
