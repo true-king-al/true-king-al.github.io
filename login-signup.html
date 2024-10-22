@@ -64,9 +64,10 @@
                 set(userRef, {
                     firstName: firstName,
                     lastName: lastName,
-                    password: password
+                    password: password,
+                    activated: false // Set account to not activated by default
                 });
-                alert('Sign up successful!');
+                alert('Sign up successful! Please wait for account activation.');
             }
         }
 
@@ -81,10 +82,19 @@
             const snapshot = await get(userRef);
             if (snapshot.exists()) {
                 const userData = snapshot.val();
+                if (!userData.activated) {
+                    set(userRef, {
+                        firstName: firstName,
+                        lastName: lastName,
+                        password: userData.password,
+                        activated: false // Set account to not activated by default
+                    });
+                }
                 if (userData.password === password) {
                     localStorage.setItem('userFirstName', firstName);
                     localStorage.setItem('userLastName', lastName);
                     localStorage.setItem('username', username);
+                    localStorage.setItem('activated', userData.activated);
 
                     alert('Login successful! Redirecting to profile...');
                     window.location.href = 'profile.html';  // Redirect to profile page after login
