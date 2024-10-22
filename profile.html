@@ -66,10 +66,13 @@
                     if (!userData.activated) {
                         activationBanner.style.display = 'block';
                     }
+                    if (userData.activated === 'true') {
+                        activationBanner.style.display = 'none';
+                    }
 
                     welcomeMessage.innerText = `Welcome, ${userData.firstName}!`;
                     usernameDisplay.innerText = `Your username: ${username}`;
-                    activationStatus.innerText = userData.activated ? '' : 'Your account is not activated.';
+                    activationStatus.innerText = (userData.activated==='true') ? '' : 'Your account is not activated.';
                     document.getElementById('logoutButton').style.display = 'block'; // Show logout button
                 } else {
                     // For other users' profiles
