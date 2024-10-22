@@ -29,7 +29,7 @@
     <script type="module">
         // Import Firebase SDKs
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
-        import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
+        import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
 
         // Firebase configuration
         const firebaseConfig = {
@@ -93,6 +93,11 @@
                 const userData = snapshot.val();
                 // Check password
                 if (userData.password === password) {
+                    // Store login info in local storage
+                    localStorage.setItem('userFirstName', firstName);
+                    localStorage.setItem('userLastName', lastName);
+                    localStorage.setItem('username', username);
+
                     alert('Login successful!');
                 } else {
                     alert('Incorrect password.');
@@ -101,6 +106,18 @@
                 alert('User does not exist. Please sign up first.');
             }
         }
+
+        // Check if user is already logged in
+        function checkLoginStatus() {
+            const loggedInUser = localStorage.getItem('username');
+            if (loggedInUser) {
+                alert(`Welcome back, ${localStorage.getItem('userFirstName')}! You are still logged in.`);
+            }
+        }
+
+        // Call checkLoginStatus on page load to see if the user is logged in
+        window.onload = checkLoginStatus;
+
         document.getElementById("signUpbutton").addEventListener("click", signUp);
         document.getElementById("logInbutton").addEventListener("click", login);
     </script>
