@@ -16,7 +16,7 @@
 </head>
 <body>
     <div id="activationBanner">
-        <strong>This account is not activated.</strong>
+        <strong>Your account is not activated.</strong>
         <p>Please email <a href="mailto:larral7864@g.comalisd.org">larral7864@g.comalisd.org</a> to request activation.</p>
     </div>
 
@@ -50,7 +50,7 @@
         const queryUsername = urlParams.get('username'); // Get 'username' parameter from URL
 
         // Function to fetch and display profile data based on the username
-        async function displayProfile(username) {
+        async function displayProfile(username, isOwnProfile) {
             const userRef = ref(database, 'users/' + username);
 
             const snapshot = await get(userRef);
@@ -61,15 +61,21 @@
                 const activationStatus = document.getElementById('activationStatus');
                 const activationBanner = document.getElementById('activationBanner');
 
-                welcomeMessage.innerText = `This is ${userData.firstName}'s profile.`;
-                usernameDisplay.innerText = `Their username: ${username}`;
+                if (isOwnProfile) {
+                    // For logged-in user's profile
+                    if (!userData.activated) {
+                        activationBanner.style.display = 'block';
+                    }
 
-                if (userData.activated) {
-                    activationStatus.innerText = 'This account is activated.';
-                    activationBanner.style.display = 'none';
+                    welcomeMessage.innerText = `Welcome, ${userData.firstName}!`;
+                    usernameDisplay.innerText = `Your username: ${username}`;
+                    activationStatus.innerText = userData.activated ? '' : 'Your account is not activated.';
+                    document.getElementById('logoutButton').style.display = 'block'; // Show logout button
                 } else {
-                    activationStatus.innerText = 'This account is not activated.';
-                    activationBanner.style.display = 'block';
+                    // For other users' profiles
+                    welcomeMessage.innerText = `This is ${userData.firstName}'s profile.`;
+                    usernameDisplay.innerText = `Their username: ${username}`;
+                    activationStatus.innerText = userData.activated ? 'This account is activated.' : 'This account is not activated.';
                 }
             } else {
                 alert('User does not exist.');
@@ -84,10 +90,11 @@
             const activated = localStorage.getItem('activated') === 'true';
 
             if (queryUsername) {
-                displayProfile(queryUsername);  // Show someone else's profile if ?username is provided
+                // Viewing another user's profile
+                displayProfile(queryUsername, false);  
             } else if (username) {
-                document.getElementById('logoutButton').style.display = 'block';  // Show logout button
-                displayProfile(username); // Show logged-in user's profile if no query string
+                // Viewing own profile
+                displayProfile(username, true);  
             } else {
                 window.location.href = 'login-signup.html'; // Redirect if not logged in and no username in URL
             }
@@ -119,7 +126,7 @@
                     localStorage.setItem('activated', 'true');
                     alert('Account activated!');
                     document.getElementById('activationBanner').style.display = 'none';
-                    document.getElementById('activationStatus').innerText = 'This account is activated.';
+                    document.getElementById('activationStatus').innerText = ''; // Hide activation status
                 }
             }
         });
