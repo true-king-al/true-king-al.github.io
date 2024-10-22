@@ -4,34 +4,79 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Profile</title>
+    <style>
+        #activationBanner {
+            display: none;
+            background-color: yellow;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid red;
+        }
+    </style>
 </head>
 <body>
+    <div id="activationBanner">
+        <strong>Your account is not activated.</strong>
+        <p>Please email <a href="mailto:larral7864@g.comalisd.org">larral7864@g.comalisd.org</a> to request activation.</p>
+    </div>
+
     <h1 id="welcomeMessage"></h1>
     <h2 id="usernameDisplay"></h2>
 
     <button id="logoutButton">Log Out</button>
 
-    <script>
-        // Function to check if the user is logged in
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
+        import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBzxQgwD_gBuylhdqlRck_PEVzueWccvTM",
+            authDomain: "messengerformewebsite.firebaseapp.com",
+            databaseURL: "https://messengerformewebsite-default-rtdb.firebaseio.com/",
+            projectId: "messengerformewebsite",
+            storageBucket: "messengerformewebsite.appspot.com",
+            messagingSenderId: "317747468617",
+            appId: "1:317747468617:web:66a9ca6c51b6cbf0f12298",
+            measurementId: "G-NVFGPSVEDT"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
         function checkLoginStatus() {
             const firstName = localStorage.getItem('userFirstName');
             const username = localStorage.getItem('username');
+            const activated = localStorage.getItem('activated') === 'true';
 
             if (!username) {
-                // Redirect to login if no user is logged in
-                window.location.href = 'login-signup.html';
+                window.location.href = 'login-signup.html'; // Redirect to login if no user is logged in
             } else {
-                // Display user information
                 document.getElementById('welcomeMessage').innerText = `Welcome, ${firstName}!`;
                 document.getElementById('usernameDisplay').innerText = `Your username: ${username}`;
+                if (!activated) {
+                    document.getElementById('activationBanner').style.display = 'block'; // Show banner if not activated
+                }
             }
         }
 
-        // Function to log out and clear local storage
+        async function activateAccount() {
+            const username = localStorage.getItem('username');
+            const userRef = ref(database, 'users/' + username);
+            
+            const snapshot = await get(userRef);
+            if (snapshot.exists()) {
+                const updates = {};
+                updates['/users/' + username + '/activated'] = true;
+                await update(userRef, updates);
+                localStorage.setItem('activated', 'true'); // Update localStorage
+                alert('Account activated!');
+                document.getElementById('activationBanner').style.display = 'none'; // Hide banner
+            }
+        }
+
+        // Function to log out
         function logout() {
-            localStorage.removeItem('userFirstName');
-            localStorage.removeItem('userLastName');
-            localStorage.removeItem('username');
+            localStorage.clear(); // Clear all local storage
             window.location.href = 'login-signup.html';  // Redirect to login page
         }
 
@@ -40,6 +85,13 @@
 
         // Log out the user when clicking the button
         document.getElementById('logoutButton').addEventListener('click', logout);
+
+        // Listen for Alt+D to activate the account
+        window.addEventListener('keydown', function (event) {
+            if (event.altKey && event.key === 'd') {
+                activateAccount(); // Activate account when Alt+D is pressed
+            }
+        });
     </script>
 </body>
 </html>
