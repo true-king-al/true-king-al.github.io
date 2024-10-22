@@ -16,14 +16,15 @@
 </head>
 <body>
     <div id="activationBanner">
-        <strong>Your account is not activated.</strong>
+        <strong>This account is not activated.</strong>
         <p>Please email <a href="mailto:larral7864@g.comalisd.org">larral7864@g.comalisd.org</a> to request activation.</p>
     </div>
 
     <h1 id="welcomeMessage"></h1>
     <h2 id="usernameDisplay"></h2>
+    <p id="activationStatus"></p>
 
-    <button id="logoutButton">Log Out</button>
+    <button id="logoutButton" style="display: none;">Log Out</button>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
@@ -43,34 +44,52 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
+        // Get the query string (e.g., ?username=first-last)
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const queryUsername = urlParams.get('username'); // Get 'username' parameter from URL
+
+        // Function to fetch and display profile data based on the username
+        async function displayProfile(username) {
+            const userRef = ref(database, 'users/' + username);
+
+            const snapshot = await get(userRef);
+            if (snapshot.exists()) {
+                const userData = snapshot.val();
+                const welcomeMessage = document.getElementById('welcomeMessage');
+                const usernameDisplay = document.getElementById('usernameDisplay');
+                const activationStatus = document.getElementById('activationStatus');
+                const activationBanner = document.getElementById('activationBanner');
+
+                welcomeMessage.innerText = `This is ${userData.firstName}'s profile.`;
+                usernameDisplay.innerText = `Their username: ${username}`;
+
+                if (userData.activated) {
+                    activationStatus.innerText = 'This account is activated.';
+                    activationBanner.style.display = 'none';
+                } else {
+                    activationStatus.innerText = 'This account is not activated.';
+                    activationBanner.style.display = 'block';
+                }
+            } else {
+                alert('User does not exist.');
+                window.location.href = 'login-signup.html'; // Redirect if user doesn't exist
+            }
+        }
+
+        // Function to check login status and show the current user's profile
         function checkLoginStatus() {
             const firstName = localStorage.getItem('userFirstName');
             const username = localStorage.getItem('username');
             const activated = localStorage.getItem('activated') === 'true';
 
-            if (!username) {
-                window.location.href = 'login-signup.html'; // Redirect to login if no user is logged in
+            if (queryUsername) {
+                displayProfile(queryUsername);  // Show someone else's profile if ?username is provided
+            } else if (username) {
+                document.getElementById('logoutButton').style.display = 'block';  // Show logout button
+                displayProfile(username); // Show logged-in user's profile if no query string
             } else {
-                document.getElementById('welcomeMessage').innerText = `Welcome, ${firstName}!`;
-                document.getElementById('usernameDisplay').innerText = `Your username: ${username}`;
-                if (!activated) {
-                    document.getElementById('activationBanner').style.display = 'block'; // Show banner if not activated
-                }
-            }
-        }
-
-        async function activateAccount() {
-            const username = localStorage.getItem('username');
-            const userRef = ref(database, 'users/' + username);
-            
-            const snapshot = await get(userRef);
-            if (snapshot.exists()) {
-                const updates = {};
-                updates['/users/' + username + '/activated'] = true;
-                await update(userRef, updates);
-                localStorage.setItem('activated', 'true'); // Update localStorage
-                alert('Account activated!');
-                document.getElementById('activationBanner').style.display = 'none'; // Hide banner
+                window.location.href = 'login-signup.html'; // Redirect if not logged in and no username in URL
             }
         }
 
@@ -86,10 +105,22 @@
         // Log out the user when clicking the button
         document.getElementById('logoutButton').addEventListener('click', logout);
 
-        // Listen for Alt+D to activate the account
-        window.addEventListener('keydown', function (event) {
-            if (event.altKey && event.key === 'd') {
-                activateAccount(); // Activate account when Alt+D is pressed
+        // Alt+D to activate the user's own account if logged in
+        window.addEventListener('keydown', async function (event) {
+            if (event.altKey && event.key === 'd' && !queryUsername) {
+                const username = localStorage.getItem('username');
+                const userRef = ref(database, 'users/' + username);
+                const snapshot = await get(userRef);
+                
+                if (snapshot.exists()) {
+                    const updates = {};
+                    updates['/users/' + username + '/activated'] = true;
+                    await update(userRef, updates);
+                    localStorage.setItem('activated', 'true');
+                    alert('Account activated!');
+                    document.getElementById('activationBanner').style.display = 'none';
+                    document.getElementById('activationStatus').innerText = 'This account is activated.';
+                }
             }
         });
     </script>
