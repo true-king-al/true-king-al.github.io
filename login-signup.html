@@ -82,14 +82,6 @@
             const snapshot = await get(userRef);
             if (snapshot.exists()) {
                 const userData = snapshot.val();
-                if (!userData.activated) {
-                    set(userRef, {
-                        firstName: firstName,
-                        lastName: lastName,
-                        password: userData.password,
-                        activated: false // Set account to not activated by default
-                    });
-                }
                 if (userData.password === password) {
                     localStorage.setItem('userFirstName', firstName);
                     localStorage.setItem('userLastName', lastName);
