@@ -202,6 +202,14 @@
                 alert('Your account is not activated. Please contact the admin to activate it.');
                 return;
             }
+            username = localStorage.getItem('username');
+            firstName = localStorage.getItem('userFirstName');
+
+            if (!username || !firstName) {
+                alert('You need to log in first.');
+                //window.location.href = 'login-signup.html'; // Redirect to login if not logged in
+                return;
+            }
 
             // Check for forbidden words
             if (containsForbiddenWords(message)) {
@@ -287,7 +295,7 @@
 
         if (!username || !firstName) {
             alert('You need to log in first.');
-            window.location.href = 'login-signup.html'; // Redirect to login if not logged in
+            //window.location.href = 'login-signup.html'; // Redirect to login if not logged in
             return;
         }
 
