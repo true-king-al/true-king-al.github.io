@@ -160,163 +160,154 @@
             appId: "1:317747468617:web:66a9ca6c51b6cbf0f12298",
             measurementId: "G-NVFGPSVEDT"
         };
+// Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
+    let username;
+    let firstName;
+    let isActivated = false;
+    let messageLimit = 10; // Default message limit
+    let isAdmin = false;
 
-        let username;
-        let messageLimit = 10; // Default message limit
-        let isAdmin = false;
+    // List of forbidden words
+    const forbiddenWords = ['nigger', 'nigga', 'n¡gger', 'n!gger', 'nega'];
 
-        // List of forbidden words
-        const forbiddenWords = ['nigger', 'nigga', 'n¡gger', 'n!gger', 'nega'];
+    // Function to check if text contains forbidden words
+    function containsForbiddenWords(text) {
+        return forbiddenWords.some(word => text.toLowerCase().includes(word));
+    }
 
-        // Function to check if text contains forbidden words
-        function containsForbiddenWords(text) {
-            return forbiddenWords.some(word => text.toLowerCase().includes(word));
+    // Function to check if the user is activated
+    async function checkActivationStatus(username) {
+        const userRef = ref(database, 'users/' + username);
+        const snapshot = await get(userRef);
+        if (snapshot.exists()) {
+            const userData = snapshot.val();
+            return userData.activated === true;
+        } else {
+            return false;
         }
+    }
 
-        // Function to check admin mode
-        function checkAdmin() {
-            let password = prompt('Enter Admin Password:');
-            if (password === 'loganiscool') {
-                isAdmin = true;
-                alert('Password correct');
-                document.querySelectorAll('.delete-button').forEach(button => {
-                    button.style.display = 'inline'; // Show delete buttons
-                });
-            } else {
-                alert('Incorrect password');
+    // Function to save the message
+    async function saveMessage(event) {
+        event.preventDefault();
+        const message = document.getElementById('message-input').value;
+
+        if (username && firstName && message) {
+            // Check if the user's account is activated before sending the message
+            const activated = await checkActivationStatus(username);
+            if (!activated) {
+                alert('Your account is not activated. Please contact the admin to activate it.');
+                return;
             }
-        }
 
-        // Function to fetch and display messages
-        function fetchMessages() {
-            const messagesRef = ref(database, 'messages');
-            const latestMessagesQuery = query(messagesRef, orderByKey(), limitToLast(messageLimit));
-            onValue(latestMessagesQuery, (snapshot) => {
-                const data = snapshot.val();
-                let displayText = 'No messages yet.';
-                const now = Date.now();
+            // Check for forbidden words
+            if (containsForbiddenWords(message)) {
+                alert('Your message contains forbidden words and cannot be sent.');
+                return;
+            }
 
-                if (data) {
-                    const messagesArray = Object.entries(data).map(([timestamp, message]) => {
-                        const messageTime = new Date(parseInt(timestamp));
-                        const timeDiff = now - messageTime.getTime();
-                        const minutes = Math.floor(timeDiff / 60000); // Time difference in minutes
-                        const hours = Math.floor(minutes / 60);
-                        const displayDiff = hours > 0 ? `${hours}h` : `${minutes}m`;
-                        return `
-                            <div class="message-container" data-timestamp="${timestamp}">
-                                <div class="message-text">${message}</div>
-                                <div class="message-time">${displayDiff} ago</div>
-                                <button class="delete-button">X</button>
-                            </div>
-                        `;
-                    }).reverse();
-                    displayText = messagesArray.join('');
-                }
-
-                document.getElementById('display-message').innerHTML = displayText;
-
-                // Add event listeners for delete buttons
-                document.querySelectorAll('.delete-button').forEach(button => {
-                    const container = button.closest('.message-container');
-                    const timestamp = container.getAttribute('data-timestamp');
-                    button.addEventListener('click', () => deleteMessage(timestamp));
+            const newMessageRef = ref(database, 'messages/' + Date.now());
+            set(newMessageRef, `${firstName}: ${message}`)
+                .then(() => {
+                    console.log('Message saved successfully');
+                    document.getElementById('message-input').value = ''; // Clear input field
+                    fetchMessages(); // Refresh messages
+                })
+                .catch(error => {
+                    console.error('Error saving message:', error);
                 });
+        }
+    }
 
-                // Hide delete buttons initially
-                if (isAdmin) {
-                    document.querySelectorAll('.delete-button').forEach(button => {
-                        button.style.display = 'inline';
-                    });
-                }
+    // Function to fetch and display messages
+    function fetchMessages() {
+        const messagesRef = ref(database, 'messages');
+        const latestMessagesQuery = query(messagesRef, orderByKey(), limitToLast(messageLimit));
+        onValue(latestMessagesQuery, (snapshot) => {
+            const data = snapshot.val();
+            let displayText = 'No messages yet.';
+            const now = Date.now();
+
+            if (data) {
+                const messagesArray = Object.entries(data).map(([timestamp, message]) => {
+                    const messageTime = new Date(parseInt(timestamp));
+                    const timeDiff = now - messageTime.getTime();
+                    const minutes = Math.floor(timeDiff / 60000); // Time difference in minutes
+                    const hours = Math.floor(minutes / 60);
+                    const displayDiff = hours > 0 ? `${hours}h` : `${minutes}m`;
+                    return `
+                        <div class="message-container" data-timestamp="${timestamp}">
+                            <div class="message-text">${message}</div>
+                            <div class="message-time">${displayDiff} ago</div>
+                            <button class="delete-button">X</button>
+                        </div>
+                    `;
+                }).reverse();
+                displayText = messagesArray.join('');
+            }
+
+            document.getElementById('display-message').innerHTML = displayText;
+
+            // Add event listeners for delete buttons
+            document.querySelectorAll('.delete-button').forEach(button => {
+                const container = button.closest('.message-container');
+                const timestamp = container.getAttribute('data-timestamp');
+                button.addEventListener('click', () => deleteMessage(timestamp));
             });
-        }
 
-        // Function to save the message
-        function saveMessage(event) {
-            event.preventDefault();
-            const message = document.getElementById('message-input').value;
-            if (username && message) {
-                if (containsForbiddenWords(message)) {
-                    alert('Your message contains forbidden words and cannot be sent.');
-                    return;
-                }
-                const newMessageRef = ref(database, 'messages/' + Date.now());
-                set(newMessageRef, `${username}: ${message}`)
-                    .then(() => {
-                        console.log('Message saved successfully');
-                        document.getElementById('message-input').value = ''; // Clear input field
-                        fetchMessages(); // Refresh messages
-                    })
-                    .catch(error => {
-                        console.error('Error saving message:', error);
-                    });
-            }
-        }
-
-        // Function to delete a message
-        function deleteMessage(timestamp) {
+            // Hide delete buttons initially
             if (isAdmin) {
-                const messageRef = ref(database, 'messages/' + timestamp);
-                remove(messageRef)
-                    .then(() => {
-                        console.log('Message deleted successfully');
-                        fetchMessages();
-                    })
-                    .catch(error => console.error('Error deleting message:', error));
+                document.querySelectorAll('.delete-button').forEach(button => {
+                    button.style.display = 'inline';
+                });
             }
+        });
+    }
+
+    // Function to delete a message
+    function deleteMessage(timestamp) {
+        if (isAdmin) {
+            const messageRef = ref(database, 'messages/' + timestamp);
+            remove(messageRef)
+                .then(() => {
+                    console.log('Message deleted successfully');
+                    fetchMessages();
+                })
+                .catch(error => console.error('Error deleting message:', error));
+        }
+    }
+
+    // Set username and first name on page load
+    window.onload = async function () {
+        username = localStorage.getItem('username');
+        firstName = localStorage.getItem('userFirstName');
+
+        if (!username || !firstName) {
+            alert('You need to log in first.');
+            window.location.href = 'login-signup.html'; // Redirect to login if not logged in
+            return;
         }
 
-        // Open settings modal
-        document.querySelector('.settings-button').addEventListener('click', () => {
-            document.getElementById('settings-modal').style.display = 'block';
-        });
+        isActivated = await checkActivationStatus(username);
+        if (!isActivated) {
+            alert('Your account is not activated. Please contact the admin.');
+        }
 
-        // Apply settings
-        document.getElementById('apply-settings').addEventListener('click', () => {
-            const newMessageLimit = parseInt(document.getElementById('message-count').value);
-            if (!isNaN(newMessageLimit) && newMessageLimit > 0) {
-                messageLimit = newMessageLimit;
-                fetchMessages();
-            }
-            document.getElementById('settings-modal').style.display = 'none';
-        });
+        fetchMessages();
+    };
 
-        // Close settings modal
-        document.getElementById('close-settings').addEventListener('click', () => {
-            document.getElementById('settings-modal').style.display = 'none';
-        });
+    // Attach the form submission to saveMessage function
+    document.getElementById('message-form').addEventListener('submit', saveMessage);
 
-        // Set username on page load
-        window.onload = function () {
-            username = prompt('Enter your username:');
-            if (!username) {
-                username = 'Anonymous';
-            }
-            if (username.toLowerCase() === 'logan')
-            {
-                if(prompt("enter password", "1234") !== 'logan#cool')
-                {
-                    username = 'logan wannabe';
-                }
-            }
-            fetchMessages();
-        };
-
-        // Attach the form submission to saveMessage function
-        document.getElementById('message-form').addEventListener('submit', saveMessage);
-
-        // Admin mode trigger (via keyboard shortcut)
-        window.addEventListener('keydown', (event) => {
-            if (event.altKey && event.key === 'd') {
-                checkAdmin();
-            }
-        });
-
+    // Admin mode trigger (via keyboard shortcut)
+    window.addEventListener('keydown', (event) => {
+        if (event.altKey && event.key === 'd') {
+            checkAdmin();
+        }
+    });
     </script>
 </body>
 </html>
