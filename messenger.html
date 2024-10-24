@@ -300,7 +300,7 @@
         }
 
         isActivated = await checkActivationStatus(username);
-        if (!isActivated) {
+        if (!isActivated && username) {
             alert('Your account is not activated. Please contact the admin.');
         }
 
