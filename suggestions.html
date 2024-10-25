@@ -236,7 +236,7 @@
         }
 
         // Save a suggestion
-        function saveSuggestion(event) {
+        async function saveSuggestion(event) {
             event.preventDefault();
             const username = localStorage.getItem('username');
             const firstName = localStorage.getItem('userFirstName');
