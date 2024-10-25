@@ -239,6 +239,7 @@
         function saveSuggestion(event) {
             event.preventDefault();
             const username = localStorage.getItem('username');
+            const firstName = localStorage.getItem('userFirstName');
             isActivated = await checkActivationStatus(username);
             if (!username) {
                 alert("you must be signed in");
@@ -248,7 +249,7 @@
                 alert("your account is not activated");
                 return;
             }
-            const suggestion = document.getElementById('suggestion-input').value;
+            const suggestion = document.getElementById('suggestion-input').value + " - " +firstName;
             if (suggestion) {
                 const newSuggestionRef = ref(database, 'suggestions/' + Date.now());
                 set(newSuggestionRef, suggestion)
