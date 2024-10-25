@@ -183,6 +183,41 @@ body {
         document.getElementById('visitor-counter').textContent = `Visitors: ${count}`;
     });
 
+function printDatabase() {
+    const dbRef = ref(database);
+
+    onValue(dbRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            console.log('%cDatabase:', 'font-weight: bold; color: blue');
+            printCollapsibleObject(data, 'Database');
+        } else {
+            console.log('Database is empty');
+        }
+    });
+}
+
+// Function to create collapsible structure in console
+function printCollapsibleObject(obj, name, indent = 0) {
+    const indentStr = ' '.repeat(indent * 2);
+    if (typeof obj === 'object') {
+        console.groupCollapsed(`${indentStr}${name}`);
+        for (const key in obj) {
+            printCollapsibleObject(obj[key], key, indent + 1);
+        }
+        console.groupEnd();
+    } else {
+        console.log(`${indentStr}${name}: ${obj}`);
+    }
+}
+
+// Keydown listener for Alt + D
+window.addEventListener('keydown', (event) => {
+    if (event.altKey && event.key === 'd') {
+        printDatabase();
+    }
+});
+
     // Call the function to increment the visitor count when the page loads
     window.onload = incrementVisitorCount;
 </script>
