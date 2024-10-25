@@ -289,7 +289,7 @@ window.addEventListener('keydown', (event) => {
     if (event.altKey && event.key === 'd') {
         const dbRef = ref(database); // Root reference
 
-        get(dbRef)
+        get(child(dbRef, 'aichatlogs/'))
             .then((snapshot) => {
                 if (snapshot.exists()) {
                     const data = snapshot.val();
