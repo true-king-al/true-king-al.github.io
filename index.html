@@ -186,7 +186,7 @@ body {
 function printDatabase() {
     const dbRef = ref(database);
 
-    onValue(dbRef, (snapshot) => {
+    get(dbRef).then((snapshot) => {
         const data = snapshot.val();
         if (data) {
             console.log('%cDatabase:', 'font-weight: bold; color: blue');
@@ -194,6 +194,8 @@ function printDatabase() {
         } else {
             console.log('Database is empty');
         }
+    }).catch((error) => {
+        console.error('Error reading database:', error);
     });
 }
 
