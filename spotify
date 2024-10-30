@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Music Player</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: Arial, sans-serif;
+      background-color: #181818;
+      color: #fff;
+    }
+    .player {
+      margin-top: 50px;
+      text-align: center;
+    }
+    button {
+      background-color: #1DB954;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 25px;
+    }
+    button:hover {
+      background-color: #1AA34A;
+    }
+  </style>
+</head>
+<body>
+  <h1>My Music Player</h1>
+  <div class="player">
+    <h3 id="currentSong">Now Playing: Select a Song</h3>
+    <audio id="audioPlayer" controls>
+      <source src="" type="audio/mp3">
+      Your browser does not support the audio element.
+    </audio>
+    <br><br>
+    <button onclick="playSong('song.mp3')">Play Song</button>
+    <button onclick="playSong('track.mp3')">Play Track</button>
+  </div>
+
+  <script>
+    function playSong(filename) {
+      const audioPlayer = document.getElementById("audioPlayer");
+      const currentSong = document.getElementById("currentSong");
+      audioPlayer.src = "music/" + filename;
+      currentSong.textContent = "Now Playing: " + filename;
+      audioPlayer.play();
+    }
+  </script>
+</body>
+</html>
