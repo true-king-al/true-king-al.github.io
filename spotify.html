@@ -25,32 +25,91 @@
       font-size: 16px;
       cursor: pointer;
       border-radius: 25px;
+      margin: 5px;
     }
     button:hover {
       background-color: #1AA34A;
+    }
+    input[type="text"] {
+      padding: 10px;
+      border-radius: 25px;
+      border: none;
+      font-size: 16px;
     }
   </style>
 </head>
 <body>
   <h1>My Music Player</h1>
+
+  <!-- Search Bar -->
+  <input type="text" id="searchInput" placeholder="Search for a song..." oninput="searchSong()">
+  <ul id="songList"></ul>
+
   <div class="player">
     <h3 id="currentSong">Now Playing: Select a Song</h3>
-    <audio id="audioPlayer" controls>
-      <source src="" type="audio/mp3">
-      Your browser does not support the audio element.
-    </audio>
-    <br><br>
-    <button onclick="playSong('song.mp3')">Play Song</button>
-    <button onclick="playSong('track.mp3')">Play Track</button>
+    <audio id="audioPlayer" onended="skipSong()" controls hidden></audio>
+    <br>
+    <button onclick="togglePlay()" id="playPauseBtn">Play</button>
+    <button onclick="skipSong()">Skip</button>
   </div>
 
   <script>
-    function playSong(filename) {
-      const audioPlayer = document.getElementById("audioPlayer");
-      const currentSong = document.getElementById("currentSong");
-      audioPlayer.src = "music/" + filename;
-      currentSong.textContent = "Now Playing: " + filename;
+    // List of songs (Update manually or load dynamically from server if needed)
+    const songs = ["song.mp3", "track.mp3", "another_song.mp3"];
+    let currentSongIndex = -1;
+
+    const audioPlayer = document.getElementById("audioPlayer");
+    const currentSongDisplay = document.getElementById("currentSong");
+    const playPauseBtn = document.getElementById("playPauseBtn");
+    const songList = document.getElementById("songList");
+
+    // Display all songs initially
+    function displaySongs(songsToDisplay) {
+      songList.innerHTML = "";
+      songsToDisplay.forEach((song, index) => {
+        const li = document.createElement("li");
+        li.textContent = song.replace(".mp3", "");
+        li.style.cursor = "pointer";
+        li.onclick = () => selectSong(index);
+        songList.appendChild(li);
+      });
+    }
+
+    // Initialize with all songs listed
+    displaySongs(songs);
+
+    function searchSong() {
+      const searchTerm = document.getElementById("searchInput").value.toLowerCase();
+      const filteredSongs = songs.filter(song => song.toLowerCase().includes(searchTerm));
+      displaySongs(filteredSongs);
+    }
+
+    function selectSong(index) {
+      currentSongIndex = index;
+      playCurrentSong();
+    }
+
+    function playCurrentSong() {
+      if (currentSongIndex === -1) return;
+      audioPlayer.src = "music/" + songs[currentSongIndex];
+      currentSongDisplay.textContent = "Now Playing: " + songs[currentSongIndex].replace(".mp3", "");
       audioPlayer.play();
+      playPauseBtn.textContent = "Pause";
+    }
+
+    function togglePlay() {
+      if (audioPlayer.paused) {
+        audioPlayer.play();
+        playPauseBtn.textContent = "Pause";
+      } else {
+        audioPlayer.pause();
+        playPauseBtn.textContent = "Play";
+      }
+    }
+
+    function skipSong() {
+      currentSongIndex = Math.floor(Math.random() * songs.length);
+      playCurrentSong();
     }
   </script>
 </body>
