@@ -164,8 +164,8 @@
     const app = initializeApp(firebaseConfig);
     const database = getDatabase(app);
 
-    let username;
-    let firstName;
+    let username = localStorage.getItem('username');
+    let firstName = localStorage.getItem('userFirstName');
     let isActivated = false;
     let messageLimit = 10; // Default message limit
     let isAdmin = false;
@@ -179,15 +179,13 @@
     }
 
     // Function to check if the user is activated
-    async function checkActivationStatus(username) {
-        const userRef = ref(database, 'users/' + username);
+    async function checkActivationStatus() {
+        if (!username) return false;
+
+        const userRef = ref(database, `users/${username}`);
         const snapshot = await get(userRef);
-        if (snapshot.exists()) {
-            const userData = snapshot.val();
-            return userData.activated === true;
-        } else {
-            return false;
-        }
+        
+        return snapshot.exists() ? snapshot.val().activated === true : false;
     }
 
     // Function to save the message
@@ -197,13 +195,11 @@
 
         if (username && firstName && message) {
             // Check if the user's account is activated before sending the message
-            const activated = await checkActivationStatus(username);
-            if (!activated) {
+            
+            if (!isActivated) {
                 alert('Your account is not activated. Please contact the admin to activate it.');
                 return;
             }
-            username = localStorage.getItem('username');
-            firstName = localStorage.getItem('userFirstName');
 
             if (!username || !firstName) {
                 alert('You need to log in first.');
@@ -288,22 +284,20 @@
         }
     }
 
+    async function initializeUserStatus() {
+        if (username && firstName) {
+            isActivated = await checkActivationStatus();
+            if (!isActivated) {
+                alert('Your account is not activated. Please contact the admin.');
+            }
+        } else {
+            alert('You need to log in first.');
+        }
+    }
+
     // Set username and first name on page load
     window.onload = async function () {
-        username = localStorage.getItem('username');
-        firstName = localStorage.getItem('userFirstName');
-
-        if (!username || !firstName) {
-            alert('You need to log in first.');
-            //window.location.href = 'login-signup.html'; // Redirect to login if not logged in
-            
-        }
-
-        isActivated = await checkActivationStatus(username);
-        if (!isActivated && username) {
-            alert('Your account is not activated. Please contact the admin.');
-        }
-
+        await initializeUserStatus();
         fetchMessages();
     };
 
