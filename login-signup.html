@@ -56,6 +56,10 @@
             const username = createUsername(firstName, lastName);
 
             const userRef = ref(database, 'users/' + username);
+            
+            localStorage.setItem('userFirstName', firstName);
+            localStorage.setItem('userLastName', lastName);
+            localStorage.setItem('username', username);
 
             const snapshot = await get(userRef);
             if (snapshot.exists()) {
@@ -69,6 +73,7 @@
                 });
                 alert('Sign up successful! Please wait for account activation.');
             }
+            window.location.href = 'profile.html';  // Redirect to profile page after login
         }
 
         async function login() {
