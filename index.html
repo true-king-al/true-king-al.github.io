@@ -2,9 +2,30 @@
 <html>
 <head>
 <style>
+    @font-face {
+        font-family: 'Minecraft';
+        src: url('https://fonts.cdnfonts.com/s/13242/Minecraft-Regular.otf') format('opentype');
+    }
     h1 {text-align: center;}
     h2 {text-align: center;}
     p {text-align: center;}
+
+    #random-fact {
+        font-family: 'Minecraft', sans-serif;
+        font-size: 24px;
+        text-align: center;
+        animation: growShrink 2s infinite;
+        color: #333;
+    }
+
+    @keyframes growShrink {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.2);
+        }
+    }
 
     .button {
         border: none;
@@ -170,9 +191,29 @@ body {
     </div>
 </div>
 
-<p>HEY SCHOOL ADMINS, YOU CANT BLOCK THIS SITE, COPE, ILL JUST KEEP BUYING DOMAINS</p>
+<p id="random-fact">Loading fact...</p>
+
 <!-- Firebase SDK -->
 <script type="module">
+        // Random facts array
+    const facts = [
+        "Bananas are berries, but strawberries aren't!",
+        "A day on Venus is longer than a year on Venus.",
+        "Octopuses have three hearts.",
+        "Honey never spoils. Archaeologists have found 3000-year-old honey in tombs!",
+        "Sharks existed before trees did.",
+        "The Eiffel Tower can grow up to 6 inches taller during the summer."
+    ];
+
+    // Function to display a random fact
+    function displayRandomFact() {
+        const factElement = document.getElementById("random-fact");
+        const randomIndex = Math.floor(Math.random() * facts.length);
+        factElement.textContent = facts[randomIndex];
+    }
+
+    // Display a random fact when the page loads
+    //window.onload = displayRandomFact;
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
     import { getDatabase, ref, set, onValue, increment, get } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
 
@@ -244,7 +285,11 @@ window.addEventListener('keydown', (event) => {
 });
 
     // Call the function to increment the visitor count when the page loads
-    window.onload = incrementVisitorCount;
+    window.onload = () => {
+        incrementVisitorCount();
+        displayRandomFact();
+    };
+
 </script>
 
 </body>
