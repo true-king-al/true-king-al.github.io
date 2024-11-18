@@ -221,7 +221,7 @@ function loadFacts() {
 
 function displayRandomFact() {
     if (facts.length === 0) {
-        console.log("no facts to display");
+        console.log("No facts to display");
         return; // Don't attempt to display a fact if the facts haven't been loaded
     }
 
@@ -240,14 +240,38 @@ function displayRandomFact() {
     const dayOfYear = Math.floor(diff / oneDay);
 
     // Combine day of year and current hour to create a "seed" number
-    const seed = (dayOfYear * 24 + currentHour) % facts.length;
-    console.log(dayOfYear * 24 + currentHour);
-    console.log(seed);
-    // Use that "seed" to select the fact
-    const randomIndex = seed;
+    const seed = dayOfYear; // Keep it constant for the day
+
+    // Seeded shuffle function
+    function seededShuffle(array, seed) {
+        const shuffled = array.slice(); // Copy the array
+        let m = shuffled.length, t, i;
+
+        while (m) {
+            i = Math.floor(random(seed) * m--); // Pick a random index
+            t = shuffled[m];
+            shuffled[m] = shuffled[i];
+            shuffled[i] = t;
+            seed++; // Increment seed for variety
+        }
+
+        return shuffled;
+    }
+
+    // Simple pseudo-random number generator based on seed
+    function random(seed) {
+        const x = Math.sin(seed) * 10000;
+        return x - Math.floor(x);
+    }
+
+    // Shuffle facts with the seed
+    const shuffledFacts = seededShuffle(facts, seed);
+
+    // Select the fact based on the hour
+    const randomIndex = currentHour % shuffledFacts.length;
 
     // Display the fact corresponding to that index
-    factElement.textContent = facts[randomIndex];
+    factElement.textContent = shuffledFacts[randomIndex];
 }
 
 
