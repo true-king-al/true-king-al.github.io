@@ -241,6 +241,7 @@ function displayRandomFact() {
 
     // Combine day of year and current hour to create a "seed" number
     const seed = (dayOfYear * 24 + currentHour) % facts.length;
+    console.log(dayOfYear * 24 + currentHour);
     console.log(seed);
     // Use that "seed" to select the fact
     const randomIndex = seed;
