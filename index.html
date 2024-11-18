@@ -269,6 +269,8 @@ function displayRandomFact() {
 
     // Select the fact based on the hour
     const randomIndex = currentHour % shuffledFacts.length;
+    console.log(randomIndex);
+    console.log(seed);
 
     // Display the fact corresponding to that index
     factElement.textContent = shuffledFacts[randomIndex];
