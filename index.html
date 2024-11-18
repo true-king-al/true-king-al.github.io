@@ -204,21 +204,51 @@ body {
 <!-- Firebase SDK -->
 <script type="module">
         // Random facts array
-    const facts = [
-        "Bananas are berries, but strawberries aren't!",
-        "A day on Venus is longer than a year on Venus.",
-        "Octopuses have three hearts.",
-        "Honey never spoils. Archaeologists have found 3000-year-old honey in tombs!",
-        "Sharks existed before trees did.",
-        "The Eiffel Tower can grow up to 6 inches taller during the summer."
-    ];
+let facts = [];
 
-    // Function to display a random fact
-    function displayRandomFact() {
-        const factElement = document.getElementById("random-fact");
-        const randomIndex = Math.floor(Math.random() * facts.length);
-        factElement.textContent = facts[randomIndex];
+function loadFacts() {
+    fetch('facts.json')
+        .then(response => response.json())
+        .then(data => {
+            facts = data;  // Store the facts in the 'facts' array
+            displayRandomFact();  // Call the function to display the fact after loading the data
+        })
+        .catch(error => {
+            console.error("Error loading facts:", error);
+        });
+}
+
+function displayRandomFact() {
+    if (facts.length === 0) {
+        return; // Don't attempt to display a fact if the facts haven't been loaded
     }
+
+    const factElement = document.getElementById("random-fact");
+
+    // Get the current date and time
+    const now = new Date();
+
+    // Get the current hour (0-23)
+    const currentHour = now.getHours();
+
+    // Get the day of the year (1 to 365 or 366)
+    const startOfYear = new Date(now.getFullYear(), 0, 0);
+    const diff = now - startOfYear;
+    const oneDay = 1000 * 60 * 60 * 24;
+    const dayOfYear = Math.floor(diff / oneDay);
+
+    // Combine day of year and current hour to create a "seed" number
+    const seed = (dayOfYear * 24 + currentHour) % facts.length;
+
+    // Use that "seed" to select the fact
+    const randomIndex = seed;
+
+    // Display the fact corresponding to that index
+    factElement.textContent = facts[randomIndex];
+}
+
+// Call loadFacts when the page is loaded
+window.onload = loadFacts;
 
     // Display a random fact when the page loads
     //window.onload = displayRandomFact;
