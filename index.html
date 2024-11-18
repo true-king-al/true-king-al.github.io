@@ -211,6 +211,7 @@ function loadFacts() {
         .then(response => response.json())
         .then(data => {
             facts = data;  // Store the facts in the 'facts' array
+            console.log(data);
             displayRandomFact();  // Call the function to display the fact after loading the data
         })
         .catch(error => {
@@ -220,6 +221,7 @@ function loadFacts() {
 
 function displayRandomFact() {
     if (facts.length === 0) {
+        console.log("no facts to display");
         return; // Don't attempt to display a fact if the facts haven't been loaded
     }
 
@@ -325,7 +327,7 @@ window.addEventListener('keydown', (event) => {
     // Call the function to increment the visitor count when the page loads
     window.onload = () => {
         incrementVisitorCount();
-        displayRandomFact();
+        
     };
 
 </script>
