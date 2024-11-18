@@ -12,7 +12,7 @@
 
     #random-fact {
         font-family: 'Minecraft', sans-serif;
-        font-size: 24px;
+        font-size: 14px;
         text-align: center;
         animation: growShrink 2s infinite;
         color: yellow;
@@ -211,7 +211,7 @@ function loadFacts() {
         .then(response => response.json())
         .then(data => {
             facts = data;  // Store the facts in the 'facts' array
-            console.log(data);
+            //console.log(data);
             displayRandomFact();  // Call the function to display the fact after loading the data
         })
         .catch(error => {
