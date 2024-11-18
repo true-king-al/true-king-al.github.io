@@ -207,7 +207,7 @@ body {
 let facts = [];
 
 function loadFacts() {
-    fetch('facts.json')
+    fetch('./facts.json')
         .then(response => response.json())
         .then(data => {
             facts = data;  // Store the facts in the 'facts' array
@@ -249,8 +249,7 @@ function displayRandomFact() {
     factElement.textContent = facts[randomIndex];
 }
 
-// Call loadFacts when the page is loaded
-window.onload = loadFacts;
+
 
     // Display a random fact when the page loads
     //window.onload = displayRandomFact;
@@ -327,7 +326,7 @@ window.addEventListener('keydown', (event) => {
     // Call the function to increment the visitor count when the page loads
     window.onload = () => {
         incrementVisitorCount();
-        
+        loadFacts();
     };
 
 </script>
