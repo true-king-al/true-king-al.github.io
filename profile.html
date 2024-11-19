@@ -61,6 +61,8 @@
                 const activationStatus = document.getElementById('activationStatus');
                 const activationBanner = document.getElementById('activationBanner');
 
+                localStorage.setItem('activated', userData.activated.toString());
+
                 if (isOwnProfile) {
                     // For logged-in user's profile
                     if (!userData.activated) {
