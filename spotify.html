@@ -55,7 +55,7 @@
 
   <script>
     // List of songs (Update manually or load dynamically from server if needed)
-    const songs = ["bite_me.mp3", "track.mp3", "another_song.mp3"];
+    const songs = ["bite me.mp3", "track.mp3", "another_song.mp3"];
     let currentSongIndex = -1;
 
     const audioPlayer = document.getElementById("audioPlayer");
@@ -92,6 +92,7 @@
     function playCurrentSong() {
       if (currentSongIndex === -1) return;
       audioPlayer.src = "music/" + songs[currentSongIndex];
+      console.log(audioPlayer.src);
       currentSongDisplay.textContent = "Now Playing: " + songs[currentSongIndex].replace(".mp3", "");
       audioPlayer.play();
       playPauseBtn.textContent = "Pause";
