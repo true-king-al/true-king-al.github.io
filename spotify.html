@@ -51,6 +51,7 @@
     <br>
     <button onclick="togglePlay()" id="playPauseBtn">Play</button>
     <button onclick="skipSong()">Skip</button>
+    <button onclick="toggleLoop()" id="loopBtn">Enable Loop</button>
   </div>
 
   <script>
@@ -88,6 +89,12 @@
       currentSongIndex = index;
       playCurrentSong();
     }
+    function toggleLoop() {
+      audioPlayer.loop = !audioPlayer.loop;
+      const loopBtn = document.getElementById("loopBtn");
+      loopBtn.textContent = audioPlayer.loop ? "Disable Loop" : "Enable Loop";
+    }
+
 
     function playCurrentSong() {
       if (currentSongIndex === -1) return;
