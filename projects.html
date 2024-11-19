@@ -2,255 +2,87 @@
 <html>
 <head>
     <style>
-        h1 {text-align: center;}
-        h2 {text-align: center;}
-        html {
+        h1, h2 { text-align: center; }
+        html, body {
             height: auto;
-            background-image: linear-gradient(rgb(0, 0, 0), rgb(23, 23, 23));
-            background-repeat: no-repeat;
-            min-height: 100vh;
             margin: 0;
-        }
-        body {
-            height: auto;
-            background-attachment: fixed;
+            min-height: 100vh;
+            background: linear-gradient(rgb(0, 0, 0), rgb(23, 23, 23)) no-repeat fixed;
             background-size: cover;
         }
         .button {
             border: 2px solid #373737;
-            color: black;
+            color: white;
             padding: 32px 64px;
             text-align: center;
             text-decoration: none;
-            display: inline-block;
             font-size: 16px;
-            margin: 4px 2px;
-            transition-duration: 0.4s;
-            cursor: pointer;
-        }
-        .button1 {
-            background-color: #000000;
-            border-color: #303030;
-            color: rgb(255, 255, 255);
-            border-radius: 19px;
-        }
-        .button1:hover {
-            background-color: #000000;
-            border-color: #a9a9a9;
-            color: rgb(255, 255, 255);
-        }
-        .button2 {
-            padding: 32px 64px;
-        }
-        .button3 {
-            background-color: #000000;
-            border-color: #303030;
-            color: rgb(255, 255, 255);
-            border-radius: 19px;
-        }
-        .button3:hover {
-            background-color: #000000;
-            border-color: #a9a9a9;
-            color: rgb(255, 255, 255);
-        }
-        .button-minecraft, .button-retro, .button-textinorsm, .button-pixelplace, .button-2048, .button-lol, .button-ai, .button-bitlife, .button-slope, .button-CC, .button-cb {
-            padding: 32px 64px;
+            font-weight: bold;
             border-radius: 19px;
             background-size: cover;
             background-position: center;
-            color: white;
-            font-size: 18px;
-            font-weight: bold;
-            height: 100px; /* Set a fixed height for all buttons */
+            transition: all 0.4s;
+            cursor: pointer;
+            height: 100px;
         }
-        .button-minecraft {
-            background-image: url('Minecraft_image.png');
-            border: 2px solid #4CAF50;
-        }
-        .button-minecraft:hover {
-            background-color: #4CAF50;
+        .button:hover {
             background-blend-mode: overlay;
-            border-color: #2E7D32;
-        }
-        .button-retro {
-            background-image: url('retroimage.png');
-            border: 2px solid #FF8C00;
-        }
-        .button-retro:hover {
-            background-color: #FF8C00;
-            background-blend-mode: overlay;
-            border-color: #E65100;
-        }
-        .button-textinorsm {
-            background-image: url('textinorsm.png');
-            border: 2px solid #8B008B;
-        }
-        .button-textinorsm:hover {
-            background-color: #8B008B;
-            background-blend-mode: overlay;
-            border-color: #4B0082;
-        }
-        .button-pixelplace {
-            background-image: url('pixelplace.png');
-            border: 2px solid #008B8B;
-        }
-        .button-pixelplace:hover {
-            background-color: #008B8B;
-            background-blend-mode: overlay;
-            border-color: #006868;
-        }
-        .button-2048 {
-            background-image: url('2048image.png');
-            border: 2px solid #008B8B;
-        }
-        .button-2048:hover {
-            background-color: #008B8B;
-            background-blend-mode: overlay;
-            border-color: #006868;
-        }
-        .button-lol {
-            background-image: url('0v0lol.jpeg');
-            border: 2px solid #008B8B;
-        }
-        .button-lol:hover {
-            background-color: #008B8B;
-            background-blend-mode: overlay;
-            border-color: #006868;
-        }
-        .button-ai {
-            background-color: #4A90E2;
-            border: 2px solid #357ABD;
-        }
-        .button-ai:hover {
-            background-color: #357ABD;
-            border-color: #2A65A4;
-        }
-        .button-bitlife {
-            background-image: url('Bitlife/logo.png');
-            border: 2px solid #357ABD;
-        }
-        .button-bitlife:hover {
-            background-color: #357ABD;
-            background-blend-mode: overlay;
-            border-color: #2A65A4;
-        }
-        .button-slope {
-            background-image: url('download (7).png');
-            border: 2px solid #008B8B;
-        }
-        .button-slope:hover {
-            background-color: #008B8B;
-            background-blend-mode: overlay;
-            border-color: #006868;
-        }
-        .button-ltf {
-            background-image: url('download (16).jpeg');
-            border: 2px solid #008B8B;
-        }
-        .button-ltf:hover {
-            background-color: #008B8B;
-            background-blend-mode: overlay;
-            border-color: #006868;
-        }
-        .button-CC {
-            background-image: url('download (18).jpeg');
-            border: 2px solid #008B8B;
-        }
-        .button-CC:hover {
-            background-color: #008B8B;
-            background-blend-mode: overlay;
-            border-color: #006868;
-        }
-        .button-cb {
-            background-image: url('download (9).png');
-            border: 2px solid #008B8B;
-        }
-        .button-cb:hover {
-            background-color: #008B8B;
-            background-blend-mode: overlay;
-            border-color: #006868;
         }
         .container {
-            height: 200px;
-            position: relative;
-        }
-        .center, .ucenter {
-            margin: 0;
-            position: absolute;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-        .center {
-            top: 40%;
-        }
-        .ucenter {
-            top: 100%;
-        }
-        .button-row {
             display: flex;
-            gap: 10px;
+            flex-wrap: wrap;
             justify-content: center;
+            gap: 10px;
             margin-top: 100px;
         }
-        .button-row2 {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-top: 210px;
+        .nav-button {
+            display: block;
+            margin: 20px auto;
+            text-align: center;
         }
     </style>
 </head>
 <body>
     <h1 style="color:#7b7b7b;">Welcome to my projects</h1>
-    <h2 style="color:#7b7b7b;">this has all the implemented games</h2>
+    <h2 style="color:#7b7b7b;">This has all the implemented games</h2>
 
-    <div class="container">
-        <div class="center">
-            <a href="index.html">
-                <button class="button button1">back to main site</button>
-            </a>
-        </div>
-        <div class="ucenter">
-            <a href="aboutme.html">
-                <button class="button button2 button3">About Me!</button>
-            </a>
-        </div>
-        <div class="ucenter button-row">
-            <a href="minecraft.html">
-                <button class="button button2 button-minecraft">Minecraft</button>
-            </a>
-            <a href="retro.html">
-                <button class="button button2 button-retro">Retro</button>
-            </a>
-            <a href="messenger.html">
-                <button class="button button2 button-textinorsm">Messenger</button>
-            </a>
-            <a href="pixelplace.html">
-                <button class="button button2 button-pixelplace">Pixel Place</button>
-            </a>
-            <a href="2048/index.html">
-                <button class="button button2 button-2048">2048</button>
-            </a>
-            
-        </div>
-        <div class="ucenter button-row2">
-            <a href="ai.html">
-                <button class="button button2 button-ai">AI</button>
-            </a>
-            <a href="cookie%20clicker/index.html">
-                <button class="button button2 button-CC"></button>
-            </a>
-            <a href="Bitlife/index.html">
-                <button class="button button2 button-bitlife">Bitlife</button>
-            </a>
-            <a href="Slope/index.html">
-                <button class="button button2 button-slope">slope</button>
-            </a>
-            <a href="core-ball/index.html">
-                <button class="button button2 button-cb">       </button>
-            </a>
-        </div>
+    <div class="nav-button">
+        <a href="index.html">
+            <button class="button" style="background-color: black;">Back to Main Site</button>
+        </a>
+        <a href="aboutme.html">
+            <button class="button" style="background-color: black;">About Me!</button>
+        </a>
     </div>
-    <br><br><br><br><br><br><br><br><br>
+
+    <div class="container" id="button-container"></div>
+
+    <script>
+        // Button data
+        const buttons = [
+            { text: "Minecraft", url: "minecraft.html", bg: "Minecraft_image.png", color: "#4CAF50" },
+            { text: "Retro", url: "retro.html", bg: "retroimage.png", color: "#FF8C00" },
+            { text: "Messenger", url: "messenger.html", bg: "textinorsm.png", color: "#8B008B" },
+            { text: "Pixel Place", url: "pixelplace.html", bg: "pixelplace.png", color: "#008B8B" },
+            { text: "2048", url: "2048/index.html", bg: "2048image.png", color: "#008B8B" },
+            { text: "AI", url: "ai.html", bg: "", color: "#4A90E2" },
+            { text: "Cookie Clicker", url: "cookie%20clicker/index.html", bg: "download (18).jpeg", color: "#008B8B" },
+            { text: "Bitlife", url: "Bitlife/index.html", bg: "Bitlife/logo.png", color: "#357ABD" },
+            { text: "Slope", url: "Slope/index.html", bg: "download (7).png", color: "#008B8B" },
+            { text: "Core Ball", url: "core-ball/index.html", bg: "download (9).png", color: "#008B8B" }
+        ];
+
+        // Generate buttons dynamically
+        const container = document.getElementById('button-container');
+        buttons.forEach(button => {
+            const btn = document.createElement('a');
+            btn.href = button.url;
+            btn.innerHTML = `<button class="button" style="
+                background-image: url('${button.bg}');
+                border-color: ${button.color};
+                ">${button.text}</button>`;
+            container.appendChild(btn);
+        });
+    </script>
 </body>
 </html>
