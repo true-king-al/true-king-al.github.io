@@ -281,7 +281,7 @@ function displayRandomFact() {
     // Display a random fact when the page loads
     //window.onload = displayRandomFact;
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
-    import { getDatabase, ref, set, onValue, increment, get, remove, onDisconnect, push, query} from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
+    import { getDatabase, ref, set, onValue, increment, get, remove, onDisconnect, push, query, orderByValue, startAt} from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
 
     // Firebase configuration
     const firebaseConfig = {
