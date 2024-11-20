@@ -4,12 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Statistics</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        #live-user-display, #total-visitors-display {
+            font-size: 24px;
+            color: #007BFF;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
     <h1>Website Statistics</h1>
-    <p>Total Visitors: <span id="visitorCount">Loading...</span></p>
+    <p id="total-visitors-display">Loading total visitors...</p>
+    <p id="live-user-display">Loading live user count...</p>
 
     <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
+
         // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBzxQgwD_gBuylhdqlRck_PEVzueWccvTM",
@@ -23,19 +42,22 @@
         };
 
         // Initialize Firebase
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js";
-
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
-        // Reference to the visitorCount in the database
-        const visitorCountRef = ref(database, 'visitorCount');
+        // Listen for active users count
+        const activeUsersRef = ref(database, 'activeUsers');
+        onValue(activeUsersRef, (snapshot) => {
+            const activeUsers = snapshot.val();
+            const count = activeUsers ? Object.keys(activeUsers).length : 0;
+            document.getElementById('live-user-display').textContent = `Currently Online: ${count}`;
+        });
 
-        // Listen for updates to the visitor count
-        onValue(visitorCountRef, (snapshot) => {
-            const count = snapshot.val();
-            document.getElementById('visitorCount').textContent = count;
+        // Listen for total visitors count
+        const totalVisitorsRef = ref(database, 'totalVisitors');
+        onValue(totalVisitorsRef, (snapshot) => {
+            const total = snapshot.val() || 0;
+            document.getElementById('total-visitors-display').textContent = `Total Visitors: ${total}`;
         });
     </script>
 </body>
