@@ -1,33 +1,55 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Statistics</title>
+    <title>Website Statistics</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            padding: 20px;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
         }
         h1 {
             color: #333;
-        }
-        #live-user-display, #total-visitors-display {
-            font-size: 24px;
-            color: #007BFF;
             margin-top: 20px;
+        }
+        .stat-container {
+            display: inline-block;
+            text-align: left;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+        .stat-item {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .stat-label {
+            font-weight: bold;
+            color: #555;
         }
     </style>
 </head>
 <body>
     <h1>Website Statistics</h1>
-    <p id="total-visitors-display">Loading total visitors...</p>
-    <p id="live-user-display">Loading live user count...</p>
+    <div class="stat-container">
+        <div class="stat-item">
+            <span class="stat-label">Currently Online:</span> <span id="live-user-counter">0</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Total Visitors:</span> <span id="total-visitor-counter">0</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Visitors in the Last 24 Hours:</span> <span id="last-24-hour-visitors">0</span>
+        </div>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
+        import { getDatabase, ref, onValue, query, orderByValue, startAt } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
 
         // Firebase configuration
         const firebaseConfig = {
@@ -45,19 +67,30 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
-        // Listen for active users count
+        // Update currently online users
         const activeUsersRef = ref(database, 'activeUsers');
         onValue(activeUsersRef, (snapshot) => {
             const activeUsers = snapshot.val();
             const count = activeUsers ? Object.keys(activeUsers).length : 0;
-            document.getElementById('live-user-display').textContent = `Currently Online: ${count}`;
+            document.getElementById('live-user-counter').textContent = count;
         });
 
-        // Listen for total visitors count
+        // Update total visitors
         const totalVisitorsRef = ref(database, 'visitorCount');
         onValue(totalVisitorsRef, (snapshot) => {
             const total = snapshot.val() || 0;
-            document.getElementById('total-visitors-display').textContent = `Total Visitors: ${total}`;
+            document.getElementById('total-visitor-counter').textContent = total;
+        });
+
+        // Get visitors in the last 24 hours
+        const visitorLogsRef = ref(database, 'visitorLogs');
+        const past24HoursTimestamp = Date.now() - 24 * 60 * 60 * 1000; // 24 hours ago
+        const last24HoursQuery = query(visitorLogsRef, orderByValue(), startAt(past24HoursTimestamp));
+
+        onValue(last24HoursQuery, (snapshot) => {
+            const visitors = snapshot.val();
+            const count = visitors ? Object.keys(visitors).length : 0;
+            document.getElementById('last-24-hour-visitors').textContent = count;
         });
     </script>
 </body>
