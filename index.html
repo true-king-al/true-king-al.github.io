@@ -281,7 +281,7 @@ function displayRandomFact() {
     // Display a random fact when the page loads
     //window.onload = displayRandomFact;
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
-    import { getDatabase, ref, set, onValue, increment, get } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
+    import { getDatabase, ref, set, onValue, increment, get, remove, onDisconnect} from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
 
     // Firebase configuration
     const firebaseConfig = {
@@ -301,6 +301,10 @@ function displayRandomFact() {
 
     // Reference to the visitors count in the database
     const visitorsRef = ref(database, 'visitorCount');
+    const sessionId = `session_${Date.now()}`;
+
+    // Reference to active users in the database
+    const activeUsersRef = ref(database, 'activeUsers/' + sessionId);
     //set(visitorsRef, 1);
     // Increment the visitor count whenever someone visits the page
     function incrementVisitorCount() {
@@ -311,6 +315,18 @@ function displayRandomFact() {
     onValue(visitorsRef, (snapshot) => {
         const count = snapshot.val() || 0;
         document.getElementById('visitor-counter').textContent = `Visitors: ${count}`;
+    });
+
+    // Add the session to active users and remove it on disconnect
+    set(activeUsersRef, true);
+    onDisconnect(activeUsersRef).remove();
+
+    // Update the live user count in real-time
+    const activeUsersCountRef = ref(database, 'activeUsers');
+    onValue(activeUsersCountRef, (snapshot) => {
+        const activeUsers = snapshot.val();
+        const count = activeUsers ? Object.keys(activeUsers).length : 0;
+        document.getElementById('live-user-counter').textContent = `Currently Online: ${count}`;
     });
 
 function printDatabase() {
