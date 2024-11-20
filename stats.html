@@ -54,7 +54,7 @@
         });
 
         // Listen for total visitors count
-        const totalVisitorsRef = ref(database, 'totalVisitors');
+        const totalVisitorsRef = ref(database, 'visitorCount');
         onValue(totalVisitorsRef, (snapshot) => {
             const total = snapshot.val() || 0;
             document.getElementById('total-visitors-display').textContent = `Total Visitors: ${total}`;
