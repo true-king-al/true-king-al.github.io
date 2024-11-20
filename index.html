@@ -326,7 +326,6 @@ function displayRandomFact() {
     onValue(activeUsersCountRef, (snapshot) => {
         const activeUsers = snapshot.val();
         const count = activeUsers ? Object.keys(activeUsers).length : 0;
-        document.getElementById('live-user-counter').textContent = `Currently Online: ${count}`;
     });
 
 function printDatabase() {
