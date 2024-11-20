@@ -304,7 +304,7 @@ function displayRandomFact() {
     const sessionId = `session_${Date.now()}`;
 
     // Reference to active users in the database
-    const activeUsersRef = ref(database, 'activeUsers/' + sessionId);
+
     //set(visitorsRef, 1);
     // Increment the visitor count whenever someone visits the page
     function incrementVisitorCount() {
@@ -317,16 +317,25 @@ function displayRandomFact() {
         document.getElementById('visitor-counter').textContent = `Visitors: ${count}`;
     });
 
-    // Add the session to active users and remove it on disconnect
+    const visitorLogsRef = ref(database, 'visitorLogs');
+    const currentTimestamp = Date.now();
+    push(visitorLogsRef, currentTimestamp);
+
+    // Fetch visitors in the past 24 hours
+    const past24HoursTimestamp = Date.now() - 24 * 60 * 60 * 1000; // 24 hours ago
+    const last24HoursQuery = query(visitorLogsRef, orderByValue(), startAt(past24HoursTimestamp));
+
+    // Update the count in real-time
+    onValue(last24HoursQuery, (snapshot) => {
+        const visitors = snapshot.val();
+        const count = visitors ? Object.keys(visitors).length : 0;
+        document.getElementById('last-24-hour-visitors').textContent = `Visitors in the past 24 hours: ${count}`;
+    });
+
+    // Track active users
+    const activeUsersRef = ref(database, 'activeUsers/' + `session_${Date.now()}`);
     set(activeUsersRef, true);
     onDisconnect(activeUsersRef).remove();
-
-    // Update the live user count in real-time
-    const activeUsersCountRef = ref(database, 'activeUsers');
-    onValue(activeUsersCountRef, (snapshot) => {
-        const activeUsers = snapshot.val();
-        const count = activeUsers ? Object.keys(activeUsers).length : 0;
-    });
 
 function printDatabase() {
     const dbRef = ref(database);
