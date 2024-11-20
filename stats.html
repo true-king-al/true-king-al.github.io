@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistics</title>
+</head>
+<body>
+    <h1>Website Statistics</h1>
+    <p>Total Visitors: <span id="visitorCount">Loading...</span></p>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBzxQgwD_gBuylhdqlRck_PEVzueWccvTM",
+            authDomain: "messengerformewebsite.firebaseapp.com",
+            databaseURL: "https://messengerformewebsite-default-rtdb.firebaseio.com/",
+            projectId: "messengerformewebsite",
+            storageBucket: "messengerformewebsite.appspot.com",
+            messagingSenderId: "317747468617",
+            appId: "1:317747468617:web:66a9ca6c51b6cbf0f12298",
+            measurementId: "G-NVFGPSVEDT"
+        };
+
+        // Initialize Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js";
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Reference to the visitorCount in the database
+        const visitorCountRef = ref(database, 'visitorCount');
+
+        // Listen for updates to the visitor count
+        onValue(visitorCountRef, (snapshot) => {
+            const count = snapshot.val();
+            document.getElementById('visitorCount').textContent = count;
+        });
+    </script>
+</body>
+</html>
