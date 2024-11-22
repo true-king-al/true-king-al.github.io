@@ -36,6 +36,21 @@
       border: none;
       font-size: 16px;
     }
+    progress {
+      width: 80%;
+      height: 10px;
+      margin-top: 10px;
+      background-color: #444;
+      border-radius: 5px;
+    }
+    progress::-webkit-progress-bar {
+      background-color: #444;
+      border-radius: 5px;
+    }
+    progress::-webkit-progress-value {
+      background-color: #1DB954;
+      border-radius: 5px;
+    }
   </style>
 </head>
 <body>
@@ -52,6 +67,9 @@
     <button onclick="togglePlay()" id="playPauseBtn">Play</button>
     <button onclick="skipSong()">Skip</button>
     <button onclick="toggleLoop()" id="loopBtn">Enable Loop</button>
+    
+    <!-- Green Progress Bar -->
+    <progress id="progressBar" value="0" max="100"></progress>
   </div>
 
   <script>
@@ -63,6 +81,7 @@
     const currentSongDisplay = document.getElementById("currentSong");
     const playPauseBtn = document.getElementById("playPauseBtn");
     const songList = document.getElementById("songList");
+    const progressBar = document.getElementById("progressBar");
 
     // Display all songs initially
     function displaySongs(songsToDisplay) {
@@ -89,12 +108,12 @@
       currentSongIndex = index;
       playCurrentSong();
     }
+
     function toggleLoop() {
       audioPlayer.loop = !audioPlayer.loop;
       const loopBtn = document.getElementById("loopBtn");
       loopBtn.textContent = audioPlayer.loop ? "Disable Loop" : "Enable Loop";
     }
-
 
     function playCurrentSong() {
       if (currentSongIndex === -1) return;
@@ -119,6 +138,20 @@
       currentSongIndex = Math.floor(Math.random() * songs.length);
       playCurrentSong();
     }
+
+    // Update progress bar as the song plays
+    audioPlayer.addEventListener("timeupdate", function() {
+      const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+      progressBar.value = progress;
+    });
+
+    // Make progress bar clickable to skip to a specific time in the song
+    progressBar.addEventListener("click", function(event) {
+      const progressBarWidth = progressBar.offsetWidth;
+      const clickPosition = event.offsetX;
+      const clickedPercentage = (clickPosition / progressBarWidth) * 100;
+      audioPlayer.currentTime = (clickedPercentage / 100) * audioPlayer.duration;
+    });
   </script>
 </body>
 </html>
