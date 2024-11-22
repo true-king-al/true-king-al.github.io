@@ -33,8 +33,6 @@
         }
         .chart-container {
             margin-top: 30px;
-            display: flex;
-            justify-content: center;
         }
         canvas {
             width: 100%;
@@ -75,6 +73,7 @@
             appId: "1:317747468617:web:66a9ca6c51b6cbf0f12298",
             measurementId: "G-NVFGPSVEDT"
         };
+
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
@@ -144,9 +143,15 @@
         onValue(last24HoursQuery, (snapshot) => {
             const visitors = snapshot.val() || {};
             const now = new Date();
+
+            // Reset visitorData array
+            visitorData.fill(0);
+
             Object.values(visitors).forEach((timestamp) => {
                 const visitorDate = new Date(timestamp);
-                const hour = (visitorDate.getHours() + 24 - now.getTimezoneOffset() / 60) % 24;
+
+                // Correctly calculate the hour, ensuring alignment with the local timezone
+                const hour = visitorDate.getHours();
                 visitorData[hour]++;
             });
 
@@ -155,7 +160,7 @@
             document.getElementById('last-24-hour-visitors').textContent = count;
 
             // Update the chart
-            visitorChart.data.datasets[0].data = visitorData;
+            visitorChart.data.datasets[0].data = [...visitorData]; // Use a fresh copy of visitorData
             visitorChart.update();
         });
     </script>
