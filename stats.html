@@ -31,7 +31,15 @@
             font-weight: bold;
             color: #555;
         }
+        .chart-container {
+            margin-top: 30px;
+        }
+        canvas {
+            max-width: 90%;
+            margin: auto;
+        }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <h1>Website Statistics</h1>
@@ -45,6 +53,9 @@
         <div class="stat-item">
             <span class="stat-label">Visitors in the Last 24 Hours:</span> <span id="last-24-hour-visitors">0</span>
         </div>
+    </div>
+    <div class="chart-container">
+        <canvas id="visitorChart"></canvas>
     </div>
 
     <script type="module">
@@ -82,15 +93,63 @@
             document.getElementById('total-visitor-counter').textContent = total;
         });
 
-        // Get visitors in the last 24 hours
+        // Get visitors in the last 24 hours and generate graph
         const visitorLogsRef = ref(database, 'visitorLogs');
         const past24HoursTimestamp = Date.now() - 24 * 60 * 60 * 1000; // 24 hours ago
         const last24HoursQuery = query(visitorLogsRef, orderByValue(), startAt(past24HoursTimestamp));
 
+        const visitorData = Array(24).fill(0); // Array to hold hourly visitor counts
         onValue(last24HoursQuery, (snapshot) => {
             const visitors = snapshot.val();
-            const count = visitors ? Object.keys(visitors).length : 0;
+            if (visitors) {
+                const now = new Date();
+                Object.values(visitors).forEach((timestamp) => {
+                    const hour = new Date(timestamp).getHours();
+                    visitorData[hour]++;
+                });
+            }
+
+            // Update the visitor count display
+            const count = Object.keys(visitors || {}).length;
             document.getElementById('last-24-hour-visitors').textContent = count;
+
+            // Update the chart
+            visitorChart.data.datasets[0].data = visitorData;
+            visitorChart.update();
+        });
+
+        // Create the graph
+        const ctx = document.getElementById('visitorChart').getContext('2d');
+        const visitorChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: Array.from({ length: 24 }, (_, i) => `${i}:00`), // Labels for 24 hours
+                datasets: [{
+                    label: 'Visitors',
+                    data: visitorData,
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Hour'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Number of Visitors'
+                        },
+                        beginAtZero: true
+                    }
+                }
+            }
         });
     </script>
 </body>
