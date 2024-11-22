@@ -33,10 +33,12 @@
         }
         .chart-container {
             margin-top: 30px;
+            display: flex;
+            justify-content: center;
         }
         canvas {
-            max-width: 90%;
-            margin: auto;
+            width: 100%;
+            max-width: 600px;
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -99,57 +101,62 @@
         const last24HoursQuery = query(visitorLogsRef, orderByValue(), startAt(past24HoursTimestamp));
 
         const visitorData = Array(24).fill(0); // Array to hold hourly visitor counts
+        let visitorChart; // Declare chart variable
+
+        const initializeChart = () => {
+            const ctx = document.getElementById('visitorChart').getContext('2d');
+            visitorChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Array.from({ length: 24 }, (_, i) => `${i}:00`), // Labels for 24 hours
+                    datasets: [{
+                        label: 'Visitors',
+                        data: visitorData,
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Hour'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Number of Visitors'
+                            },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        };
+
+        // Initialize the chart
+        initializeChart();
+
         onValue(last24HoursQuery, (snapshot) => {
-            const visitors = snapshot.val();
-            if (visitors) {
-                const now = new Date();
-                Object.values(visitors).forEach((timestamp) => {
-                    const hour = new Date(timestamp).getHours();
-                    visitorData[hour]++;
-                });
-            }
+            const visitors = snapshot.val() || {};
+            const now = new Date();
+            Object.values(visitors).forEach((timestamp) => {
+                const visitorDate = new Date(timestamp);
+                const hour = (visitorDate.getHours() + 24 - now.getTimezoneOffset() / 60) % 24;
+                visitorData[hour]++;
+            });
 
             // Update the visitor count display
-            const count = Object.keys(visitors || {}).length;
+            const count = Object.keys(visitors).length;
             document.getElementById('last-24-hour-visitors').textContent = count;
 
             // Update the chart
             visitorChart.data.datasets[0].data = visitorData;
             visitorChart.update();
-        });
-
-        // Create the graph
-        const ctx = document.getElementById('visitorChart').getContext('2d');
-        const visitorChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: Array.from({ length: 24 }, (_, i) => `${i}:00`), // Labels for 24 hours
-                datasets: [{
-                    label: 'Visitors',
-                    data: visitorData,
-                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Hour'
-                        }
-                    },
-                    y: {
-                        title: {
-                            display: true,
-                            text: 'Number of Visitors'
-                        },
-                        beginAtZero: true
-                    }
-                }
-            }
         });
     </script>
 </body>
