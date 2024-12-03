@@ -188,6 +188,22 @@
         return snapshot.exists() ? snapshot.val().activated === true : false;
     }
 
+    // Function to check if the current user is an admin
+    function checkAdmin() {
+        if (username === 'logan-larrabee') {
+            isAdmin = true;
+            alert('Admin privileges granted.');
+            // Show delete buttons for messages
+            document.querySelectorAll('.delete-button').forEach(button => {
+                button.style.display = 'inline';
+            });
+        } else {
+            isAdmin = false;
+            alert('You are not an admin.');
+        }
+    }
+
+
     // Function to save the message
     async function saveMessage(event) {
         event.preventDefault();
