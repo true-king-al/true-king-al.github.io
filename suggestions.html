@@ -159,11 +159,22 @@
         let suggestionLimit = 50;
         let isAdmin = false;
         let isActivated = false;
+        const encryptedPassword = "zl5zU6x3hxU7HT2eN+3qyw==";  // The encrypted admin password
+        const aesKey = "password12345678";  // The AES key used to encrypt/decrypt
+
+        // Function to decrypt the password
+        function decryptPassword(encryptedText, key) {
+            let decrypted = CryptoJS.AES.decrypt(encryptedText, CryptoJS.enc.Utf8.parse(key), {
+                mode: CryptoJS.mode.ECB,
+                padding: CryptoJS.pad.Pkcs7
+            });
+            return decrypted.toString(CryptoJS.enc.Utf8);
+        }
 
         // Check if the entered password is correct
         function checkAdmin() {
             let password = document.getElementById('admin-password').value;
-            if (password == 'painloganpain') {
+            if (password == decryptPassword(encryptedPassword, aesKey)) {
                 isAdmin = true;
                 alert('password correct');
                 document.querySelectorAll('.delete-button').forEach(button => {
