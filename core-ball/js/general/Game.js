@@ -27,7 +27,7 @@ define(function(require, exports, module) {
     var FPS = 60;
     var BASE_HEIGHT = 560;
     var STORAGE_KEY = "core-ball-level";
-    var WX_SHARE_TEXT = "Core Ball(酷啵)-练手活的HTML5游戏，我已玩到第#{level}关了，你也来试试吧!";
+    var WX_SHARE_TEXT = "Core Ball";
     var SHARE_HREF = "sinaweibo://share?content=Core Ball(酷啵) - 练手活的HTML5小游戏，我已玩到第#{level}关了，你也来试试吧！ http://coreball.sinaapp.com";
     
     var scene;
