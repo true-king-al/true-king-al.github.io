@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slot Machine</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        canvas {
+            border: 2px solid #000;
+            margin: 20px auto;
+        }
+        button {
+            font-size: 16px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Slot Machine</h1>
+    <canvas id="slotMachine" width="300" height="200"></canvas>
+    <br>
+    <button id="spinButton">Spin</button>
+
+    <script>
+        const canvas = document.getElementById("slotMachine");
+        const ctx = canvas.getContext("2d");
+        const symbols = ["🍒", "🍋", "🔔", "🍇", "💎", "🍉"];
+        const slotCount = 3;
+        const slotWidth = canvas.width / slotCount;
+        const slotHeight = canvas.height;
+        let slots = [0, 0, 0];
+        let spinning = false;
+
+        function drawSlots() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < slotCount; i++) {
+                ctx.font = "48px Arial";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(symbols[slots[i]], (i + 0.5) * slotWidth, slotHeight / 2);
+            }
+        }
+
+        function spinSlots() {
+            const spinInterval = setInterval(() => {
+                for (let i = 0; i < slots.length; i++) {
+                    slots[i] = Math.floor(Math.random() * symbols.length);
+                }
+                drawSlots();
+            }, 100);
+
+            setTimeout(() => {
+                clearInterval(spinInterval);
+                spinning = false;
+                checkResult();
+            }, 2000);
+        }
+
+        function checkResult() {
+            if (slots.every((val, _, arr) => val === arr[0])) {
+                alert("🎉 Jackpot! All symbols match!");
+            } else {
+                alert("Better luck next time!");
+            }
+        }
+
+        document.getElementById("spinButton").addEventListener("click", () => {
+            if (!spinning) {
+                spinning = true;
+                spinSlots();
+            }
+        });
+
+        drawSlots(); // Initial draw
+    </script>
+</body>
+</html>
