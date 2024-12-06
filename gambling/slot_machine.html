@@ -55,163 +55,69 @@
   <canvas id="slotMachine" width="300" height="150"></canvas>
   <button id="spinButton">Spin</button>
 
-  <script>
-    const canvas = document.getElementById("slotMachine");
-    const ctx = canvas.getContext("2d");
-    const symbols = ["🍒", "🍋", "🔔", "🍇", "💎", "🍉"];
-    const slotCount = 3;
-    const slotWidth = canvas.width / slotCount;
-    const slotHeight = canvas.height;
-    const fontSize = 64;
-    const spinDuration = 3000; // Total spin duration per reel in milliseconds
-    const stopDelays = [0, 800, 1600]; // Delays for each reel to stop
-    const spinRepeats = 5; // Number of times each reel spins before stopping
+<script>
+  function animate(currentTime) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.font = `${fontSize}px Arial`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
 
-    let slots = [
-      { 
-        currentSymbol: getRandomSymbol(),
-        nextSymbol: null,
-        yOffset: -slotHeight,
-        spinning: false,
-        startTime: null,
-        stopTime: null,
-        totalDistance: 0
-      },
-      { 
-        currentSymbol: getRandomSymbol(),
-        nextSymbol: null,
-        yOffset: -slotHeight,
-        spinning: false,
-        startTime: null,
-        stopTime: null,
-        totalDistance: 0
-      },
-      { 
-        currentSymbol: getRandomSymbol(),
-        nextSymbol: null,
-        yOffset: -slotHeight,
-        spinning: false,
-        startTime: null,
-        stopTime: null,
-        totalDistance: 0
+    slots.forEach((slot, index) => {
+      if (currentTime >= slot.startTime && slot.spinning) {
+        let elapsed = currentTime - slot.startTime;
+        let duration = slot.stopTime - slot.startTime;
+        let progress = Math.min(elapsed / duration, 1);
+
+        // Calculate yOffset with easing (ease-out effect)
+        let easeProgress = 1 - Math.pow(1 - progress, 3);
+        slot.yOffset = -slotHeight + (easeProgress * (slotHeight + slot.totalDistance));
+
+        if (progress >= 1) {
+          // Stop spinning
+          slot.spinning = false;
+          slot.currentSymbol = slot.nextSymbol;
+          slot.yOffset = 0;
+        }
       }
-    ];
 
-    let animationRequest;
-    let spinStartTime;
-    let spinning = false;
+      // Determine the position of the symbols
+      let visibleIndex = Math.floor((slot.yOffset / slotHeight) + symbols.length) % symbols.length;
+      let displaySymbol = symbols[visibleIndex];
+      let nextSymbolIndex = (visibleIndex + 1) % symbols.length;
+      let nextSymbol = symbols[nextSymbolIndex];
 
-    // Initialize on page load
-    drawInitialSlots();
+      const x = (index + 0.5) * slotWidth;
 
-    document.getElementById("spinButton").addEventListener("click", () => {
-      if (!spinning) {
-        startSpin();
+      // Draw current symbol
+      ctx.fillText(displaySymbol, x, slot.yOffset % slotHeight);
+
+      // Draw next symbol if spinning
+      if (slot.spinning) {
+        ctx.fillText(nextSymbol, x, (slot.yOffset % slotHeight) + slotHeight);
       }
     });
 
-    function getRandomSymbol() {
-      return symbols[Math.floor(Math.random() * symbols.length)];
+    // Draw slot borders
+    for (let i = 1; i < slotCount; i++) {
+      ctx.beginPath();
+      ctx.moveTo(i * slotWidth, 0);
+      ctx.lineTo(i * slotWidth, slotHeight);
+      ctx.strokeStyle = "#16a085";
+      ctx.lineWidth = 4;
+      ctx.stroke();
     }
 
-    function drawInitialSlots() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.font = `${fontSize}px Arial`;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      slots.forEach((slot, index) => {
-        const x = (index + 0.5) * slotWidth;
-        const y = slotHeight / 2;
-        ctx.fillText(slot.currentSymbol, x, y);
-      });
-    }
-
-    function startSpin() {
-      spinning = true;
-      spinStartTime = performance.now();
-      
-      // Initialize spinning state for each slot
-      slots.forEach((slot, index) => {
-        slot.spinning = true;
-        slot.startTime = spinStartTime + stopDelays[index];
-        slot.stopTime = spinStartTime + spinDuration + stopDelays[index];
-        slot.totalDistance = spinRepeats * slotHeight;
-        slot.yOffset = 0;
-        slot.nextSymbol = getRandomSymbol();
-      });
-
+    // Continue the animation if any slot is still spinning
+    const anySpinning = slots.some(slot => slot.spinning);
+    if (anySpinning) {
       animationRequest = requestAnimationFrame(animate);
+    } else {
+      cancelAnimationFrame(animationRequest);
+      spinning = false;
+      checkResult();
     }
+  }
+</script>
 
-    function animate(currentTime) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.font = `${fontSize}px Arial`;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-
-      slots.forEach((slot, index) => {
-        if (currentTime >= slot.startTime && slot.spinning) {
-          let elapsed = currentTime - slot.startTime;
-          let duration = slot.stopTime - slot.startTime;
-          let progress = Math.min(elapsed / duration, 1);
-
-          // Calculate yOffset with easing (ease out)
-          let easeProgress = 1 - Math.pow(1 - progress, 3);
-          slot.yOffset = (easeProgress * slot.totalDistance) - slotHeight;
-
-          if (progress >= 1) {
-            // Stop spinning
-            slot.spinning = false;
-            slot.currentSymbol = slot.nextSymbol;
-            slot.yOffset = 0;
-          }
-        }
-
-        // Determine which symbol to display based on yOffset
-        let symbolIndex = Math.floor(slot.yOffset / slotHeight) % symbols.length;
-        let displaySymbol = symbols[(symbols.indexOf(slot.currentSymbol) + symbolIndex) % symbols.length];
-        let nextSymbol = symbols[(symbols.indexOf(displaySymbol) + 1) % symbols.length];
-
-        const x = (index + 0.5) * slotWidth;
-        
-        // Draw current symbol
-        ctx.fillText(displaySymbol, x, slotHeight / 2 - slot.yOffset % slotHeight);
-
-        // Draw next symbol if spinning
-        if (slot.spinning) {
-          ctx.fillText(nextSymbol, x, slotHeight / 2 - (slot.yOffset % slotHeight) - slotHeight);
-        }
-      });
-
-      // Draw slot borders
-      for (let i = 1; i < slotCount; i++) {
-        ctx.beginPath();
-        ctx.moveTo(i * slotWidth, 0);
-        ctx.lineTo(i * slotWidth, slotHeight);
-        ctx.strokeStyle = "#16a085";
-        ctx.lineWidth = 4;
-        ctx.stroke();
-      }
-
-      // Continue the animation if any slot is still spinning
-      const anySpinning = slots.some(slot => slot.spinning);
-      if (anySpinning) {
-        animationRequest = requestAnimationFrame(animate);
-      } else {
-        cancelAnimationFrame(animationRequest);
-        spinning = false;
-        checkResult();
-      }
-    }
-
-    function checkResult() {
-      const [first, second, third] = slots.map(slot => slot.currentSymbol);
-      if (first === second && second === third) {
-        alert("🎉 Jackpot! All symbols match!");
-      } else {
-        alert("Better luck next time!");
-      }
-    }
-  </script>
 </body>
 </html>
