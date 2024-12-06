@@ -63,8 +63,9 @@
     const slotWidth = canvas.width / slotCount;
     const slotHeight = canvas.height;
     const fontSize = 64;
-    const spinDuration = 10000; // Total spin duration in milliseconds
+    const spinDuration = 3000; // Total spin duration per reel in milliseconds
     const stopDelays = [0, 800, 1600]; // Delays for each reel to stop
+    const spinRepeats = 5; // Number of times each reel spins before stopping
 
     let slots = [
       { 
@@ -73,7 +74,8 @@
         yOffset: -slotHeight,
         spinning: false,
         startTime: null,
-        stopTime: null
+        stopTime: null,
+        totalDistance: 0
       },
       { 
         currentSymbol: getRandomSymbol(),
@@ -81,7 +83,8 @@
         yOffset: -slotHeight,
         spinning: false,
         startTime: null,
-        stopTime: null
+        stopTime: null,
+        totalDistance: 0
       },
       { 
         currentSymbol: getRandomSymbol(),
@@ -89,7 +92,8 @@
         yOffset: -slotHeight,
         spinning: false,
         startTime: null,
-        stopTime: null
+        stopTime: null,
+        totalDistance: 0
       }
     ];
 
@@ -97,7 +101,7 @@
     let spinStartTime;
     let spinning = false;
 
-    // Initializeed on page load
+    // Initialize on page load
     drawInitialSlots();
 
     document.getElementById("spinButton").addEventListener("click", () => {
@@ -131,6 +135,8 @@
         slot.spinning = true;
         slot.startTime = spinStartTime + stopDelays[index];
         slot.stopTime = spinStartTime + spinDuration + stopDelays[index];
+        slot.totalDistance = spinRepeats * slotHeight;
+        slot.yOffset = 0;
         slot.nextSymbol = getRandomSymbol();
       });
 
@@ -144,35 +150,36 @@
       ctx.textBaseline = "middle";
 
       slots.forEach((slot, index) => {
-        // Calculate elapsed time since spin started for this slot
-        const elapsed = currentTime - slot.startTime;
-
         if (currentTime >= slot.startTime && slot.spinning) {
-          // Calculate the yOffset based on elapsed time
-          // The slot moves from top (-slotHeight) to center (slotHeight / 2)
-          const totalSpinTime = spinDuration;
-          const progress = Math.min(elapsed / totalSpinTime, 1);
-          
-          // Ease-out effect
-          const easeProgress = 1 - Math.pow(1 - progress, 3);
-          slot.yOffset = -slotHeight + easeProgress * (slotHeight + slotHeight / 2);
-          
+          let elapsed = currentTime - slot.startTime;
+          let duration = slot.stopTime - slot.startTime;
+          let progress = Math.min(elapsed / duration, 1);
+
+          // Calculate yOffset with easing (ease out)
+          let easeProgress = 1 - Math.pow(1 - progress, 3);
+          slot.yOffset = easeProgress * slot.totalDistance;
+
           if (progress >= 1) {
             // Stop spinning
             slot.spinning = false;
             slot.currentSymbol = slot.nextSymbol;
-            slot.yOffset = slotHeight / 2;
+            slot.yOffset = 0;
           }
         }
 
-        // Draw current symbol
-        const x = (index + 0.5) * slotWidth;
-        const y = slot.yOffset;
-        ctx.fillText(slot.currentSymbol, x, y);
+        // Determine which symbol to display based on yOffset
+        let symbolIndex = Math.floor(slot.yOffset / slotHeight) % symbols.length;
+        let displaySymbol = symbols[(symbols.indexOf(slot.currentSymbol) + symbolIndex) % symbols.length];
+        let nextSymbol = symbols[(symbols.indexOf(displaySymbol) + 1) % symbols.length];
 
-        // If currently spinning, draw the next symbol above
+        const x = (index + 0.5) * slotWidth;
+        
+        // Draw current symbol
+        ctx.fillText(displaySymbol, x, slotHeight / 2 - slot.yOffset % slotHeight);
+
+        // Draw next symbol if spinning
         if (slot.spinning) {
-          ctx.fillText(slot.nextSymbol, x, y - slotHeight);
+          ctx.fillText(nextSymbol, x, slotHeight / 2 - (slot.yOffset % slotHeight) - slotHeight);
         }
       });
 
