@@ -129,12 +129,14 @@
                     do {
                         finalSymbol = getRandomSymbol();
                     } while (finalSymbol === firstTwoSymbol);
-                } else if (shouldWin) {
-                    // Otherwise, pick random symbols
-                    finalSymbol = winSymbol
                 } else {
                     // Otherwise, pick random symbols
                     finalSymbol = getRandomSymbol();
+                }
+
+                if (shouldWin) {
+                    // if should win then set it to win symbol
+                    finalSymbol = winSymbol;
                 }
 
                 // Animate reel spinning
