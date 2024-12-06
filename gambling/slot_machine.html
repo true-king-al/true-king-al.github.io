@@ -1,123 +1,171 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Animated Slot Machine</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      text-align: center;
-      background-color: #2c3e50;
-      color: #ecf0f1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-    }
-
-    h1 {
-      margin-bottom: 20px;
-    }
-
-    #slotMachine {
-      border: 4px solid #16a085;
-      border-radius: 10px;
-      background-color: #1abc9c;
-      margin-bottom: 20px;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-    }
-
-    button {
-      font-size: 18px;
-      padding: 10px 30px;
-      cursor: pointer;
-      border: none;
-      border-radius: 5px;
-      background-color: #e74c3c;
-      color: #fff;
-      transition: background-color 0.3s, transform 0.2s;
-    }
-
-    button:hover {
-      background-color: #c0392b;
-    }
-
-    button:active {
-      transform: scale(0.95);
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slot Machine</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #333;
+            color: #fff;
+        }
+        .slot-machine {
+            text-align: center;
+            border: 5px solid #555;
+            border-radius: 10px;
+            padding: 20px;
+            background: linear-gradient(145deg, #444, #222);
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.5);
+        }
+        .reels {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .reel {
+            width: 60px;
+            height: 60px;
+            margin: 0 10px;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #222;
+            background: #fff;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0px 3px 5px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            position: relative;
+        }
+        .controls {
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background: #28a745;
+            color: white;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #218838;
+        }
+        .message {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-  <h1>🎰 Slot Machine 🎰</h1>
-  <canvas id="slotMachine" width="300" height="150"></canvas>
-  <button id="spinButton">Spin</button>
+    <div class="slot-machine">
+        <h1>Slot Machine</h1>
+        <div class="reels">
+            <div class="reel" id="reel1">7</div>
+            <div class="reel" id="reel2">7</div>
+            <div class="reel" id="reel3">7</div>
+        </div>
+        <div class="controls">
+            <button id="spinButton">Spin</button>
+        </div>
+        <div class="message" id="message"></div>
+    </div>
 
-<script>
-  function animate(currentTime) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.font = `${fontSize}px Arial`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
+    <script>
+        // Grab references to the reel elements
+        const reelElements = [
+            document.getElementById('reel1'),
+            document.getElementById('reel2'),
+            document.getElementById('reel3')
+        ];
 
-    slots.forEach((slot, index) => {
-      if (currentTime >= slot.startTime && slot.spinning) {
-        let elapsed = currentTime - slot.startTime;
-        let duration = slot.stopTime - slot.startTime;
-        let progress = Math.min(elapsed / duration, 1);
+        // Grab the spin button and message display
+        const spinButton = document.getElementById('spinButton');
+        const messageElement = document.getElementById('message');
 
-        // Calculate yOffset with easing (ease-out effect)
-        let easeProgress = 1 - Math.pow(1 - progress, 3);
-        slot.yOffset = -slotHeight + (easeProgress * (slotHeight + slot.totalDistance));
+        // Define possible slot symbols
+        const symbols = ['🍒', '🍋', '🔔', '⭐', '7'];
 
-        if (progress >= 1) {
-          // Stop spinning
-          slot.spinning = false;
-          slot.currentSymbol = slot.nextSymbol;
-          slot.yOffset = 0;
+        // Function to get a random symbol from the array
+        function getRandomSymbol() {
+            return symbols[Math.floor(Math.random() * symbols.length)];
         }
-      }
 
-      // Determine the position of the symbols
-      let visibleIndex = Math.floor((slot.yOffset / slotHeight) + symbols.length) % symbols.length;
-      let displaySymbol = symbols[visibleIndex];
-      let nextSymbolIndex = (visibleIndex + 1) % symbols.length;
-      let nextSymbol = symbols[nextSymbolIndex];
+        // Animate reels and determine the result with "edging" logic
+        function spinReels() {
+            let results = []; // Store results for each reel
+            messageElement.textContent = ''; // Clear previous message
+            spinButton.disabled = true; // Disable button during spin
 
-      const x = (index + 0.5) * slotWidth;
+            // Determine if we will "edge" the player
+            const shouldEdge = Math.random() < 0.5; // 50% chance to edge
+            let firstTwoSymbol = shouldEdge ? getRandomSymbol() : null;
 
-      // Draw current symbol
-      ctx.fillText(displaySymbol, x, slot.yOffset % slotHeight);
+            reelElements.forEach((reel, index) => {
+                let position = 0; // Start position of animation
+                const duration = 2000 + index * 2000; // Spin duration per reel
+                const interval = 50; // Interval for updating position
+                let finalSymbol;
 
-      // Draw next symbol if spinning
-      if (slot.spinning) {
-        ctx.fillText(nextSymbol, x, (slot.yOffset % slotHeight) + slotHeight);
-      }
-    });
+                if (shouldEdge && index < 2) {
+                    // Force the first two reels to match if edging
+                    finalSymbol = firstTwoSymbol;
+                } else if (shouldEdge && index === 2) {
+                    // Force the last reel to be different if edging
+                    do {
+                        finalSymbol = getRandomSymbol();
+                    } while (finalSymbol === firstTwoSymbol);
+                } else {
+                    // Otherwise, pick random symbols
+                    finalSymbol = getRandomSymbol();
+                }
 
-    // Draw slot borders
-    for (let i = 1; i < slotCount; i++) {
-      ctx.beginPath();
-      ctx.moveTo(i * slotWidth, 0);
-      ctx.lineTo(i * slotWidth, slotHeight);
-      ctx.strokeStyle = "#16a085";
-      ctx.lineWidth = 4;
-      ctx.stroke();
-    }
+                // Animate reel spinning
+                const intervalId = setInterval(() => {
+                    position += 1;
+                    reel.textContent = symbols[position % symbols.length]; // Loop through symbols
+                }, interval);
 
-    // Continue the animation if any slot is still spinning
-    const anySpinning = slots.some(slot => slot.spinning);
-    if (anySpinning) {
-      animationRequest = requestAnimationFrame(animate);
-    } else {
-      cancelAnimationFrame(animationRequest);
-      spinning = false;
-      checkResult();
-    }
-  }
-</script>
+                // Stop animation after duration and set final symbol
+                setTimeout(() => {
+                    clearInterval(intervalId);
+                    reel.textContent = finalSymbol;
+                    results[index] = finalSymbol; // Save result for this reel
 
+                    // Check win condition after all reels stop
+                    if (index === reelElements.length - 1) {
+                        checkWin(results);
+                        spinButton.disabled = false; // Re-enable button
+                    }
+                }, duration);
+            });
+        }
+
+        // Check if all three reels match
+        function checkWin(results) {
+            if (results[0] === results[1] && results[1] === results[2]) {
+                messageElement.textContent = '🎉 Jackpot! You Win! 🎉';
+                messageElement.style.color = '#ffc107';
+            } else {
+                messageElement.textContent = 'Try Again!';
+                messageElement.style.color = '#fff';
+            }
+        }
+
+        // Add click event listener to spin button
+        spinButton.addEventListener('click', spinReels);
+    </script>
 </body>
 </html>
