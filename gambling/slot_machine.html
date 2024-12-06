@@ -81,7 +81,9 @@
             <button id="spinButton">Spin</button>
         </div>
         <div class="message" id="message"></div>
+        <p1 id="moneyuhave">Money: $1000</p1>
     </div>
+    
 
     <script>
         // Grab references to the reel elements
@@ -94,9 +96,11 @@
         // Grab the spin button and message display
         const spinButton = document.getElementById('spinButton');
         const messageElement = document.getElementById('message');
+        const moneyMessage = document.getElementById('moneyuhave');
 
         // Define possible slot symbols
         const symbols = ['🍒', '🍋', '🔔', '⭐', '7'];
+        let money = 1000;
 
         // Function to get a random symbol from the array
         function getRandomSymbol() {
@@ -106,6 +110,7 @@
         // Animate reels and determine the result with "edging" logic
         function spinReels() {
             let results = []; // Store results for each reel
+            money = money - 50;
             messageElement.textContent = ''; // Clear previous message
             spinButton.disabled = true; // Disable button during spin
 
@@ -117,7 +122,7 @@
 
             reelElements.forEach((reel, index) => {
                 let position = 0; // Start position of animation
-                const duration = 200 + index * 200; // Spin duration per reel
+                const duration = 2000 + index * 1000; // Spin duration per reel
                 const interval = 50; // Interval for updating position
                 let finalSymbol;
 
@@ -165,6 +170,8 @@
             if (results[0] === results[1] && results[1] === results[2]) {
                 messageElement.textContent = '🎉 Jackpot! You Win! 🎉';
                 messageElement.style.color = '#ffc107';
+                money = money + 500;
+                moneyMessage.textContent = 'Money: $' + money;
             } else {
                 messageElement.textContent = 'Try Again!';
                 messageElement.style.color = '#fff';
