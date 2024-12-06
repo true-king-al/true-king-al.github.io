@@ -157,7 +157,7 @@
 
           // Calculate yOffset with easing (ease out)
           let easeProgress = 1 - Math.pow(1 - progress, 3);
-          slot.yOffset = easeProgress * slot.totalDistance;
+          slot.yOffset = (easeProgress * slot.totalDistance) - slotHeight;
 
           if (progress >= 1) {
             // Stop spinning
