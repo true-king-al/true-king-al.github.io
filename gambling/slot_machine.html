@@ -111,7 +111,9 @@
 
             // Determine if we will "edge" the player
             const shouldEdge = Math.random() < 0.5; // 50% chance to edge
+            const shouldWin = Math.random() < 0.1; // 10% chance to win
             let firstTwoSymbol = shouldEdge ? getRandomSymbol() : null;
+            let winSymbol = shouldWin ? getRandomSymbol() : null;
 
             reelElements.forEach((reel, index) => {
                 let position = 0; // Start position of animation
@@ -127,6 +129,9 @@
                     do {
                         finalSymbol = getRandomSymbol();
                     } while (finalSymbol === firstTwoSymbol);
+                } else if (shouldWin) {
+                    // Otherwise, pick random symbols
+                    finalSymbol = winSymbol
                 } else {
                     // Otherwise, pick random symbols
                     finalSymbol = getRandomSymbol();
