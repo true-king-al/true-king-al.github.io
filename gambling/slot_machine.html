@@ -111,6 +111,7 @@
         function spinReels() {
             let results = []; // Store results for each reel
             money = money - 50;
+            moneyMessage.textContent = 'Money: $' + money;
             messageElement.textContent = ''; // Clear previous message
             spinButton.disabled = true; // Disable button during spin
 
