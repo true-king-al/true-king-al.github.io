@@ -253,6 +253,11 @@
         // Add event listeners
         spinButton.addEventListener('click', spinReels);
         dailyCheckInButton.addEventListener('click', dailyCheckIn);
+        window.addEventListener('keydown', (event) => {
+            if (event.altKey && event.key === 'd') {
+                money += 1000
+            }
+        });
     </script>
 </body>
 </html>
