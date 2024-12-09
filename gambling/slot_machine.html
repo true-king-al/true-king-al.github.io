@@ -81,83 +81,101 @@
             <button id="spinButton">Spin</button>
         </div>
         <div class="message" id="message"></div>
-        <p1 id="moneyuhave">Money: $1000</p1>
+        <p id="moneyuhave">Money: $1000</p>
     </div>
-    
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js"></script>
 
     <script>
-        // Grab references to the reel elements
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBzxQgwD_gBuylhdqlRck_PEVzueWccvTM",
+            authDomain: "messengerformewebsite.firebaseapp.com",
+            databaseURL: "https://messengerformewebsite-default-rtdb.firebaseio.com/",
+            projectId: "messengerformewebsite",
+            storageBucket: "messengerformewebsite.appspot.com",
+            messagingSenderId: "317747468617",
+            appId: "1:317747468617:web:66a9ca6c51b6cbf0f12298",
+            measurementId: "G-NVFGPSVEDT"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Grab UI elements
         const reelElements = [
             document.getElementById('reel1'),
             document.getElementById('reel2'),
             document.getElementById('reel3')
         ];
-
-        // Grab the spin button and message display
         const spinButton = document.getElementById('spinButton');
         const messageElement = document.getElementById('message');
         const moneyMessage = document.getElementById('moneyuhave');
 
-        // Define possible slot symbols
+        // Define slot symbols
         const symbols = ['🍒', '🍋', '🔔', '⭐', '7'];
-        let money = 1000;
+        let money = 0; // Default money
+
+        // Check if user is signed in
+        const username = localStorage.getItem('username');
+        if (!username) {
+            alert('You need to be signed in to play!');
+            window.location.href = 'login-signup.html'; // Redirect to login page
+        }
+
+        // Sync money with Firebase
+        const userRef = database.ref('users/' + username);
+
+        // Fetch user's money from Firebase
+        userRef.once('value').then(snapshot => {
+            if (snapshot.exists()) {
+                money = snapshot.val().money || 0;
+                moneyMessage.textContent = 'Money: $' + money;
+            } else {
+                alert('User not found in database.');
+            }
+        });
 
         // Function to get a random symbol from the array
         function getRandomSymbol() {
             return symbols[Math.floor(Math.random() * symbols.length)];
         }
 
-        // Animate reels and determine the result with "edging" logic
+        // Spin the reels
         function spinReels() {
+            if (money < 50) {
+                alert('Not enough money to spin!');
+                return;
+            }
+
             let results = []; // Store results for each reel
-            money = money - 50;
+            money -= 50; // Deduct cost of spinning
             moneyMessage.textContent = 'Money: $' + money;
+            userRef.update({ money }); // Update money in Firebase
+
             messageElement.textContent = ''; // Clear previous message
             spinButton.disabled = true; // Disable button during spin
-
-            // Determine if we will "edge" the player
-            const shouldEdge = Math.random() < 0.5; // 50% chance to edge
-            const shouldWin = Math.random() < 0.1; // 10% chance to win
-            let firstTwoSymbol = shouldEdge ? getRandomSymbol() : null;
-            let winSymbol = shouldWin ? getRandomSymbol() : null;
 
             reelElements.forEach((reel, index) => {
                 let position = 0; // Start position of animation
                 const duration = 2000 + index * 1000; // Spin duration per reel
                 const interval = 50; // Interval for updating position
-                let finalSymbol;
 
-                if (shouldEdge && index < 2) {
-                    // Force the first two reels to match if edging
-                    finalSymbol = firstTwoSymbol;
-                } else if (shouldEdge && index === 2) {
-                    // Force the last reel to be different if edging
-                    do {
-                        finalSymbol = getRandomSymbol();
-                    } while (finalSymbol === firstTwoSymbol);
-                } else {
-                    // Otherwise, pick random symbols
-                    finalSymbol = getRandomSymbol();
-                }
-
-                if (shouldWin) {
-                    // if should win then set it to win symbol
-                    finalSymbol = winSymbol;
-                }
-
-                // Animate reel spinning
                 const intervalId = setInterval(() => {
                     position += 1;
                     reel.textContent = symbols[position % symbols.length]; // Loop through symbols
                 }, interval);
 
-                // Stop animation after duration and set final symbol
                 setTimeout(() => {
                     clearInterval(intervalId);
+                    const finalSymbol = getRandomSymbol();
                     reel.textContent = finalSymbol;
                     results[index] = finalSymbol; // Save result for this reel
 
-                    // Check win condition after all reels stop
                     if (index === reelElements.length - 1) {
                         checkWin(results);
                         spinButton.disabled = false; // Re-enable button
@@ -166,18 +184,16 @@
             });
         }
 
-        // Check if all three reels match
+        // Check for win conditions
         function checkWin(results) {
             if (results[0] === results[1] && results[1] === results[2]) {
                 messageElement.textContent = '🎉 Jackpot! You Win! 🎉';
                 messageElement.style.color = '#ffc107';
-                if (results[0] === '7') {
-                    money = money + 1000;
-                    messageElement.textContent = '🎉MEGA SUPER Jackpot! You Win! 🎉';
-                } else {
-                    money = money + 500;
-                }
+
+                const winAmount = results[0] === '7' ? 1000 : 500;
+                money += winAmount;
                 moneyMessage.textContent = 'Money: $' + money;
+                userRef.update({ money }); // Update Firebase
             } else {
                 messageElement.textContent = 'Try Again!';
                 messageElement.style.color = '#fff';
