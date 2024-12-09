@@ -128,7 +128,7 @@
         }
 
         // Sync money with Firebase
-        const userRef = ref('users/' + username);
+        const userRef = ref(database, 'users/' + username);
 
         // Fetch user's money from Firebase
         userRef.once('value').then(snapshot => {
