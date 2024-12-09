@@ -82,6 +82,7 @@
         </div>
         <div class="message" id="message"></div>
         <p id="moneyuhave">Money: $1000</p>
+        <button id="dailyCheckInButton">Daily Check-In</button>
     </div>
 
     <script type="module">
@@ -111,6 +112,7 @@
             document.getElementById('reel3')
         ];
         const spinButton = document.getElementById('spinButton');
+        const dailyCheckInButton = document.getElementById('dailyCheckInButton');
         const messageElement = document.getElementById('message');
         const moneyMessage = document.getElementById('moneyuhave');
 
@@ -123,7 +125,6 @@
         if (!username) {
             alert('You need to be signed in to play!');
             window.location.href = 'https://chmszone.com/login-signup.html'; // Redirect to the login page
-
         }
 
         // Sync money with Firebase
@@ -135,7 +136,7 @@
                 money = snapshot.val().money || 0;
                 moneyMessage.textContent = 'Money: $' + money;
             } else {
-                set(userRef, { money: money }); // Initialize user data if not present
+                set(userRef, { money: money, lastCheckIn: null }); // Initialize user data if not present
                 moneyMessage.textContent = 'Money: $' + money;
             }
         }).catch(error => {
@@ -202,8 +203,31 @@
             }
         }
 
-        // Add click event listener to spin button
+        // Daily check-in function
+        function dailyCheckIn() {
+            get(userRef).then(snapshot => {
+                if (snapshot.exists()) {
+                    const userData = snapshot.val();
+                    const lastCheckIn = userData.lastCheckIn || null;
+                    const today = new Date().toDateString();
+
+                    if (lastCheckIn !== today) {
+                        money += 1000;
+                        moneyMessage.textContent = 'Money: $' + money;
+                        update(userRef, { money, lastCheckIn: today });
+                        alert('Daily check-in successful! You earned $1000.');
+                    } else {
+                        alert('You have already checked in today!');
+                    }
+                }
+            }).catch(error => {
+                console.error('Error with daily check-in:', error);
+            });
+        }
+
+        // Add event listeners
         spinButton.addEventListener('click', spinReels);
+        dailyCheckInButton.addEventListener('click', dailyCheckIn);
     </script>
 </body>
 </html>
