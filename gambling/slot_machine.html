@@ -171,7 +171,12 @@
             if (results[0] === results[1] && results[1] === results[2]) {
                 messageElement.textContent = '🎉 Jackpot! You Win! 🎉';
                 messageElement.style.color = '#ffc107';
-                money = money + 500;
+                if (results[0] === '7') {
+                    money = money + 1000;
+                    messageElement.textContent = '🎉MEGA SUPER Jackpot! You Win! 🎉';
+                } else {
+                    money = money + 500;
+                }
                 moneyMessage.textContent = 'Money: $' + money;
             } else {
                 messageElement.textContent = 'Try Again!';
