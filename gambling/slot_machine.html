@@ -84,13 +84,10 @@
         <p id="moneyuhave">Money: $1000</p>
     </div>
 
-    <!-- Firebase SDK -->
-
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
-        import { getDatabase, ref, set, remove, onValue, query, orderByKey, limitToLast, get } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-analytics.js";
+        import { getDatabase, ref, set, update, get, onValue } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
+
         // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBzxQgwD_gBuylhdqlRck_PEVzueWccvTM",
@@ -106,6 +103,7 @@
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
+
         // Grab UI elements
         const reelElements = [
             document.getElementById('reel1'),
@@ -118,7 +116,7 @@
 
         // Define slot symbols
         const symbols = ['🍒', '🍋', '🔔', '⭐', '7'];
-        let money = 0; // Default money
+        let money = 1000; // Default money if Firebase data isn't available
 
         // Check if user is signed in
         const username = localStorage.getItem('username');
@@ -131,13 +129,16 @@
         const userRef = ref(database, 'users/' + username);
 
         // Fetch user's money from Firebase
-        userRef.once('value').then(snapshot => {
+        get(userRef).then(snapshot => {
             if (snapshot.exists()) {
                 money = snapshot.val().money || 0;
                 moneyMessage.textContent = 'Money: $' + money;
             } else {
-                alert('User not found in database.');
+                set(userRef, { money: money }); // Initialize user data if not present
+                moneyMessage.textContent = 'Money: $' + money;
             }
+        }).catch(error => {
+            console.error('Error fetching user data:', error);
         });
 
         // Function to get a random symbol from the array
@@ -155,7 +156,7 @@
             let results = []; // Store results for each reel
             money -= 50; // Deduct cost of spinning
             moneyMessage.textContent = 'Money: $' + money;
-            userRef.update({ money }); // Update money in Firebase
+            update(userRef, { money }); // Update money in Firebase
 
             messageElement.textContent = ''; // Clear previous message
             spinButton.disabled = true; // Disable button during spin
@@ -193,7 +194,7 @@
                 const winAmount = results[0] === '7' ? 1000 : 500;
                 money += winAmount;
                 moneyMessage.textContent = 'Money: $' + money;
-                userRef.update({ money }); // Update Firebase
+                update(userRef, { money }); // Update Firebase
             } else {
                 messageElement.textContent = 'Try Again!';
                 messageElement.style.color = '#fff';
