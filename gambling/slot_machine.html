@@ -67,9 +67,40 @@
             font-size: 1.2rem;
             font-weight: bold;
         }
+        .leaderboard {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #444;
+            padding: 10px 15px;
+            border-radius: 10px;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.5);
+        }
+        .leaderboard h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            border-bottom: 1px solid #fff;
+            padding-bottom: 5px;
+            margin-bottom: 5px;
+        }
+        .leaderboard ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .leaderboard li {
+            font-size: 0.9rem;
+            padding: 2px 0;
+        }
     </style>
 </head>
 <body>
+    <div class="leaderboard" id="leaderboard">
+        <h3>Leaderboard</h3>
+        <ul id="leaderboardList"></ul>
+    </div>    
     <div class="slot-machine">
         <h1>Slot Machine</h1>
         <div class="reels">
@@ -249,6 +280,35 @@
                 console.error('Error with daily check-in:', error);
             });
         }
+
+        // Function to update the leaderboard
+        function updateLeaderboard() {
+            const leaderboardRef = ref(database, 'users/');
+            const leaderboardList = document.getElementById('leaderboardList');
+        
+            get(leaderboardRef).then(snapshot => {
+                if (snapshot.exists()) {
+                    const users = snapshot.val();
+                    const sortedUsers = Object.entries(users)
+                        .map(([name, data]) => ({ name, money: data.money || 0 }))
+                        .sort((a, b) => b.money - a.money)
+                        .slice(0, 10); // Top 10 users
+                
+                    leaderboardList.innerHTML = sortedUsers
+                        .map(user => `<li>${user.name}: $${user.money}</li>`)
+                        .join('');
+                } else {
+                    leaderboardList.innerHTML = '<li>No data available</li>';
+                }
+            }).catch(error => {
+                console.error('Error fetching leaderboard data:', error);
+            });
+        }
+
+        // Call updateLeaderboard initially and periodically
+        updateLeaderboard();
+        setInterval(updateLeaderboard, 60000); // Update every 60 seconds
+
 
         // Add event listeners
         spinButton.addEventListener('click', spinReels);
