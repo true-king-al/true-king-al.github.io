@@ -326,6 +326,24 @@
             checkAdmin();
         }
     });
+    document.querySelector('.settings-button').addEventListener('click', () => {
+            document.getElementById('settings-modal').style.display = 'block';
+        });
+
+    // Apply settings
+    document.getElementById('apply-settings').addEventListener('click', () => {
+        const newMessageLimit = parseInt(document.getElementById('message-count').value);
+        if (!isNaN(newMessageLimit) && newMessageLimit > 0) {
+            messageLimit = newMessageLimit;
+            fetchMessages();
+        }
+        document.getElementById('settings-modal').style.display = 'none';
+    });
+
+        // Close settings modal
+    document.getElementById('close-settings').addEventListener('click', () => {
+        document.getElementById('settings-modal').style.display = 'none';
+    });
     </script>
 </body>
 </html>
