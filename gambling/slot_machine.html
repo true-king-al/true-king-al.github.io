@@ -315,6 +315,8 @@ if (results[0] === results[1] && results[1] === results[2]) {
         messageElement.textContent = '🎉 Jackpot! You Win! 🎉';
         messageElement.style.color = '#ffc107';
         messageElement.style.fontSize = '1.5rem';
+        messageElement.style.fontWeight = 'normal'; // Reset font weight
+        messageElement.style.textShadow = ''; // Reset text shadow
 
         money += 500; // Normal win reward
         moneyMessage.textContent = 'Money: $' + money;
@@ -324,6 +326,9 @@ if (results[0] === results[1] && results[1] === results[2]) {
     // If not a win
     messageElement.textContent = 'Try Again!';
     messageElement.style.color = '#fff';
+    messageElement.style.fontSize = '1rem'; // Reset font size
+    messageElement.style.fontWeight = 'normal'; // Reset font weight
+    messageElement.style.textShadow = ''; // Reset text shadow
 }
 
     spinButton.disabled = false; // Re-enable spin button
