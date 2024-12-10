@@ -133,7 +133,6 @@
             border: 3px solid #ffc107;
             box-shadow: 0 0 10px #ffc107;
         }
-
     </style>
 </head>
 <body>
@@ -202,7 +201,8 @@
 
         // Define slot symbols
         const symbols = ['🍒', '🍋', '🔔', '⭐', '7'];
-        var money = 1000; // Default money if Firebase data isn't available
+        let money = 1000; // Default money if Firebase data isn't available
+        let debugMode = false; // Debug mode disabled by default
 
         // Check if user is signed in
         const username = localStorage.getItem('username');
@@ -239,7 +239,7 @@
                 document.getElementById('hold2').checked,
                 document.getElementById('hold3').checked
             ];
-            const holdCost = holdStates.filter(hold => hold).length * 50; // $20 per held reel
+            const holdCost = holdStates.filter(hold => hold).length * 50; // $50 per held reel
             const totalCost = 50 + holdCost;
             if (money < totalCost) {
                 alert('Not enough money to spin!');
@@ -254,40 +254,36 @@
             messageElement.textContent = '';
             spinButton.disabled = true;
 
-            
-
-            reelElements.forEach((reel, index) => {
-                if (holdStates[index]) {
-                    reel.classList.add('locked');
-                    results[index] = reel.textContent;
-                    if (index === reelElements.length - 1) {
-                        checkWin(results);
-                        spinButton.disabled = false;
+            try {
+                reelElements.forEach((reel, index) => {
+                    if (holdStates[index]) {
+                        reel.classList.add('locked');
+                        results[index] = reel.textContent;
+                        if (index === reelElements.length - 1) checkWin(results);
+                        return;
                     }
-                    return;
-                }
 
-                reel.classList.remove('locked');
-                let position = 0;
-                const duration = 2000 + index * 1000;
-                const interval = 50;
+                    reel.classList.remove('locked');
+                    let position = 0;
+                    const duration = 2000 + index * 1000;
+                    const interval = 50;
 
-                const intervalId = setInterval(() => {
-                    position += 1;
-                    reel.textContent = symbols[position % symbols.length];
-                }, interval);
+                    const intervalId = setInterval(() => {
+                        position += 1;
+                        reel.textContent = symbols[position % symbols.length];
+                    }, interval);
 
-                setTimeout(() => {
-                    clearInterval(intervalId);
-                    reel.textContent = getRandomSymbol();
-                    results[index] = reel.textContent;
+                    setTimeout(() => {
+                        clearInterval(intervalId);
+                        reel.textContent = getRandomSymbol();
+                        results[index] = reel.textContent;
 
-                    if (index === reelElements.length - 1) {
-                        checkWin(results);
-                        spinButton.disabled = false;
-                    }
-                }, duration);
-            });
+                        if (index === reelElements.length - 1) checkWin(results);
+                    }, duration);
+                });
+            } finally {
+                spinButton.disabled = false;
+            }
         }
 
         // Check for win conditions
@@ -328,18 +324,19 @@
             });
         }
 
+        // Real-time leaderboard updates
         function updateLeaderboard() {
             const leaderboardRef = ref(database, 'users/');
             const leaderboardList = document.getElementById('leaderboardList');
-    
+
             onValue(leaderboardRef, snapshot => {
                 if (snapshot.exists()) {
                     const users = snapshot.val();
                     const sortedUsers = Object.entries(users)
                         .map(([name, data]) => ({ name, money: data.money || 0 }))
                         .sort((a, b) => b.money - a.money)
-                        .slice(0, 10); // Top 10 users
-            
+                        .slice(0, 10);
+
                     leaderboardList.innerHTML = sortedUsers
                         .map(user => `<li>${user.name}: $${user.money}</li>`)
                         .join('');
@@ -354,10 +351,28 @@
         // Initialize real-time leaderboard updates
         updateLeaderboard();
 
+        // Debug mode toggle
+        window.addEventListener('keydown', (event) => {
+            if (event.altKey && event.key === 't') {
+                debugMode = !debugMode;
+                alert(`Debug mode ${debugMode ? 'enabled' : 'disabled'}`);
+            }
+        });
+
+        // Debug key bindings
+        window.addEventListener('keydown', (event) => {
+            if (debugMode) {
+                if (event.altKey && event.key === 'd') money += 1000;
+                if (event.altKey && event.key === 'e') money -= 1000;
+                if (event.altKey && event.key === 'r') money = 1000;
+                moneyMessage.textContent = 'Money: $' + money;
+            }
+        });
 
         // Add event listeners
         spinButton.addEventListener('click', spinReels);
         dailyCheckInButton.addEventListener('click', dailyCheckIn);
+
         const holdCheckboxes = [
             document.getElementById('hold1'),
             document.getElementById('hold2'),
@@ -372,21 +387,6 @@
                     checkbox.checked = false; // Uncheck the last one
                 }
             });
-        });
-        window.addEventListener('keydown', (event) => {
-            if (event.altKey && event.key === 'd') {
-                money += 1000
-            }
-        });
-        window.addEventListener('keydown', (event) => {
-            if (event.altKey && event.key === 'e') {
-                money -= 1000
-            }
-        });
-        window.addEventListener('keydown', (event) => {
-            if (event.altKey && event.key === 'r') {
-                money = 1000
-            }
         });
     </script>
 </body>
