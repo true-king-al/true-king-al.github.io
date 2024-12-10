@@ -103,6 +103,36 @@
             border: 3px solid #ffc107;
             box-shadow: 0 0 10px #ffc107;
         }
+        .reels {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            gap: 20px;
+        }
+
+        .reel-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hold-checkbox {
+            margin-top: 10px;
+            transform: scale(1.5);
+            cursor: pointer;
+        }
+
+        .hold-label {
+            font-size: 0.9rem;
+            color: #fff;
+            margin-top: 5px;
+            cursor: pointer;
+        }
+
+        .reel.locked {
+            border: 3px solid #ffc107;
+            box-shadow: 0 0 10px #ffc107;
+        }
 
     </style>
 </head>
@@ -114,13 +144,23 @@
     <div class="slot-machine">
         <h1>Slot Machine</h1>
         <div class="reels">
-            <div class="reel" id="reel1">7</div>
-            <input type="checkbox" id="hold1" class="hold-checkbox" title="Hold Reel 1">
-            <div class="reel" id="reel2">7</div>
-            <input type="checkbox" id="hold2" class="hold-checkbox" title="Hold Reel 2">
-            <div class="reel" id="reel3">7</div>
-            <input type="checkbox" id="hold3" class="hold-checkbox" title="Hold Reel 3">
+            <div class="reel-container">
+                <div class="reel" id="reel1">7</div>
+                <input type="checkbox" id="hold1" class="hold-checkbox" title="Hold Reel 1">
+                <label for="hold1" class="hold-label">Hold</label>
+            </div>
+            <div class="reel-container">
+                <div class="reel" id="reel2">7</div>
+                <input type="checkbox" id="hold2" class="hold-checkbox" title="Hold Reel 2">
+                <label for="hold2" class="hold-label">Hold</label>
+            </div>
+            <div class="reel-container">
+                <div class="reel" id="reel3">7</div>
+                <input type="checkbox" id="hold3" class="hold-checkbox" title="Hold Reel 3">
+                <label for="hold3" class="hold-label">Hold</label>
+            </div>
         </div>
+
         <div class="controls">
             <button id="spinButton">Spin</button>
         </div>
