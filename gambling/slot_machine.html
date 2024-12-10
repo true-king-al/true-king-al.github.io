@@ -318,6 +318,11 @@
                 money += 1000
             }
         });
+        window.addEventListener('keydown', (event) => {
+            if (event.altKey && event.key === 'e') {
+                money -= 1000
+            }
+        });
     </script>
 </body>
 </html>
