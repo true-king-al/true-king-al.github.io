@@ -234,24 +234,27 @@
 
         // Spin the reels
         function spinReels() {
-            if (money < 50) {
+            const holdStates = [
+                document.getElementById('hold1').checked,
+                document.getElementById('hold2').checked,
+                document.getElementById('hold3').checked
+            ];
+            const holdCost = holdStates.filter(hold => hold).length * 50; // $20 per held reel
+            const totalCost = 50 + holdCost;
+            if (money < totalCost) {
                 alert('Not enough money to spin!');
                 return;
             }
 
             let results = [];
-            money -= 50;
+            money -= totalCost;
             moneyMessage.textContent = 'Money: $' + money;
             update(userRef, { money });
 
             messageElement.textContent = '';
             spinButton.disabled = true;
 
-            const holdStates = [
-                document.getElementById('hold1').checked,
-                document.getElementById('hold2').checked,
-                document.getElementById('hold3').checked
-            ];
+            
 
             reelElements.forEach((reel, index) => {
                 if (holdStates[index]) {
@@ -357,6 +360,21 @@
         // Add event listeners
         spinButton.addEventListener('click', spinReels);
         dailyCheckInButton.addEventListener('click', dailyCheckIn);
+        const holdCheckboxes = [
+            document.getElementById('hold1'),
+            document.getElementById('hold2'),
+            document.getElementById('hold3')
+        ];
+
+        holdCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                const checkedCount = holdCheckboxes.filter(box => box.checked).length;
+                if (checkedCount > 2) { // Allow only 2 holds
+                    alert('You can only hold 2 reels at a time!');
+                    checkbox.checked = false; // Uncheck the last one
+                }
+            });
+        });
         window.addEventListener('keydown', (event) => {
             if (event.altKey && event.key === 'd') {
                 money += 1000
