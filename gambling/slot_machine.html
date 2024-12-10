@@ -232,75 +232,82 @@
             return symbols[Math.floor(Math.random() * symbols.length)];
         }
 
-        // Spin the reels
-        function spinReels() {
-            const holdStates = [
-                document.getElementById('hold1').checked,
-                document.getElementById('hold2').checked,
-                document.getElementById('hold3').checked
-            ];
-            const holdCost = holdStates.filter(hold => hold).length * 50; // $50 per held reel
-            const totalCost = 50 + holdCost;
-            if (money < totalCost) {
-                alert('Not enough money to spin!');
-                return;
-            }
+function spinReels() {
+    const holdStates = [
+        document.getElementById('hold1').checked,
+        document.getElementById('hold2').checked,
+        document.getElementById('hold3').checked
+    ];
+    const holdCost = holdStates.filter(hold => hold).length * 50; // $50 per held reel
+    const totalCost = 50 + holdCost;
 
-            let results = [];
-            money -= totalCost;
-            moneyMessage.textContent = 'Money: $' + money;
-            update(userRef, { money });
+    if (money < totalCost) {
+        alert('Not enough money to spin!');
+        return;
+    }
 
-            messageElement.textContent = '';
-            spinButton.disabled = true;
+    money -= totalCost;
+    moneyMessage.textContent = 'Money: $' + money;
+    update(userRef, { money });
 
-            try {
-                reelElements.forEach((reel, index) => {
-                    if (holdStates[index]) {
-                        reel.classList.add('locked');
-                        results[index] = reel.textContent;
-                        if (index === reelElements.length - 1) checkWin(results);
-                        return;
-                    }
+    const results = Array(3).fill(null); // Initialize results array
+    messageElement.textContent = ''; // Clear previous message
+    spinButton.disabled = true;
 
-                    reel.classList.remove('locked');
-                    let position = 0;
-                    const duration = 2000 + index * 1000;
-                    const interval = 50;
+    let reelsUpdated = 0; // Counter to track completed reels
 
-                    const intervalId = setInterval(() => {
-                        position += 1;
-                        reel.textContent = symbols[position % symbols.length];
-                    }, interval);
-
-                    setTimeout(() => {
-                        clearInterval(intervalId);
-                        reel.textContent = getRandomSymbol();
-                        results[index] = reel.textContent;
-
-                        if (index === reelElements.length - 1) checkWin(results);
-                    }, duration);
-                });
-            } finally {
-                spinButton.disabled = false;
-            }
+    reelElements.forEach((reel, index) => {
+        if (holdStates[index]) {
+            // If reel is held, keep its value and mark it as updated
+            reel.classList.add('locked');
+            results[index] = reel.textContent;
+            reelsUpdated++;
+            if (reelsUpdated === reelElements.length) checkWin(results); // Check win after last reel updates
+            return;
         }
 
-        // Check for win conditions
-        function checkWin(results) {
-            if (results[0] === results[1] && results[1] === results[2]) {
-                messageElement.textContent = '🎉 Jackpot! You Win! 🎉';
-                messageElement.style.color = '#ffc107';
+        reel.classList.remove('locked');
+        let position = 0;
+        const duration = 2000 + index * 1000; // Spin duration
+        const interval = 50;
 
-                const winAmount = results[0] === '7' ? 1000 : 500;
-                money += winAmount;
-                moneyMessage.textContent = 'Money: $' + money;
-                update(userRef, { money }); // Update Firebase
-            } else {
-                messageElement.textContent = 'Try Again!';
-                messageElement.style.color = '#fff';
-            }
-        }
+        const intervalId = setInterval(() => {
+            position++;
+            reel.textContent = symbols[position % symbols.length];
+        }, interval);
+
+        setTimeout(() => {
+            clearInterval(intervalId);
+            reel.textContent = getRandomSymbol();
+            results[index] = reel.textContent;
+            reelsUpdated++;
+
+            // Check win after all reels finish spinning
+            if (reelsUpdated === reelElements.length) checkWin(results);
+        }, duration);
+    });
+}
+
+function checkWin(results) {
+    // Ensure all results are populated
+    if (results.includes(null)) return;
+
+    if (results[0] === results[1] && results[1] === results[2]) {
+        messageElement.textContent = '🎉 Jackpot! You Win! 🎉';
+        messageElement.style.color = '#ffc107';
+
+        const winAmount = results[0] === '7' ? 1000 : 500;
+        money += winAmount;
+        moneyMessage.textContent = 'Money: $' + money;
+        update(userRef, { money }); // Update Firebase
+    } else {
+        messageElement.textContent = 'Try Again!';
+        messageElement.style.color = '#fff';
+    }
+
+    spinButton.disabled = false; // Re-enable spin button
+}
+
 
         // Daily check-in function
         function dailyCheckIn() {
