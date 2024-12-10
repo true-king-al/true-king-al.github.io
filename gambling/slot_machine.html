@@ -94,6 +94,16 @@
             font-size: 0.9rem;
             padding: 2px 0;
         }
+        .hold-checkbox {
+            margin: 0 10px;
+            cursor: pointer;
+            transform: scale(1.5);
+        }
+        .reel.locked {
+            border: 3px solid #ffc107;
+            box-shadow: 0 0 10px #ffc107;
+        }
+
     </style>
 </head>
 <body>
@@ -105,8 +115,11 @@
         <h1>Slot Machine</h1>
         <div class="reels">
             <div class="reel" id="reel1">7</div>
+            <input type="checkbox" id="hold1" class="hold-checkbox" title="Hold Reel 1">
             <div class="reel" id="reel2">7</div>
+            <input type="checkbox" id="hold2" class="hold-checkbox" title="Hold Reel 2">
             <div class="reel" id="reel3">7</div>
+            <input type="checkbox" id="hold3" class="hold-checkbox" title="Hold Reel 3">
         </div>
         <div class="controls">
             <button id="spinButton">Spin</button>
@@ -186,58 +199,49 @@
                 return;
             }
 
-            let results = []; // Store results for each reel
-            money -= 50; // Deduct cost of spinning
+            let results = [];
+            money -= 50;
             moneyMessage.textContent = 'Money: $' + money;
-            update(userRef, { money }); // Update money in Firebase
+            update(userRef, { money });
 
-            messageElement.textContent = ''; // Clear previous message
-            spinButton.disabled = true; // Disable button during spin
+            messageElement.textContent = '';
+            spinButton.disabled = true;
 
-            // Determine if we will "edge" the player
-            const shouldEdge = Math.random() < 0.5; // 50% chance to edge
-            const shouldWin = Math.random() < 0.1; // 10% chance to win
-            let firstTwoSymbol = shouldEdge ? getRandomSymbol() : null;
-            let winSymbol = shouldWin ? getRandomSymbol() : null;
+            const holdStates = [
+                document.getElementById('hold1').checked,
+                document.getElementById('hold2').checked,
+                document.getElementById('hold3').checked
+            ];
 
             reelElements.forEach((reel, index) => {
-                let position = 0; // Start position of animation
-                const duration = 2000 + index * 1000; // Spin duration per reel
-                const interval = 50; // Interval for updating position
-
-                let finalSymbol;
-                if (shouldEdge && index < 2) {
-                    // Force the first two reels to match if edging
-                    finalSymbol = firstTwoSymbol;
-                } else if (shouldEdge && index === 2) {
-                    // Force the last reel to be different if edging
-                    do {
-                        finalSymbol = getRandomSymbol();
-                    } while (finalSymbol === firstTwoSymbol);
-                } else {
-                    // Otherwise, pick random symbols
-                    finalSymbol = getRandomSymbol();
+                if (holdStates[index]) {
+                    reel.classList.add('locked');
+                    results[index] = reel.textContent;
+                    if (index === reelElements.length - 1) {
+                        checkWin(results);
+                        spinButton.disabled = false;
+                    }
+                    return;
                 }
 
-                if (shouldWin) {
-                    // if should win then set it to win symbol
-                    finalSymbol = winSymbol;
-                }
+                reel.classList.remove('locked');
+                let position = 0;
+                const duration = 2000 + index * 1000;
+                const interval = 50;
 
-                // Animate reel spinning
                 const intervalId = setInterval(() => {
                     position += 1;
-                    reel.textContent = symbols[position % symbols.length]; // Loop through symbols
+                    reel.textContent = symbols[position % symbols.length];
                 }, interval);
 
                 setTimeout(() => {
                     clearInterval(intervalId);
-                    reel.textContent = finalSymbol;
-                    results[index] = finalSymbol; // Save result for this reel
+                    reel.textContent = getRandomSymbol();
+                    results[index] = reel.textContent;
 
                     if (index === reelElements.length - 1) {
                         checkWin(results);
-                        spinButton.disabled = false; // Re-enable button
+                        spinButton.disabled = false;
                     }
                 }, duration);
             });
