@@ -328,33 +328,31 @@
             });
         }
 
-        // Function to update the leaderboard
         function updateLeaderboard() {
             const leaderboardRef = ref(database, 'users/');
             const leaderboardList = document.getElementById('leaderboardList');
-        
-            get(leaderboardRef).then(snapshot => {
+    
+            onValue(leaderboardRef, snapshot => {
                 if (snapshot.exists()) {
                     const users = snapshot.val();
                     const sortedUsers = Object.entries(users)
                         .map(([name, data]) => ({ name, money: data.money || 0 }))
                         .sort((a, b) => b.money - a.money)
                         .slice(0, 10); // Top 10 users
-                
+            
                     leaderboardList.innerHTML = sortedUsers
                         .map(user => `<li>${user.name}: $${user.money}</li>`)
                         .join('');
                 } else {
                     leaderboardList.innerHTML = '<li>No data available</li>';
                 }
-            }).catch(error => {
+            }, error => {
                 console.error('Error fetching leaderboard data:', error);
             });
         }
 
-        // Call updateLeaderboard initially and periodically
+        // Initialize real-time leaderboard updates
         updateLeaderboard();
-        setInterval(updateLeaderboard, 60000); // Update every 60 seconds
 
 
         // Add event listeners
