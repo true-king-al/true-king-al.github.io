@@ -291,19 +291,40 @@ function spinReels() {
 function checkWin(results) {
     // Ensure all results are populated
     if (results.includes(null)) return;
+if (results[0] === results[1] && results[1] === results[2]) {
+    // Check if all three reels match
+    if (results[0] === '7') {
+        // Mega Super Win for three '7's
+        messageElement.textContent = '🌟 MEGA SUPER Jackpot! You Win BIG! 🌟';
+        messageElement.style.color = '#ff5733'; // A special color for mega win
+        messageElement.style.fontSize = '2rem';
+        messageElement.style.fontWeight = 'bold';
+        messageElement.style.textShadow = '2px 2px 5px #ffcc00'; // A cool glowing effect
 
-    if (results[0] === results[1] && results[1] === results[2]) {
-        messageElement.textContent = '🎉 Jackpot! You Win! 🎉';
-        messageElement.style.color = '#ffc107';
-
-        const winAmount = results[0] === '7' ? 1000 : 500;
-        money += winAmount;
+        money += 1000; // Mega win reward
         moneyMessage.textContent = 'Money: $' + money;
         update(userRef, { money }); // Update Firebase
+
+        // Add some animation for fun
+        document.body.style.backgroundColor = '#ffcc00'; // Change background color to yellow
+        setTimeout(() => {
+            document.body.style.backgroundColor = '#333'; // Return to original color after a few seconds
+        }, 2000);
     } else {
-        messageElement.textContent = 'Try Again!';
-        messageElement.style.color = '#fff';
+        // Normal win for other matches
+        messageElement.textContent = '🎉 Jackpot! You Win! 🎉';
+        messageElement.style.color = '#ffc107';
+        messageElement.style.fontSize = '1.5rem';
+
+        money += 500; // Normal win reward
+        moneyMessage.textContent = 'Money: $' + money;
+        update(userRef, { money }); // Update Firebase
     }
+} else {
+    // If not a win
+    messageElement.textContent = 'Try Again!';
+    messageElement.style.color = '#fff';
+}
 
     spinButton.disabled = false; // Re-enable spin button
 }
