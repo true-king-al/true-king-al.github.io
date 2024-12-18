@@ -13,7 +13,7 @@
         <h2>Sign Up</h2>
         <input type="text" id="signUpFirstName" placeholder="First Name">
         <input type="text" id="signUpLastName" placeholder="Last Name">
-        <input type="text" id="signupusername" placeholder="Username">
+        <input type="text" id="signuppainname" placeholder="Username">
         <input type="password" id="signUpPassword" placeholder="Password">
         <button id="signUpbutton">Sign Up</button>
     </div>
@@ -53,7 +53,7 @@
             const lastName = document.getElementById('signUpLastName').value;
             const password = document.getElementById('signUpPassword').value;
 
-            const username = document.getElementById('signupusername').value;
+            const username = document.getElementById('signuppainname').value;
 
             const userRef = ref(database, 'users/' + username);
             
