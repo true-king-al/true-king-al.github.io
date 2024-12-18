@@ -13,17 +13,17 @@
         <h2>Sign Up</h2>
         <input type="text" id="signUpFirstName" placeholder="First Name">
         <input type="text" id="signUpLastName" placeholder="Last Name">
-        <input type="text" id="signuppainname" placeholder="Username">
+        <input type="text" id="signUpUsername" placeholder="Username">
         <input type="password" id="signUpPassword" placeholder="Password" autocomplete="new-password">
-        <button id="signUpbutton">Sign Up</button>
+        <button id="signUpButton">Sign Up</button>
     </div>
 
     <!-- Login Form -->
     <div>
         <h2>Login</h2>
-        <input type="text" id="username" placeholder="Username" autocomplete="username">
+        <input type="text" id="loginUsername" placeholder="Username" autocomplete="username">
         <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password">
-        <button id="logInbutton">Login</button>
+        <button id="loginButton">Login</button>
     </div>
 
     <script type="module">
@@ -52,14 +52,14 @@
             const firstName = document.getElementById('signUpFirstName').value;
             const lastName = document.getElementById('signUpLastName').value;
             const password = document.getElementById('signUpPassword').value;
+            const username = document.getElementById('signUpUsername').value;
 
-            const username = document.getElementById('signuppainname').value;
+            if (!firstName || !lastName || !username || !password) {
+                alert('All fields must be filled!');
+                return;
+            }
 
             const userRef = ref(database, 'users/' + username);
-            
-            localStorage.setItem('userFirstName', firstName);
-            localStorage.setItem('userLastName', lastName);
-            localStorage.setItem('username', username);
 
             const snapshot = await get(userRef);
             if (snapshot.exists()) {
@@ -68,30 +68,31 @@
                 set(userRef, {
                     firstName: firstName,
                     lastName: lastName,
-                    password: password,
-                    activated: false // Set account to not activated by default
+                    password: password
                 });
-                alert('Sign up successful! Please wait for account activation.');
+                alert('Sign up successful!');
+                window.location.href = 'profile.html';  // Redirect to profile page after signup
             }
-            window.location.href = 'profile.html';  // Redirect to profile page after login
         }
 
         async function login() {
-            const firstName = document.getElementById('username').value;
-            
+            const username = document.getElementById('loginUsername').value;
             const password = document.getElementById('loginPassword').value;
 
-            const username = firstName;
+            if (!username || !password) {
+                alert('Please fill in both fields!');
+                return;
+            }
+
             const userRef = ref(database, 'users/' + username);
 
             const snapshot = await get(userRef);
             if (snapshot.exists()) {
                 const userData = snapshot.val();
                 if (userData.password === password) {
-                    localStorage.setItem('userFirstName', firstName);
-                    localStorage.setItem('userLastName', lastName);
+                    localStorage.setItem('userFirstName', userData.firstName);
+                    localStorage.setItem('userLastName', userData.lastName);
                     localStorage.setItem('username', username);
-                    localStorage.setItem('activated', userData.activated);
 
                     alert('Login successful! Redirecting to profile...');
                     window.location.href = 'profile.html';  // Redirect to profile page after login
@@ -112,8 +113,8 @@
 
         window.onload = checkLoginStatus;
 
-        document.getElementById("signUpbutton").addEventListener("click", signUp);
-        document.getElementById("logInbutton").addEventListener("click", login);
+        document.getElementById("signUpButton").addEventListener("click", signUp);
+        document.getElementById("loginButton").addEventListener("click", login);
     </script>
 </body>
 </html>
