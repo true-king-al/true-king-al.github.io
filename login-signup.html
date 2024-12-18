@@ -13,7 +13,7 @@
         <h2>Sign Up</h2>
         <input type="text" id="signUpFirstName" placeholder="First Name">
         <input type="text" id="signUpLastName" placeholder="Last Name">
-        <input type="text" id="username" placeholder="Username">
+        <input type="text" id="signupusername" placeholder="Username">
         <input type="password" id="signUpPassword" placeholder="Password">
         <button id="signUpbutton">Sign Up</button>
     </div>
@@ -21,7 +21,7 @@
     <!-- Login Form -->
     <div>
         <h2>Login</h2>
-        <input type="text" id="loginFirstName" placeholder="User name">
+        <input type="text" id="username" placeholder="User name">
         <input type="password" id="loginPassword" placeholder="Password">
         <button id="logInbutton">Login</button>
     </div>
@@ -53,7 +53,7 @@
             const lastName = document.getElementById('signUpLastName').value;
             const password = document.getElementById('signUpPassword').value;
 
-            const username = document.getElementById('username').value;
+            const username = document.getElementById('signupusername').value;
 
             const userRef = ref(database, 'users/' + username);
             
@@ -77,7 +77,7 @@
         }
 
         async function login() {
-            const firstName = document.getElementById('loginFirstName').value;
+            const firstName = document.getElementById('username').value;
             const lastName = document.getElementById('loginLastName').value;
             const password = document.getElementById('loginPassword').value;
 
