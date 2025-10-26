@@ -328,18 +328,53 @@
     </footer>
 
     <script type="module">
-        let facts = [];
+        // Fallback facts embedded directly
+        let facts = [
+            "Bananas are berries, but strawberries aren't!",
+            "A day on Venus is longer than a year on Venus.",
+            "Octopuses have three hearts.",
+            "i can hack anybody",
+            "Honey never spoils. Archaeologists have found 3000-year-old honey in tombs!",
+            "Sharks existed before trees did.",
+            "The Eiffel Tower can grow up to 6 inches taller during the summer.",
+            "logan is soo cool and handsome right?",
+            "the cops are out to get me",
+            "check back in a hour, this will be different",
+            "check back in a hour, this will be different",
+            "i love procrastinating",
+            "SIGN UP NOW!!!!!!!!11!!!11",
+            "this text changes every hour",
+            "murder drones is the best show ever",
+            "BITE ME!!",
+            "N from murder drones is the best and cutest character ever",
+            "hi do you want to be my friend?",
+            "ksp is the best game ever",
+            "i had no friends at my old school"
+        ];
 
         function loadFacts() {
             fetch('./facts.json')
-                .then(response => response.json())
-                .then(data => {
-                    facts = data;
-                    displayRandomFact();
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
+                .then(text => {
+                    try {
+                        const data = JSON.parse(text);
+                        facts = data;
+                        displayRandomFact();
+                    } catch (e) {
+                        console.error("JSON parsing error:", e);
+                        console.log("Using fallback facts");
+                        displayRandomFact();
+                    }
                 })
                 .catch(error => {
                     console.error("Error loading facts:", error);
-                    document.getElementById("random-fact").textContent = "Could not load fact. Please refresh!";
+                    console.log("Using fallback facts");
+                    displayRandomFact();
                 });
         }
 
