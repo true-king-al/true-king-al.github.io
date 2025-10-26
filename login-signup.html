@@ -3,27 +3,370 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login and Sign Up</title>
+    <title>Login & Sign Up - NBHS Hangout</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Animated background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.3;
+        }
+
+        .bg-animation span {
+            position: absolute;
+            display: block;
+            width: 20px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.5);
+            animation: float 25s infinite;
+            border-radius: 50%;
+        }
+
+        .bg-animation span:nth-child(1) { left: 25%; animation-delay: 0s; }
+        .bg-animation span:nth-child(2) { left: 50%; animation-delay: 2s; }
+        .bg-animation span:nth-child(3) { left: 75%; animation-delay: 4s; }
+        .bg-animation span:nth-child(4) { left: 10%; animation-delay: 6s; }
+        .bg-animation span:nth-child(5) { left: 85%; animation-delay: 8s; }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(100vh) scale(0);
+            }
+            50% {
+                transform: translateY(-10vh) scale(1);
+            }
+        }
+
+        /* Back button */
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateX(-5px);
+        }
+
+        /* Container */
+        .container {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 50px 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            max-width: 900px;
+            width: 100%;
+            animation: slideUp 0.6s ease-out;
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Tab switcher */
+        .tab-switcher {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 40px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 5px;
+            border-radius: 50px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 15px;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .tab-btn:hover:not(.active) {
+            color: white;
+        }
+
+        /* Forms */
+        .form-container {
+            display: none;
+        }
+
+        .form-container.active {
+            display: block;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            color: white;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button[type="submit"]:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+
+        button[type="submit"]:active {
+            transform: translateY(-1px);
+        }
+
+        .info-text {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 40px 25px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .back-btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Success/Error messages */
+        .message {
+            padding: 15px 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+            animation: slideDown 0.4s ease-out;
+            display: none;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.success {
+            background: rgba(76, 175, 80, 0.3);
+            border: 2px solid rgba(76, 175, 80, 0.5);
+            color: white;
+        }
+
+        .message.error {
+            background: rgba(244, 67, 54, 0.3);
+            border: 2px solid rgba(244, 67, 54, 0.5);
+            color: white;
+        }
+
+        .message.show {
+            display: block;
+        }
+    </style>
 </head>
 <body>
-    <h1>Sign Up / Login</h1>
-
-    <!-- Sign Up Form -->
-    <div>
-        <h2>Sign Up</h2>
-        <input type="text" id="signUpFirstName" placeholder="First Name">
-        <input type="text" id="signUpLastName" placeholder="Last Name">
-        <input type="text" id="signUpUsername" placeholder="Username">
-        <input type="password" id="signUpPassword" placeholder="Password" autocomplete="new-password">
-        <button id="signUpButton">Sign Up</button>
+    <div class="bg-animation">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
     </div>
 
-    <!-- Login Form -->
-    <div>
-        <h2>Login</h2>
-        <input type="text" id="loginUsername" placeholder="Username" autocomplete="username">
-        <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password">
-        <button id="loginButton">Login</button>
+    <a href="index.html" class="back-btn">
+        <span>←</span> Back to Home
+    </a>
+
+    <div class="container">
+        <h1>🎮 Join NBHS Hangout</h1>
+
+        <div id="messageBox" class="message"></div>
+
+        <div class="tab-switcher">
+            <button class="tab-btn active" id="signupTabBtn">Sign Up</button>
+            <button class="tab-btn" id="loginTabBtn">Login</button>
+        </div>
+
+        <!-- Sign Up Form -->
+        <div id="signupForm" class="form-container active">
+            <form id="signupFormElement">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="signUpFirstName">First Name</label>
+                        <input type="text" id="signUpFirstName" placeholder="John" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signUpLastName">Last Name</label>
+                        <input type="text" id="signUpLastName" placeholder="Doe" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="signUpUsername">Username</label>
+                    <input type="text" id="signUpUsername" placeholder="Choose a unique username" required>
+                </div>
+                <div class="form-group">
+                    <label for="signUpPassword">Password</label>
+                    <input type="password" id="signUpPassword" placeholder="Create a strong password" autocomplete="new-password" required>
+                </div>
+                <button type="submit">Create Account</button>
+                <p class="info-text">Already have an account? Switch to Login above.</p>
+            </form>
+        </div>
+
+        <!-- Login Form -->
+        <div id="loginForm" class="form-container">
+            <form id="loginFormElement">
+                <div class="form-group">
+                    <label for="loginUsername">Username</label>
+                    <input type="text" id="loginUsername" placeholder="Enter your username" autocomplete="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" placeholder="Enter your password" autocomplete="current-password" required>
+                </div>
+                <button type="submit">Login</button>
+                <p class="info-text">Don't have an account? Switch to Sign Up above.</p>
+            </form>
+        </div>
     </div>
 
     <script type="module">
@@ -44,77 +387,156 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
-        function createUsername(firstName, lastName) {
-            return `${firstName}-${lastName}`.toLowerCase();
-        }
+        // Tab switching functionality
+        function switchTab(tab) {
+            const signupForm = document.getElementById('signupForm');
+            const loginForm = document.getElementById('loginForm');
+            const signupTabBtn = document.getElementById('signupTabBtn');
+            const loginTabBtn = document.getElementById('loginTabBtn');
 
-        async function signUp() {
-            const firstName = document.getElementById('signUpFirstName').value;
-            const lastName = document.getElementById('signUpLastName').value;
-            const password = document.getElementById('signUpPassword').value;
-            const username = document.getElementById('signUpUsername').value;
-
-            if (!firstName || !lastName || !username || !password) {
-                alert('All fields must be filled!');
-                return;
-            }
-
-            const userRef = ref(database, 'users/' + username);
-
-            const snapshot = await get(userRef);
-            if (snapshot.exists()) {
-                alert('User already exists. Please login instead.');
+            if (tab === 'signup') {
+                signupForm.classList.add('active');
+                loginForm.classList.remove('active');
+                signupTabBtn.classList.add('active');
+                loginTabBtn.classList.remove('active');
             } else {
-                set(userRef, {
-                    firstName: firstName,
-                    lastName: lastName,
-                    password: password
-                });
-                alert('Sign up successful!');
-                window.location.href = 'profile.html';  // Redirect to profile page after signup
-            }
-        }
-
-        async function login() {
-            const username = document.getElementById('loginUsername').value;
-            const password = document.getElementById('loginPassword').value;
-
-            if (!username || !password) {
-                alert('Please fill in both fields!');
-                return;
-            }
-
-            const userRef = ref(database, 'users/' + username);
-
-            const snapshot = await get(userRef);
-            if (snapshot.exists()) {
-                const userData = snapshot.val();
-                if (userData.password === password) {
-                    localStorage.setItem('userFirstName', userData.firstName);
-                    localStorage.setItem('userLastName', userData.lastName);
-                    localStorage.setItem('username', username);
-
-                    alert('Login successful! Redirecting to profile...');
-                    window.location.href = 'profile.html';  // Redirect to profile page after login
-                } else {
-                    alert('Incorrect password.');
-                }
-            } else {
-                alert('User does not exist. Please sign up first.');
+                loginForm.classList.add('active');
+                signupForm.classList.remove('active');
+                loginTabBtn.classList.add('active');
+                signupTabBtn.classList.remove('active');
             }
         }
 
         function checkLoginStatus() {
-            const loggedInUser = localStorage.getItem('username');
+            const loggedInUser = sessionStorage.getItem('username');
             if (loggedInUser) {
-                window.location.href = 'profile.html'; // Redirect if already logged in
+                window.location.href = 'profile.html';
             }
         }
 
-        window.onload = checkLoginStatus;
+        // Initialize event listeners when DOM is ready
+        function initializeEventListeners() {
+            // Add event listeners for tab buttons
+            document.getElementById('signupTabBtn').addEventListener('click', () => switchTab('signup'));
+            document.getElementById('loginTabBtn').addEventListener('click', () => switchTab('login'));
 
-        document.getElementById("signUpButton").addEventListener("click", signUp);
-        document.getElementById("loginButton").addEventListener("click", login);
+            // Add form submit event listeners
+            document.getElementById('signupFormElement').addEventListener('submit', (e) => {
+                e.preventDefault();
+                signUp();
+            });
+
+            document.getElementById('loginFormElement').addEventListener('submit', (e) => {
+                e.preventDefault();
+                login();
+            });
+        }
+
+        window.onload = () => {
+            checkLoginStatus();
+            initializeEventListeners();
+        };
+            const messageBox = document.getElementById('messageBox');
+            messageBox.textContent = message;
+            messageBox.className = `message ${type} show`;
+            
+            setTimeout(() => {
+                messageBox.classList.remove('show');
+            }, 5000);
+        }
+
+        async function signUp() {
+            const firstName = document.getElementById('signUpFirstName').value.trim();
+            const lastName = document.getElementById('signUpLastName').value.trim();
+            const password = document.getElementById('signUpPassword').value;
+            const username = document.getElementById('signUpUsername').value.trim();
+
+            if (!firstName || !lastName || !username || !password) {
+                showMessage('All fields must be filled!', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showMessage('Password must be at least 6 characters long!', 'error');
+                return;
+            }
+
+            const userRef = ref(database, 'users/' + username);
+
+            try {
+                const snapshot = await get(userRef);
+                if (snapshot.exists()) {
+                    showMessage('Username already taken. Please choose another one.', 'error');
+                } else {
+                    await set(userRef, {
+                        firstName: firstName,
+                        lastName: lastName,
+                        password: password,
+                        createdAt: new Date().toISOString()
+                    });
+                    
+                    showMessage('Account created successfully! Redirecting...', 'success');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'profile.html';
+                    }, 1500);
+                }
+            } catch (error) {
+                showMessage('An error occurred. Please try again.', 'error');
+                console.error(error);
+            }
+        }
+
+        async function login() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            if (!username || !password) {
+                showMessage('Please fill in both fields!', 'error');
+                return;
+            }
+
+            const userRef = ref(database, 'users/' + username);
+
+            try {
+                const snapshot = await get(userRef);
+                if (snapshot.exists()) {
+                    const userData = snapshot.val();
+                    if (userData.password === password) {
+                        // Note: In production, you should use a more secure session management system
+                        // localStorage is used here for simplicity but is not recommended for sensitive data
+                        const sessionData = {
+                            firstName: userData.firstName,
+                            lastName: userData.lastName,
+                            username: username
+                        };
+                        
+                        Object.keys(sessionData).forEach(key => {
+                            sessionStorage.setItem(key, sessionData[key]);
+                        });
+
+                        showMessage('Login successful! Redirecting...', 'success');
+                        
+                        setTimeout(() => {
+                            window.location.href = 'profile.html';
+                        }, 1500);
+                    } else {
+                        showMessage('Incorrect password. Please try again.', 'error');
+                    }
+                } else {
+                    showMessage('User does not exist. Please sign up first.', 'error');
+                }
+            } catch (error) {
+                showMessage('An error occurred. Please try again.', 'error');
+                console.error(error);
+            }
+        }
+
+        // Add event listeners for tab buttons
+        document.getElementById('signupTabBtn').addEventListener('click', () => switchTab('signup'));
+        document.getElementById('loginTabBtn').addEventListener('click', () => switchTab('login'));
+
+        function showMessage(message, type) {
     </script>
 </body>
 </html>
