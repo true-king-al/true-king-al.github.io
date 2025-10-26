@@ -330,4 +330,106 @@
     <script type="module">
         let facts = [];
 
-        function loadF
+        function loadFacts() {
+            fetch('./facts.json')
+                .then(response => response.json())
+                .then(data => {
+                    facts = data;
+                    displayRandomFact();
+                })
+                .catch(error => {
+                    console.error("Error loading facts:", error);
+                    document.getElementById("random-fact").textContent = "Could not load fact. Please refresh!";
+                });
+        }
+
+        function displayRandomFact() {
+            if (facts.length === 0) {
+                return;
+            }
+
+            const factElement = document.getElementById("random-fact");
+            const now = new Date();
+            const currentHour = now.getHours();
+            const startOfYear = new Date(now.getFullYear(), 0, 0);
+            const diff = now - startOfYear;
+            const oneDay = 1000 * 60 * 60 * 24;
+            const dayOfYear = Math.floor(diff / oneDay);
+            const seed = dayOfYear;
+
+            function seededShuffle(array, seed) {
+                const shuffled = array.slice();
+                let m = shuffled.length, t, i;
+
+                while (m) {
+                    i = Math.floor(random(seed) * m--);
+                    t = shuffled[m];
+                    shuffled[m] = shuffled[i];
+                    shuffled[i] = t;
+                    seed++;
+                }
+
+                return shuffled;
+            }
+
+            function random(seed) {
+                const x = Math.sin(seed) * 10000;
+                return x - Math.floor(x);
+            }
+
+            const shuffledFacts = seededShuffle(facts, seed);
+            const randomIndex = currentHour % shuffledFacts.length;
+            factElement.textContent = shuffledFacts[randomIndex];
+        }
+
+        // Firebase integration
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
+        import { getDatabase, ref, set, onValue, increment, push, query, orderByValue, startAt, onDisconnect } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBzxQgwD_gBuylhdqlRck_PEVzueWccvTM",
+            authDomain: "messengerformewebsite.firebaseapp.com",
+            databaseURL: "https://messengerformewebsite-default-rtdb.firebaseio.com/",
+            projectId: "messengerformewebsite",
+            storageBucket: "messengerformewebsite.appspot.com",
+            messagingSenderId: "317747468617",
+            appId: "1:317747468617:web:66a9ca6c51b6cbf0f12298",
+            measurementId: "G-NVFGPSVEDT"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        const visitorsRef = ref(database, 'visitorCount');
+
+        function incrementVisitorCount() {
+            set(visitorsRef, increment(1));
+        }
+
+        onValue(visitorsRef, (snapshot) => {
+            const count = snapshot.val() || 0;
+            document.getElementById('visitor-counter').textContent = `Visitors: ${count}`;
+        });
+
+        const visitorLogsRef = ref(database, 'visitorLogs');
+        const currentTimestamp = Date.now();
+        push(visitorLogsRef, currentTimestamp);
+
+        const past24HoursTimestamp = Date.now() - 24 * 60 * 60 * 1000;
+        const last24HoursQuery = query(visitorLogsRef, orderByValue(), startAt(past24HoursTimestamp));
+
+        onValue(last24HoursQuery, (snapshot) => {
+            const visitors = snapshot.val();
+            const count = visitors ? Object.keys(visitors).length : 0;
+            document.getElementById('last-24-hour-visitors').textContent = `Last 24h: ${count}`;
+        });
+
+        const activeUsersRef = ref(database, 'activeUsers/' + `session_${Date.now()}`);
+        set(activeUsersRef, true);
+        onDisconnect(activeUsersRef).remove();
+
+        window.onload = () => {
+            incrementVisitorCount();
+            loadFacts();
+        };
+    </script>
